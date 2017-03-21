@@ -14,14 +14,14 @@ import rcms.util.logger.RCMSLogger;
  * @maintainer Jose Ruiz
  *
  */
-public class MyErrorHandler extends UserErrorHandler {
+public class GEMErrorHandler extends UserErrorHandler {
 	
 	/**
 	 * <code>RCMSLogger</code>: RCMS log4j logger.
 	 */
 	static RCMSLogger logger = new RCMSLogger(GEMEventHandler.class);
 
-	public MyErrorHandler() throws EventHandlerException {
+	public GEMErrorHandler() throws EventHandlerException {
 		// this handler inherits UserErrorHandler
 		// so it is already registered for Error events
 			

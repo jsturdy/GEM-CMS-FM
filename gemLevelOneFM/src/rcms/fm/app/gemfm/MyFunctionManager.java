@@ -143,7 +143,7 @@ public class MyFunctionManager extends UserFunctionManager {
 		//
 		// Add error handler
 		//
-		addEventHandler(new MyErrorHandler());
+		addEventHandler(new GEMErrorHandler());
 
 	}
 	
