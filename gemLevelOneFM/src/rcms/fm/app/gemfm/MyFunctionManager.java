@@ -138,7 +138,7 @@ public class MyFunctionManager extends UserFunctionManager {
 		//
 		// Add event handler
 		//
-		addEventHandler(new MyEventHandler());
+		addEventHandler(new GEMEventHandler());
 
 		//
 		// Add error handler

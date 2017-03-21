@@ -31,19 +31,19 @@ import rcms.util.logger.RCMSLogger;
  * @maintainer Jose Ruiz
  *
  */
-public class MyEventHandler extends UserStateNotificationHandler {
+public class GEMEventHandler extends UserStateNotificationHandler {
 	
 	/**
 	 * <code>RCMSLogger</code>: RCMS log4j logger.
 	 */
-	static RCMSLogger logger = new RCMSLogger(MyEventHandler.class);
+	static RCMSLogger logger = new RCMSLogger(GEMEventHandler.class);
 	
 	MyFunctionManager functionManager = null;
 	
 	private QualifiedGroup qualifiedGroup = null;
 	
 	
-	public MyEventHandler() throws rcms.fm.fw.EventHandlerException {
+	public GEMEventHandler() throws rcms.fm.fw.EventHandlerException {
 		// this handler inherits UserStateNotificationHandler
 		// so it is already registered for StateNotification events
 		

@@ -19,7 +19,7 @@ public class MyErrorHandler extends UserErrorHandler {
 	/**
 	 * <code>RCMSLogger</code>: RCMS log4j logger.
 	 */
-	static RCMSLogger logger = new RCMSLogger(MyEventHandler.class);
+	static RCMSLogger logger = new RCMSLogger(GEMEventHandler.class);
 
 	public MyErrorHandler() throws EventHandlerException {
 		// this handler inherits UserErrorHandler
