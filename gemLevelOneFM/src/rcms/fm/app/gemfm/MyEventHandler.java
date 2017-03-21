@@ -103,7 +103,7 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			logger.debug("initAction called.");
 			
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("Initializing")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("Initializing")));
 		
 			// get the parameters of the command
 			Integer sid;
@@ -111,8 +111,8 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			
 			try {
 				ParameterSet<CommandParameter> parameterSet = getUserFunctionManager().getLastInput().getParameterSet();
-				sid = ((CommandParameter<IntegerT>)parameterSet.get(MyParameters.SID)).getValue().getInteger();
-				globalConfKey = ((CommandParameter<StringT>)parameterSet.get(MyParameters.GLOBAL_CONF_KEY)).getValue().toString();
+				sid = ((CommandParameter<IntegerT>)parameterSet.get(GEMParameters.SID)).getValue().getInteger();
+				globalConfKey = ((CommandParameter<StringT>)parameterSet.get(GEMParameters.GLOBAL_CONF_KEY)).getValue().toString();
 			}
 			catch (Exception e) {
 				// go to error, we require parameters
@@ -168,8 +168,8 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			 ***********************************************/
 
 			// set exported parameters
-			((FunctionManagerParameter<IntegerT>)functionManager.getParameterSet().get(MyParameters.INITIALIZED_WITH_SID)).setValue(new IntegerT(sid));
-			((FunctionManagerParameter<StringT>)functionManager.getParameterSet().get(MyParameters.INITIALIZED_WITH_GLOBAL_CONF_KEY)).setValue(new StringT(globalConfKey));
+			((FunctionManagerParameter<IntegerT>)functionManager.getParameterSet().get(GEMParameters.INITIALIZED_WITH_SID)).setValue(new IntegerT(sid));
+			((FunctionManagerParameter<StringT>)functionManager.getParameterSet().get(GEMParameters.INITIALIZED_WITH_GLOBAL_CONF_KEY)).setValue(new StringT(globalConfKey));
 			
 			
 			 // go to HALT
@@ -177,7 +177,7 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			
 			
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
 			
 			logger.info("initAction Executed");
 		}
@@ -207,7 +207,7 @@ public class MyEventHandler extends UserStateNotificationHandler {
 				logger.debug("resetAction called.");
 				
 				// set action
-				functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("Resetting")));
+				functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("Resetting")));
 				
 				/************************************************
 				 * PUT YOUR CODE HERE							
@@ -242,7 +242,7 @@ public class MyEventHandler extends UserStateNotificationHandler {
 				logger.info("Executing recoverAction");
 				
 				// set action
-				functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("recovering")));
+				functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("recovering")));
 				
 				/************************************************
 				 * PUT YOUR CODE HERE							
@@ -276,7 +276,7 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			logger.info("Executing configureAction");
 			
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("configuring")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("configuring")));
 			
 			// get the parameters of the command
 			Integer runNumber;
@@ -285,9 +285,9 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			
 			try {
 				ParameterSet<CommandParameter> parameterSet = getUserFunctionManager().getLastInput().getParameterSet();
-				runNumber = ((CommandParameter<IntegerT>)parameterSet.get(MyParameters.RUN_NUMBER)).getValue().getInteger();
-				runKey = ((CommandParameter<StringT>)parameterSet.get(MyParameters.RUN_KEY)).getValue().toString();
-				fedEnableMask = ((CommandParameter<StringT>)parameterSet.get(MyParameters.FED_ENABLE_MASK)).getValue().toString();
+				runNumber = ((CommandParameter<IntegerT>)parameterSet.get(GEMParameters.RUN_NUMBER)).getValue().getInteger();
+				runKey = ((CommandParameter<StringT>)parameterSet.get(GEMParameters.RUN_KEY)).getValue().toString();
+				fedEnableMask = ((CommandParameter<StringT>)parameterSet.get(GEMParameters.FED_ENABLE_MASK)).getValue().toString();
 			}
 			catch (Exception e) {
 				// go to error, we require parameters
@@ -309,15 +309,15 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			 ***********************************************/
 			
 			// Set the configuration parameters in the Function Manager parameters
-			((FunctionManagerParameter<IntegerT>)functionManager.getParameterSet().get(MyParameters.CONFIGURED_WITH_RUN_NUMBER)).setValue(new IntegerT(runNumber));
-			((FunctionManagerParameter<StringT>)functionManager.getParameterSet().get(MyParameters.CONFIGURED_WITH_RUN_KEY)).setValue(new StringT(runKey));
-			((FunctionManagerParameter<StringT>)functionManager.getParameterSet().get(MyParameters.CONFIGURED_WITH_FED_ENABLE_MASK)).setValue(new StringT(fedEnableMask));
+			((FunctionManagerParameter<IntegerT>)functionManager.getParameterSet().get(GEMParameters.CONFIGURED_WITH_RUN_NUMBER)).setValue(new IntegerT(runNumber));
+			((FunctionManagerParameter<StringT>)functionManager.getParameterSet().get(GEMParameters.CONFIGURED_WITH_RUN_KEY)).setValue(new StringT(runKey));
+			((FunctionManagerParameter<StringT>)functionManager.getParameterSet().get(GEMParameters.CONFIGURED_WITH_FED_ENABLE_MASK)).setValue(new StringT(fedEnableMask));
 
 			// leave intermediate state
 			functionManager.fireEvent( GEMInputs.SETCONFIGURED );
 			
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
 
 			
 			
@@ -343,13 +343,13 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			logger.info("Executing startAction");
 			
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("starting")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("starting")));
 
 			// get the parameters of the command
 			ParameterSet<CommandParameter> parameterSet = getUserFunctionManager().getLastInput().getParameterSet();
 
 			// check parameter set
-			if (parameterSet.size()==0 || parameterSet.get(MyParameters.RUN_NUMBER) == null )  {
+			if (parameterSet.size()==0 || parameterSet.get(GEMParameters.RUN_NUMBER) == null )  {
 
 				// go to error, we require parameters
 				String errMsg = "startAction: no parameters given with start command.";
@@ -366,7 +366,7 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			}
 			
 			// get the run number from the start command
-			Integer runNumber = ((IntegerT)parameterSet.get(MyParameters.RUN_NUMBER).getValue()).getInteger();
+			Integer runNumber = ((IntegerT)parameterSet.get(GEMParameters.RUN_NUMBER).getValue()).getInteger();
 			
 			
 			/************************************************
@@ -374,13 +374,13 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			 ***********************************************/
 			
 			// Set the run number in the Function Manager parameters
-			((FunctionManagerParameter<IntegerT>)functionManager.getParameterSet().get(MyParameters.STARTED_WITH_RUN_NUMBER)).setValue(new IntegerT(runNumber));
+			((FunctionManagerParameter<IntegerT>)functionManager.getParameterSet().get(GEMParameters.STARTED_WITH_RUN_NUMBER)).setValue(new IntegerT(runNumber));
 
 			// leave intermediate state
 			functionManager.fireEvent( GEMInputs.SETRUNNING );
 			
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
 
 			
 			
@@ -408,7 +408,7 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			logger.info("Executing pauseAction");
 			
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("pausing")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("pausing")));
 			
 			/************************************************
 			 * PUT YOUR CODE HERE							
@@ -418,7 +418,7 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			functionManager.fireEvent( GEMInputs.SETPAUSED );
 			
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
 			
 			logger.debug("pausingAction Executed");
 			
@@ -443,7 +443,7 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			logger.info("Executing stopAction");
 			
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("stopping")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("stopping")));
 			
 			/************************************************
 			 * PUT YOUR CODE HERE							
@@ -453,7 +453,7 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			functionManager.fireEvent( GEMInputs.SETCONFIGURED );
 			
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
 			
 			logger.debug("stopAction Executed");
 			
@@ -478,7 +478,7 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			logger.info("Executing resumeAction");
 			
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("resuming")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("resuming")));
 			
 			/************************************************
 			 * PUT YOUR CODE HERE							
@@ -515,7 +515,7 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			logger.info("Executing haltAction");
 			
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("halting")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("halting")));
 			
 			/************************************************
 			 * PUT YOUR CODE HERE							
@@ -556,7 +556,7 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			logger.info("Executing preparingTestModeAction");
 
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("preparingTestMode")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("preparingTestMode")));
 
 			/************************************************
 			 * PUT YOUR CODE HERE							
@@ -569,7 +569,7 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			functionManager.fireEvent( GEMInputs.SETTTSTEST_MODE );
 
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
 
 			logger.debug("preparingTestModeAction Executed");
 		}
@@ -597,18 +597,18 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			logger.info("Executing testingTTSAction");
 
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("testing TTS")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("testing TTS")));
 
 			// get the parameters of the command
 			ParameterSet<CommandParameter> parameterSet = getUserFunctionManager().getLastInput().getParameterSet();
 
 			// check parameter set
-			if (parameterSet.size()==0 || parameterSet.get(MyParameters.TTS_TEST_FED_ID) == null ||
-					parameterSet.get(MyParameters.TTS_TEST_MODE) == null ||
-					((StringT)parameterSet.get(MyParameters.TTS_TEST_MODE).getValue()).equals("") || 
-					parameterSet.get(MyParameters.TTS_TEST_PATTERN) == null ||
-					((StringT)parameterSet.get(MyParameters.TTS_TEST_PATTERN).getValue()).equals("") ||
-					parameterSet.get(MyParameters.TTS_TEST_SEQUENCE_REPEAT) == null)
+			if (parameterSet.size()==0 || parameterSet.get(GEMParameters.TTS_TEST_FED_ID) == null ||
+					parameterSet.get(GEMParameters.TTS_TEST_MODE) == null ||
+					((StringT)parameterSet.get(GEMParameters.TTS_TEST_MODE).getValue()).equals("") || 
+					parameterSet.get(GEMParameters.TTS_TEST_PATTERN) == null ||
+					((StringT)parameterSet.get(GEMParameters.TTS_TEST_PATTERN).getValue()).equals("") ||
+					parameterSet.get(GEMParameters.TTS_TEST_SEQUENCE_REPEAT) == null)
 					{
 
 				// go to error, we require parameters
@@ -625,10 +625,10 @@ public class MyEventHandler extends UserStateNotificationHandler {
 				
 			}
 			
-			Integer fedId = ((IntegerT)parameterSet.get(MyParameters.TTS_TEST_FED_ID).getValue()).getInteger();
-			String mode = ((StringT)parameterSet.get(MyParameters.TTS_TEST_MODE).getValue()).getString();
-			String pattern = ((StringT)parameterSet.get(MyParameters.TTS_TEST_PATTERN).getValue()).getString();
-			Integer cycles = ((IntegerT)parameterSet.get(MyParameters.TTS_TEST_SEQUENCE_REPEAT).getValue()).getInteger();
+			Integer fedId = ((IntegerT)parameterSet.get(GEMParameters.TTS_TEST_FED_ID).getValue()).getInteger();
+			String mode = ((StringT)parameterSet.get(GEMParameters.TTS_TEST_MODE).getValue()).getString();
+			String pattern = ((StringT)parameterSet.get(GEMParameters.TTS_TEST_PATTERN).getValue()).getString();
+			Integer cycles = ((IntegerT)parameterSet.get(GEMParameters.TTS_TEST_SEQUENCE_REPEAT).getValue()).getInteger();
 			
 
 
@@ -652,7 +652,7 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			functionManager.fireEvent( GEMInputs.SETTTSTEST_MODE );
 
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
 
 			logger.debug("preparingTestModeAction Executed");
 		}
@@ -676,14 +676,14 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			logger.info("Executing coldResettingAction");
 
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("coldResetting")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("coldResetting")));
 
 			/************************************************
 			 * PUT YOUR CODE HERE							
 			 ***********************************************/
 			// perform a cold-reset of your hardware
 
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("Cold Reset completed.")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("Cold Reset completed.")));
 			// leave intermediate state
 			functionManager.fireEvent( GEMInputs.SETHALTED );
 
@@ -709,14 +709,14 @@ public class MyEventHandler extends UserStateNotificationHandler {
 			logger.info("Executing fixSoftErrorAction");
 			
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("fixingSoftError")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("fixingSoftError")));
 			
 			// get the parameters of the command
 			ParameterSet<CommandParameter> parameterSet = getUserFunctionManager().getLastInput().getParameterSet();
 
 			// check parameter set
 			Long triggerNumberAtPause = null;
-			if (parameterSet.size()==0 || parameterSet.get(MyParameters.TRIGGER_NUMBER_AT_PAUSE) == null) {
+			if (parameterSet.size()==0 || parameterSet.get(GEMParameters.TRIGGER_NUMBER_AT_PAUSE) == null) {
 
 				// go to error, we require parameters
 				String warnMsg = "fixSoftErrorAction: no parameters given with fixSoftError command.";
@@ -725,7 +725,7 @@ public class MyEventHandler extends UserStateNotificationHandler {
 				logger.warn(warnMsg);				
 				
 			} else {
-				triggerNumberAtPause = ((LongT)parameterSet.get(MyParameters.TRIGGER_NUMBER_AT_PAUSE).getValue()).getLong();
+				triggerNumberAtPause = ((LongT)parameterSet.get(GEMParameters.TRIGGER_NUMBER_AT_PAUSE).getValue()).getLong();
 			}
 			
 			/************************************************
@@ -801,7 +801,7 @@ public class MyEventHandler extends UserStateNotificationHandler {
 		error.setMessage(errMessage);
 
 		// update error msg parameter for GUI
-		functionManager.getParameterSet().get(MyParameters.ERROR_MSG).setValue(new StringT(errMessage));
+		functionManager.getParameterSet().get(GEMParameters.ERROR_MSG).setValue(new StringT(errMessage));
 		
 		// send error
 		try {
@@ -813,9 +813,9 @@ public class MyEventHandler extends UserStateNotificationHandler {
 	
 	private void cleanUpFMParameters() {
 		// Clean-up of the Function Manager parameters
-		functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ACTION_MSG,new StringT("")));
-		functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(MyParameters.ERROR_MSG,new StringT("")));
-		functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(MyParameters.TTS_TEST_FED_ID,new IntegerT(-1)));
+		functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
+		functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ERROR_MSG,new StringT("")));
+		functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(GEMParameters.TTS_TEST_FED_ID,new IntegerT(-1)));
 	}
 	
 }

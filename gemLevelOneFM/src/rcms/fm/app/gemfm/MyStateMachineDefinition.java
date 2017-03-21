@@ -116,10 +116,10 @@ public class MyStateMachineDefinition extends UserStateMachineDefinition {
 		
 		// define parameters for tts testing command
 		//
-		CommandParameter<IntegerT> ttsTestFedid = new CommandParameter<IntegerT>(MyParameters.TTS_TEST_FED_ID, new IntegerT(-1));
-		CommandParameter<StringT> ttsTestMode = new CommandParameter<StringT>(MyParameters.TTS_TEST_MODE, new StringT(""));
-		CommandParameter<StringT> ttsTestPattern = new CommandParameter<StringT>(MyParameters.TTS_TEST_PATTERN, new StringT(""));
-		CommandParameter<IntegerT> ttsTestSequenceRepeat = new CommandParameter<IntegerT>(MyParameters.TTS_TEST_SEQUENCE_REPEAT, new IntegerT(-1));
+		CommandParameter<IntegerT> ttsTestFedid = new CommandParameter<IntegerT>(GEMParameters.TTS_TEST_FED_ID, new IntegerT(-1));
+		CommandParameter<StringT> ttsTestMode = new CommandParameter<StringT>(GEMParameters.TTS_TEST_MODE, new StringT(""));
+		CommandParameter<StringT> ttsTestPattern = new CommandParameter<StringT>(GEMParameters.TTS_TEST_PATTERN, new StringT(""));
+		CommandParameter<IntegerT> ttsTestSequenceRepeat = new CommandParameter<IntegerT>(GEMParameters.TTS_TEST_SEQUENCE_REPEAT, new IntegerT(-1));
 		
 		// define parameter set
 		ParameterSet<CommandParameter> ttsTestParameters = new ParameterSet<CommandParameter>();
@@ -139,8 +139,8 @@ public class MyStateMachineDefinition extends UserStateMachineDefinition {
 		//
 		// define parameters for Initialize command
 		//
-		CommandParameter<IntegerT> initializeSid = new CommandParameter<IntegerT>(MyParameters.SID, new IntegerT(0));
-		CommandParameter<StringT> initializeGlobalConfigurationKey = new CommandParameter<StringT>(MyParameters.GLOBAL_CONF_KEY, new StringT(""));
+		CommandParameter<IntegerT> initializeSid = new CommandParameter<IntegerT>(GEMParameters.SID, new IntegerT(0));
+		CommandParameter<StringT> initializeGlobalConfigurationKey = new CommandParameter<StringT>(GEMParameters.GLOBAL_CONF_KEY, new StringT(""));
 
 		// define parameter set
 		ParameterSet<CommandParameter> initializeParameters = new ParameterSet<CommandParameter>();
@@ -157,9 +157,9 @@ public class MyStateMachineDefinition extends UserStateMachineDefinition {
 		//
 		// define parameters for Configure command
 		//
-		CommandParameter<StringT> configureFedEnableMask = new CommandParameter<StringT>(MyParameters.FED_ENABLE_MASK, new StringT(""));
-		CommandParameter<IntegerT> configureRunNumber = new CommandParameter<IntegerT>(MyParameters.RUN_NUMBER, new IntegerT(-1));
-		CommandParameter<StringT> configureRunKey = new CommandParameter<StringT>(MyParameters.RUN_KEY, new StringT(""));
+		CommandParameter<StringT> configureFedEnableMask = new CommandParameter<StringT>(GEMParameters.FED_ENABLE_MASK, new StringT(""));
+		CommandParameter<IntegerT> configureRunNumber = new CommandParameter<IntegerT>(GEMParameters.RUN_NUMBER, new IntegerT(-1));
+		CommandParameter<StringT> configureRunKey = new CommandParameter<StringT>(GEMParameters.RUN_KEY, new StringT(""));
 
 		// define parameter set
 		ParameterSet<CommandParameter> configureParameters = new ParameterSet<CommandParameter>();
@@ -177,7 +177,7 @@ public class MyStateMachineDefinition extends UserStateMachineDefinition {
 		//
 		// define parameters for Start command
 		//
-		CommandParameter<IntegerT> startRunNumber = new CommandParameter<IntegerT>(MyParameters.RUN_NUMBER, new IntegerT(-1));
+		CommandParameter<IntegerT> startRunNumber = new CommandParameter<IntegerT>(GEMParameters.RUN_NUMBER, new IntegerT(-1));
 
 		// define parameter set
 		ParameterSet<CommandParameter> startParameters = new ParameterSet<CommandParameter>();
@@ -194,7 +194,7 @@ public class MyStateMachineDefinition extends UserStateMachineDefinition {
 		//
 		// define parameters for FixSoftError command
 		//
-		CommandParameter<LongT> triggerNumberAtPause = new CommandParameter<LongT>(MyParameters.TRIGGER_NUMBER_AT_PAUSE, new LongT(-1));
+		CommandParameter<LongT> triggerNumberAtPause = new CommandParameter<LongT>(GEMParameters.TRIGGER_NUMBER_AT_PAUSE, new LongT(-1));
 
 		// define parameter set
 		ParameterSet<CommandParameter> fixSoftErrorParameters = new ParameterSet<CommandParameter>();

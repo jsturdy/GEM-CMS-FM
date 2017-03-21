@@ -24,7 +24,7 @@ import rcms.fm.fw.parameter.type.StringT;
  * @maintainer Jose Ruiz
  *
  */
-public class MyParameters {
+public class GEMParameters {
  
 	/**
 	 * standard parameter definitions for Level 1 Function Manager

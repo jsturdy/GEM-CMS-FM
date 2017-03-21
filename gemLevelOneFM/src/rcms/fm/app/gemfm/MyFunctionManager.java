@@ -123,7 +123,7 @@ public class MyFunctionManager extends UserFunctionManager {
 	private void addParameters() {
 
 		// add parameters to parameter Set so they are visible.
-		parameterSet = MyParameters.LVL_ONE_PARAMETER_SET;
+		parameterSet = GEMParameters.LVL_ONE_PARAMETER_SET;
 
 	}
 
