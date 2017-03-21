@@ -133,7 +133,7 @@ public class MyFunctionManager extends UserFunctionManager {
 		//
 		// Set first of all the State Machine Definition
 		//
-		setStateMachineDefinition(new MyStateMachineDefinition());
+		setStateMachineDefinition(new GEMStateMachineDefinition());
 
 		//
 		// Add event handler

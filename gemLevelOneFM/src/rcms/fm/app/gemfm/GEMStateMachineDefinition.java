@@ -19,9 +19,9 @@ import rcms.statemachine.definition.StateMachineDefinitionException;
  * @author Andrea Petrucci, Alexander Oh, Michele Gulmini
  * @maintainer Jose Ruiz
  */
-public class MyStateMachineDefinition extends UserStateMachineDefinition {
+public class GEMStateMachineDefinition extends UserStateMachineDefinition {
 
-	public MyStateMachineDefinition() throws StateMachineDefinitionException {
+	public GEMStateMachineDefinition() throws StateMachineDefinitionException {
 		//
 		// Defines the States for this Finite State Machine.
 		//
