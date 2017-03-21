@@ -17,12 +17,12 @@ import rcms.util.logger.RCMSLogger;
  * @author Andrea Petrucci, Alexander Oh, Michele Gulmini
  * @maintainer Jose Ruiz
  */
-public class MyFunctionManager extends UserFunctionManager {
+public class GEMFunctionManager extends UserFunctionManager {
 
 	/**
 	 * <code>RCMSLogger</code>: RCMS log4j Logger
 	 */
-	static RCMSLogger logger = new RCMSLogger(MyFunctionManager.class);
+	static RCMSLogger logger = new RCMSLogger(GEMFunctionManager.class);
 
 	/**
 	 * define some containers
@@ -67,7 +67,7 @@ public class MyFunctionManager extends UserFunctionManager {
 	/**
 	 * Instantiates an MyFunctionManager.
 	 */
-	public MyFunctionManager() {
+	public GEMFunctionManager() {
 		//
 		// Any State Machine Implementation must provide the framework
 		// with some information about itself.

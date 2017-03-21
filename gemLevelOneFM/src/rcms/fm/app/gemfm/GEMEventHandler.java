@@ -38,7 +38,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	 */
 	static RCMSLogger logger = new RCMSLogger(GEMEventHandler.class);
 	
-	MyFunctionManager functionManager = null;
+	GEMFunctionManager functionManager = null;
 	
 	private QualifiedGroup qualifiedGroup = null;
 	
@@ -72,7 +72,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	
 	
 	public void init() throws rcms.fm.fw.EventHandlerException {
-		functionManager = (MyFunctionManager) getUserFunctionManager();
+		functionManager = (GEMFunctionManager) getUserFunctionManager();
 		qualifiedGroup  = functionManager.getQualifiedGroup();
 		
 		// debug
