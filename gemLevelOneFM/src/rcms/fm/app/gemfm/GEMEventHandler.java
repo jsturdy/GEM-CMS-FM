@@ -23,6 +23,12 @@ import rcms.fm.resource.qualifiedresource.XdaqApplicationContainer;
 import rcms.stateFormat.StateNotification;
 import rcms.util.logger.RCMSLogger;
 
+import rcms.utilities.runinfo.RunNumberData;
+import rcms.utilities.runinfo.RunSequenceNumber;
+import rcms.utilities.runinfo.RunInfo;
+import rcms.utilities.runinfo.RunInfoException;
+import rcms.utilities.runinfo.RunInfoConnectorIF;
+
 /**
  * 
  * Main Event Handler class for Level 1 Function Manager.
@@ -79,7 +85,28 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 		logger.debug("init() called: functionManager=" + functionManager );
 	}
 	
-	
+  // get official CMS run and sequence number                        
+  protected RunNumberData getOfficialRunNumber() {
+    // check availability of runInfo DB
+    RunInfoConnectorIF ric = functionManager.getRunInfoConnector();
+    // Get SID from parameter
+    Sid = ((IntegerT)functionManager.getParameterSet().get("SID").getValue()).getInteger();
+    if ( ric == null ) {
+      logger.error("[GEM " + functionManager.FMname + "] RunInfoConnector is empty i.e. Is there a RunInfo DB or is it down?");
+
+      // by default give run number 0
+      return new RunNumberData(new Integer(Sid),new Integer(0),functionManager.getOwner(),Calendar.getInstance().getTime());
+    }
+    else {
+      RunSequenceNumber rsn = new RunSequenceNumber(ric,functionManager.getOwner(),RunSequenceName);
+      RunNumberData rnd = rsn.createRunSequenceNumber(Sid);
+
+      logger.info("[GEM " + functionManager.FMname + "] received run number: " + rnd.getRunNumber() + " and sequence number: " + rnd.getSequenceNumber());
+
+      functionManager.GEMRunInfo = null; // make RunInfo ready for the next round of run info to store
+      return rnd;
+    }
+  }
 
 	public void initAction(Object obj) throws UserActionException {
 		
@@ -193,7 +220,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			/************************************************
 			 * PUT YOUR CODE HERE							
 			 ***********************************************/
-					
+			
 			return;
 		}
 		
@@ -213,6 +240,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 				 * PUT YOUR CODE HERE							
 				 ***********************************************/
 				
+				functionManager.GEMRunInfo = null; // make RunInfo ready for the next round of run info to store
+
 				// go to Initital
 				functionManager.fireEvent( GEMInputs.SETHALTED );
 				

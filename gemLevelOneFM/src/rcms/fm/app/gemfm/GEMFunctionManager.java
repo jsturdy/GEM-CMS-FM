@@ -11,6 +11,8 @@ import rcms.statemachine.definition.State;
 import rcms.statemachine.definition.StateMachineDefinitionException;
 import rcms.util.logger.RCMSLogger;
 
+import rcms.utilities.runinfo.RunInfo;
+
 /**
  * Example of Function Machine for controlling an Level 1 Function Manager.
  * 
@@ -63,6 +65,13 @@ public class GEMFunctionManager extends UserFunctionManager {
 	// In the template FM we store whether we have detected a softError in a boolean
 	boolean softErrorDetected=false;
 
+        // connector to the RunInfo database
+        public RunInfo GEMRunInfo = null;    
+
+        // set from the controlled EventHandler
+        public String  RunType = "";
+        public Integer RunNumber = 0;
+        //public Integer CachedRunNumber = 0;
 	
 	/**
 	 * Instantiates an MyFunctionManager.
