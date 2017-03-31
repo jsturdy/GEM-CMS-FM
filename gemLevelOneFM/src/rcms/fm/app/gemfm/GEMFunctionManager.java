@@ -11,6 +11,8 @@ import rcms.statemachine.definition.State;
 import rcms.statemachine.definition.StateMachineDefinitionException;
 import rcms.util.logger.RCMSLogger;
 
+import rcms.resourceservice.db.resource.fm.FunctionManagerResource;
+
 import rcms.utilities.runinfo.RunInfo;
 
 /**
@@ -72,6 +74,8 @@ public class GEMFunctionManager extends UserFunctionManager {
         public String  RunType = "";
         public Integer RunNumber = 0;
         //public Integer CachedRunNumber = 0;
+
+        public String FMname = "empty";
 	
 	/**
 	 * Instantiates an MyFunctionManager.
@@ -99,6 +103,11 @@ public class GEMFunctionManager extends UserFunctionManager {
 
 		System.out.println("createAction called.");
 		logger.debug("createAction called.");
+
+		// Retrieve the configuration for this Function Manager from the Group
+		FunctionManagerResource fmConf = ((FunctionManagerResource) qualifiedGroup.getGroup().getThisResource());
+
+		FMname = fmConf.getName();
 
 		System.out.println("createAction executed.");
 		logger.debug("createAction executed.");

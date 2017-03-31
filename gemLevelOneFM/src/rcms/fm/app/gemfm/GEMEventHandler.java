@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Calendar;
 
 import rcms.errorFormat.CMS.CMSError;
 import rcms.fm.fw.StateEnteredEvent;
@@ -47,7 +48,9 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	GEMFunctionManager functionManager = null;
 	
 	private QualifiedGroup qualifiedGroup = null;
-	
+
+        public Integer Sid              =  0;           // Session ID for database connections
+        public String RunSequenceName   =  "HCAL test"; // Run sequence name, for attaining a run sequence number
 	
 	public GEMEventHandler() throws rcms.fm.fw.EventHandlerException {
 		// this handler inherits UserStateNotificationHandler
