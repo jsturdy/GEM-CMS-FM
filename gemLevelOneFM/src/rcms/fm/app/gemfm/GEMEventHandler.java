@@ -24,6 +24,9 @@ import rcms.fm.resource.qualifiedresource.XdaqApplicationContainer;
 import rcms.stateFormat.StateNotification;
 import rcms.util.logger.RCMSLogger;
 
+import rcms.util.logsession.LogSessionException;
+import rcms.util.logsession.LogSessionConnector;
+
 import rcms.utilities.runinfo.RunNumberData;
 import rcms.utilities.runinfo.RunSequenceNumber;
 import rcms.utilities.runinfo.RunInfo;
@@ -39,13 +42,14 @@ import rcms.utilities.runinfo.RunInfoConnectorIF;
  *
  */
 public class GEMEventHandler extends UserStateNotificationHandler {
+
+        GEMFunctionManager functionManager = null;
 	
 	/**
 	 * <code>RCMSLogger</code>: RCMS log4j logger.
 	 */
 	static RCMSLogger logger = new RCMSLogger(GEMEventHandler.class);
-	
-	GEMFunctionManager functionManager = null;
+        public LogSessionConnector logSessionConnector;  // Connector for logsession DB
 	
 	private QualifiedGroup qualifiedGroup = null;
 
@@ -87,7 +91,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 		// debug
 		logger.debug("init() called: functionManager=" + functionManager );
 	}
-	
+
+
   // get official CMS run and sequence number                        
   protected RunNumberData getOfficialRunNumber() {
     // check availability of runInfo DB

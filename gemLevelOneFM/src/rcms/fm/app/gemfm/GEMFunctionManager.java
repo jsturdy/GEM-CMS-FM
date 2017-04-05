@@ -13,6 +13,9 @@ import rcms.util.logger.RCMSLogger;
 
 import rcms.resourceservice.db.resource.fm.FunctionManagerResource;
 
+import rcms.util.logsession.LogSessionException;
+import rcms.util.logsession.LogSessionConnector;
+
 import rcms.utilities.runinfo.RunInfo;
 
 /**
@@ -129,7 +132,9 @@ public class GEMFunctionManager extends UserFunctionManager {
 		System.out.println("destroyAction called");
 		logger.debug("destroyAction called");
 
-		// do nothing
+		// try to close any open session ID only if we are in local run mode i.e. not CDAQ and not miniDAQ runs and if it's a LV1FM 
+		//if (RunType.equals("local") && !containerFMChildren.isEmpty()) { closeSessionId(); }
+		closeSessionId(); //NEEDS TO BE CORRECTED TO ONLY BE CALLED IN LOCAL RUNS
 
 		System.out.println("destroyAction executed");
 		logger.debug("destroyAction executed");
@@ -163,7 +168,60 @@ public class GEMFunctionManager extends UserFunctionManager {
 		//
 		addEventHandler(new GEMErrorHandler());
 
+		// get log session connector
+		logSessionConnector = getLogSessionConnector();
+
+		// get session ID
+		getSessionId();
+
 	}
+
+    // get a session Id
+    protected void getSessionId() {
+      String user = getQualifiedGroup().getGroup().getDirectory().getUser();
+      String description = getQualifiedGroup().getGroup().getDirectory().getFullPath();
+      int sessionId = 0;
+
+      logger.debug("[GEM base] Log session connector: " + logSessionConnector );
+
+      if (logSessionConnector != null) {
+        try {
+          sessionId = logSessionConnector.createSession( user, description );
+          logger.debug("[GEM base] New session Id obtained =" + sessionId );
+        }
+        catch (LogSessionException e1) {
+          logger.warn("[GEM base] Could not get session ID, using default = " + sessionId + ". Exception: ",e1);
+        }
+      }
+      else {
+        logger.warn("[GEM base] logSessionConnector = " + logSessionConnector + ", using default = " + sessionId + ".");
+      }
+
+      // put the session ID into parameter set             
+      getParameterSet().get("SID").setValue(new IntegerT(sessionId));
+    }
+
+  // close session Id. This routine is called always when functionmanager gets destroyed.
+  protected void closeSessionId() {
+    if (logSessionConnector != null) {
+      int sessionId = 0;
+      try {
+        sessionId = ((IntegerT)getParameterSet().get("SID").getValue()).getInteger();
+      }
+      catch (Exception e) {
+        logger.warn("[GEM " + FMname + "] Could not get sessionId for closing session.\nNot closing session.\nThis is OK if no sessionId was requested from within GEM land, i.e. global runs.",e);
+      }
+      try {
+        logger.debug("[GEM " + FMname + "] Trying to close log sessionId = " + sessionId );
+        logSessionConnector.closeSession(sessionId);
+        logger.debug("[GEM " + FMname + "] ... closed log sessionId = " + sessionId );
+      }
+      catch (LogSessionException e1) {
+        logger.warn("[GEM " + FMname + "] Could not close sessionId, but sessionId was requested and used.\nThis is OK only for global runs.\nException: ",e1);
+      }
+    }
+
+  }
 	
 	public boolean isDegraded() {
 		// FM may check whether it is currently degraded if such functionality exists
