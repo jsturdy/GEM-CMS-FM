@@ -49,7 +49,6 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	 * <code>RCMSLogger</code>: RCMS log4j logger.
 	 */
 	static RCMSLogger logger = new RCMSLogger(GEMEventHandler.class);
-        public LogSessionConnector logSessionConnector;  // Connector for logsession DB
 	
 	private QualifiedGroup qualifiedGroup = null;
 

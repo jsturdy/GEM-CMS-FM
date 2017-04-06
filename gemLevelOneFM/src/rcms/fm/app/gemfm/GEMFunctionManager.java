@@ -30,6 +30,7 @@ public class GEMFunctionManager extends UserFunctionManager {
 	 * <code>RCMSLogger</code>: RCMS log4j Logger
 	 */
 	static RCMSLogger logger = new RCMSLogger(GEMFunctionManager.class);
+        public LogSessionConnector logSessionConnector;  // Connector for logsession DB
 
 	/**
 	 * define some containers
