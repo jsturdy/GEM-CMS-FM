@@ -3,6 +3,13 @@ package rcms.fm.app.gemfm;
 
 import rcms.fm.fw.parameter.CommandParameter;
 import rcms.fm.fw.parameter.ParameterSet;
+
+import rcms.fm.fw.parameter.type.IntegerT;
+import rcms.fm.fw.parameter.type.StringT;
+import rcms.fm.fw.parameter.type.DoubleT;
+import rcms.fm.fw.parameter.type.VectorT;
+import rcms.fm.fw.parameter.type.BooleanT;
+
 import rcms.fm.fw.user.UserActionException;
 import rcms.fm.fw.user.UserFunctionManager;
 import rcms.fm.resource.QualifiedResourceContainer;
