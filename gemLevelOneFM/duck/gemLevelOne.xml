@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" user="gemdev" path="JoseTesting/template">
+  <FunctionManager name="template" 
+		   hostname="localhost" 
+		   port="10000" 
+		   qualifiedResourceType="rcms.fm.resource.qualifiedresource.FunctionManager" 
+		   sourceURL="http://localhost:10000/functionmanagers/gemlevelOneFM.jar" 
+		   className="rcms.fm.app.gemfm.GEMFunctionManager">
+    <!-- GEMSupervisor XDAQ Application - TO BE ADDED -->
+    <!-- FEDKit XDAQ Applications - TO BE ADDED -->
+    <!-- job control -->
+    <Service name="JobControl"
+             hostname="gem904daq01" port="9999" urn="urn:xdaq-application:lid=10"
+             qualifiedResourceType="rcms.fm.resource.qualifiedresource.JobControl" />
+  </FunctionManager>
+</Configuration>
