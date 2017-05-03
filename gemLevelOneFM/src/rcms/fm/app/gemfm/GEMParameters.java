@@ -102,7 +102,8 @@ public class GEMParameters {
 		/**
 		 * Session Identifier
 		 */
-		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<IntegerT>(INITIALIZED_WITH_SID, new IntegerT(-1), Exported.READONLY));
+		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<IntegerT> (SID, new IntegerT(0), Exported.READONLY) );  // Database connection session identifier
+		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT>(INITIALIZED_WITH_SID, new StringT("not set"), Exported.READONLY));  // Configuration information for l0:  SID on initialize
 		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT>(INITIALIZED_WITH_GLOBAL_CONF_KEY, new StringT(""), Exported.READONLY));
 				
 		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT>(CONFIGURED_WITH_FED_ENABLE_MASK, new StringT(""), Exported.READONLY));

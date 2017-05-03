@@ -145,8 +145,16 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			
 			try {
 				ParameterSet<CommandParameter> parameterSet = getUserFunctionManager().getLastInput().getParameterSet();
-				sid = ((CommandParameter<IntegerT>)parameterSet.get(GEMParameters.SID)).getValue().getInteger();
-				globalConfKey = ((CommandParameter<StringT>)parameterSet.get(GEMParameters.GLOBAL_CONF_KEY)).getValue().toString();
+				if (parameterSet.get("SID") != null) {
+				    sid = ((CommandParameter<IntegerT>)parameterSet.get(GEMParameters.SID)).getValue().getInteger();
+				    ((FunctionManagerParameter<IntegerT>)functionManager.getParameterSet().get(GEMParameters.INITIALIZED_WITH_SID)).setValue(new IntegerT(sid));
+				    logger.debug("[GEM INIT] INITIALIZED_WITH_SID has been set");
+				    //getParameterSet().get("INITIALIZED_WITH_SID").setValue(new IntegerT(sid)); //For the moment this parameter is only here to show if it is correctly set after initialization -> Really needed in future?
+				}
+				else {
+				    logger.debug("[GEM INIT] SID has been found to be null");
+				}
+				//globalConfKey = ((CommandParameter<StringT>)parameterSet.get(GEMParameters.GLOBAL_CONF_KEY)).getValue().toString();
 			}
 			catch (Exception e) {
 				// go to error, we require parameters
@@ -168,7 +176,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			// initialize qualified group
 			
 			//
-			QualifiedGroup qg = functionManager.getQualifiedGroup();
+			/*QualifiedGroup qg = functionManager.getQualifiedGroup();
 
 			try {
 				qg.init();
@@ -192,7 +200,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			List<QualifiedResource> xdaqList = qg.seekQualifiedResourcesOfType(new XdaqApplication());
 			functionManager.containerXdaqApplication = new XdaqApplicationContainer(xdaqList);
 			logger.debug("Application list : " + xdaqList.size() );
-
+			*/
 			// Example: find "your" applications
 			// functionManager.containerYourClass = new XdaqApplicationContainer( 
 			//		functionManager.containerXdaqApplication.getApplicationsOfClass("yourClass"));
@@ -202,8 +210,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			 ***********************************************/
 
 			// set exported parameters
-			((FunctionManagerParameter<IntegerT>)functionManager.getParameterSet().get(GEMParameters.INITIALIZED_WITH_SID)).setValue(new IntegerT(sid));
-			((FunctionManagerParameter<StringT>)functionManager.getParameterSet().get(GEMParameters.INITIALIZED_WITH_GLOBAL_CONF_KEY)).setValue(new StringT(globalConfKey));
+			//((FunctionManagerParameter<IntegerT>)functionManager.getParameterSet().get(GEMParameters.INITIALIZED_WITH_SID)).setValue(new IntegerT(sid));
+			//((FunctionManagerParameter<StringT>)functionManager.getParameterSet().get(GEMParameters.INITIALIZED_WITH_GLOBAL_CONF_KEY)).setValue(new StringT(globalConfKey));
 			
 			
 			 // go to HALT

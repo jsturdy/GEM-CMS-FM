@@ -120,6 +120,16 @@ public class GEMFunctionManager extends UserFunctionManager {
 
 		FMname = fmConf.getName();
 
+		// get log session connector
+		logger.debug("Get log session connector started");
+		logSessionConnector = getLogSessionConnector();
+		logger.debug("Get log session connector finished");
+
+		// get session ID
+		logger.debug("Get session ID started");
+		getSessionId();
+		logger.debug("Get session ID finished");
+
 		System.out.println("createAction executed.");
 		logger.debug("createAction executed.");
 
@@ -142,7 +152,7 @@ public class GEMFunctionManager extends UserFunctionManager {
 
 		// try to close any open session ID only if we are in local run mode i.e. not CDAQ and not miniDAQ runs and if it's a LV1FM 
 		//if (RunType.equals("local") && !containerFMChildren.isEmpty()) { closeSessionId(); }
-		closeSessionId(); //NEEDS TO BE CORRECTED TO ONLY BE CALLED IN LOCAL RUNS
+		//closeSessionId(); //NEEDS TO BE CORRECTED TO ONLY BE CALLED IN LOCAL RUNS
 
 		System.out.println("destroyAction executed");
 		logger.debug("destroyAction executed");
@@ -176,11 +186,6 @@ public class GEMFunctionManager extends UserFunctionManager {
 		//
 		addEventHandler(new GEMErrorHandler());
 
-		// get log session connector
-		logSessionConnector = getLogSessionConnector();
-
-		// get session ID
-		getSessionId();
 
 	}
 
@@ -205,7 +210,7 @@ public class GEMFunctionManager extends UserFunctionManager {
         logger.warn("[GEM base] logSessionConnector = " + logSessionConnector + ", using default = " + sessionId + ".");
       }
 
-      // put the session ID into parameter set             
+      // put the session ID into parameter set
       getParameterSet().get("SID").setValue(new IntegerT(sessionId));
     }
 
