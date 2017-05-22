@@ -86,6 +86,9 @@ public class GEMFunctionManager extends UserFunctionManager {
         public Integer RunNumber = 0;
         //public Integer CachedRunNumber = 0;
 
+        // HCAL RunInfo namespace, the FM name will be added in the createAction() method                                                                                        
+        public String GEM_NS = "CMS.";
+
         public String FMname = "empty";
 	
 	/**
@@ -152,7 +155,7 @@ public class GEMFunctionManager extends UserFunctionManager {
 
 		// try to close any open session ID only if we are in local run mode i.e. not CDAQ and not miniDAQ runs and if it's a LV1FM 
 		//if (RunType.equals("local") && !containerFMChildren.isEmpty()) { closeSessionId(); }
-		//closeSessionId(); //NEEDS TO BE CORRECTED TO ONLY BE CALLED IN LOCAL RUNS
+		closeSessionId(); //NEEDS TO BE CORRECTED TO ONLY BE CALLED IN LOCAL RUNS
 
 		System.out.println("destroyAction executed");
 		logger.debug("destroyAction executed");

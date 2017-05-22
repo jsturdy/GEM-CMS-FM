@@ -115,6 +115,23 @@ public class GEMEventHandler extends UserStateNotificationHandler {
     }
   }
 
+  // establish connection to RunInfoDB - if needed                                                                                                                                            
+  protected void checkRunInfoDBConnection() {
+    if (functionManager.GEMRunInfo == null) {
+      logger.info("[GEM " + functionManager.FMname + "] creating new RunInfo accessor with namespace: " + functionManager.GEM_NS + " now ...");
+
+      //Get SID from parameter                                                                                                                                                                
+      Sid = ((IntegerT)functionManager.getParameterSet().get("SID").getValue()).getInteger();
+
+      RunInfoConnectorIF ric = functionManager.getRunInfoConnector();
+      functionManager.GEMRunInfo =  new RunInfo(ric,Sid,Integer.valueOf(functionManager.RunNumber));
+
+      functionManager.GEMRunInfo.setNameSpace(functionManager.GEM_NS);
+
+      logger.info("[GEM " + functionManager.FMname + "] ... RunInfo accessor available.");
+    }
+  }
+
 	public void initAction(Object obj) throws UserActionException {
 		
 		if (obj instanceof StateNotification) {
@@ -323,15 +340,15 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("configuring")));
 			
 			// get the parameters of the command
-			Integer runNumber;
-			String runKey = null;
-			String fedEnableMask = null;
+			//Integer runNumber;
+			//String runKey = null;
+			//String fedEnableMask = null;
 			
 			try {
 				ParameterSet<CommandParameter> parameterSet = getUserFunctionManager().getLastInput().getParameterSet();
-				runNumber = ((CommandParameter<IntegerT>)parameterSet.get(GEMParameters.RUN_NUMBER)).getValue().getInteger();
-				runKey = ((CommandParameter<StringT>)parameterSet.get(GEMParameters.RUN_KEY)).getValue().toString();
-				fedEnableMask = ((CommandParameter<StringT>)parameterSet.get(GEMParameters.FED_ENABLE_MASK)).getValue().toString();
+				//runNumber = ((CommandParameter<IntegerT>)parameterSet.get(GEMParameters.RUN_NUMBER)).getValue().getInteger();
+				//runKey = ((CommandParameter<StringT>)parameterSet.get(GEMParameters.RUN_KEY)).getValue().toString();
+				//fedEnableMask = ((CommandParameter<StringT>)parameterSet.get(GEMParameters.FED_ENABLE_MASK)).getValue().toString();
 			}
 			catch (Exception e) {
 				// go to error, we require parameters
@@ -353,9 +370,9 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			 ***********************************************/
 			
 			// Set the configuration parameters in the Function Manager parameters
-			((FunctionManagerParameter<IntegerT>)functionManager.getParameterSet().get(GEMParameters.CONFIGURED_WITH_RUN_NUMBER)).setValue(new IntegerT(runNumber));
-			((FunctionManagerParameter<StringT>)functionManager.getParameterSet().get(GEMParameters.CONFIGURED_WITH_RUN_KEY)).setValue(new StringT(runKey));
-			((FunctionManagerParameter<StringT>)functionManager.getParameterSet().get(GEMParameters.CONFIGURED_WITH_FED_ENABLE_MASK)).setValue(new StringT(fedEnableMask));
+			//((FunctionManagerParameter<IntegerT>)functionManager.getParameterSet().get(GEMParameters.CONFIGURED_WITH_RUN_NUMBER)).setValue(new IntegerT(runNumber));
+			//((FunctionManagerParameter<StringT>)functionManager.getParameterSet().get(GEMParameters.CONFIGURED_WITH_RUN_KEY)).setValue(new StringT(runKey));
+			//((FunctionManagerParameter<StringT>)functionManager.getParameterSet().get(GEMParameters.CONFIGURED_WITH_FED_ENABLE_MASK)).setValue(new StringT(fedEnableMask));
 
 			// leave intermediate state
 			functionManager.fireEvent( GEMInputs.SETCONFIGURED );
@@ -392,6 +409,21 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			// get the parameters of the command
 			ParameterSet<CommandParameter> parameterSet = getUserFunctionManager().getLastInput().getParameterSet();
 
+			if(functionManager.getRunInfoConnector()!=null){
+			    RunNumberData rnd = getOfficialRunNumber();
+			    
+			    functionManager.RunNumber    = rnd.getRunNumber();
+			    //RunSeqNumber = rnd.getSequenceNumber();
+			    
+			    functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>("RUN_NUMBER", new IntegerT(functionManager.RunNumber)));
+			    //functionManager.getGEMparameterSet().put(new FunctionManagerParameter<IntegerT>("RUN_SEQ_NUMBER", new IntegerT(RunSeqNumber)));
+			    //logger.info("[GEM LVL1 " + functionManager.FMname + "] ... run number: " + functionManager.RunNumber + ", SequenceNumber: " + RunSeqNumber);
+			}
+			else{
+			    logger.error("[GEM LVL1 "+functionManager.FMname+"] Official RunNumber requested, but cannot establish RunInfo Connection. Is there a RunInfo DB? or is RunInfo DB down?");
+			    //logger.info("[GEM LVL1 "+functionManager.FMname+"] Going to use run number ="+functionManager.RunNumber+", RunSeqNumber = "+ RunSeqNumber);
+			}
+
 			// check parameter set
 			if (parameterSet.size()==0 || parameterSet.get(GEMParameters.RUN_NUMBER) == null )  {
 
@@ -411,14 +443,18 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			
 			// get the run number from the start command
 			Integer runNumber = ((IntegerT)parameterSet.get(GEMParameters.RUN_NUMBER).getValue()).getInteger();
-			
-			
+
+			functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(GEMParameters.STARTED_WITH_RUN_NUMBER,new IntegerT(runNumber)));
+
+                        // Set the run number in the Function Manager parameters             
+                        functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(GEMParameters.RUN_NUMBER,new IntegerT(runNumber)));
+
 			/************************************************
 			 * PUT YOUR CODE HERE							
 			 ***********************************************/
 			
 			// Set the run number in the Function Manager parameters
-			((FunctionManagerParameter<IntegerT>)functionManager.getParameterSet().get(GEMParameters.STARTED_WITH_RUN_NUMBER)).setValue(new IntegerT(runNumber));
+			//((FunctionManagerParameter<IntegerT>)functionManager.getParameterSet().get(GEMParameters.STARTED_WITH_RUN_NUMBER)).setValue(new IntegerT(runNumber));
 
 			// leave intermediate state
 			functionManager.fireEvent( GEMInputs.SETRUNNING );
