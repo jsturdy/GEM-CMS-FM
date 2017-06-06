@@ -59,13 +59,13 @@ public class GEMFunctionManager extends UserFunctionManager {
 	 * <code>containerFunctionManager</code>: container of FunctionManagers
 	 * in the running Group.
 	 */
-	public QualifiedResourceContainer containerFunctionManager = null;
+	//public QualifiedResourceContainer containerFunctionManager = null;
 
 	/**
 	 * <code>containerJobControl</code>: container of JobControl in the
 	 * running Group.
 	 */
-	public QualifiedResourceContainer containerJobControl = null;
+	//public QualifiedResourceContainer containerJobControl = null;
 
 	/**
 	 * <code>calcState</code>: Calculated State.
@@ -86,7 +86,7 @@ public class GEMFunctionManager extends UserFunctionManager {
         public Integer RunNumber = 0;
         //public Integer CachedRunNumber = 0;
 
-        // HCAL RunInfo namespace, the FM name will be added in the createAction() method                                                                                        
+        // HCAL RunInfo namespace, the FM name will be added in the createAction() method                   
         public String GEM_NS = "CMS.";
 
         public String FMname = "empty";
@@ -119,9 +119,9 @@ public class GEMFunctionManager extends UserFunctionManager {
 		logger.debug("createAction called.");
 
 		// Retrieve the configuration for this Function Manager from the Group
-		FunctionManagerResource fmConf = ((FunctionManagerResource) qualifiedGroup.getGroup().getThisResource());
+		//FunctionManagerResource fmConf = ((FunctionManagerResource) qualifiedGroup.getGroup().getThisResource());
 
-		FMname = fmConf.getName();
+		//FMname = fmConf.getName();
 
 		// get log session connector
 		logger.debug("Get log session connector started");
@@ -148,7 +148,7 @@ public class GEMFunctionManager extends UserFunctionManager {
 		// This method is called by the framework when the Function Manager is
 		// destroyed.
 		//
-	    qualifiedGroup.destroy();
+	    //qualifiedGroup.destroy();
 	    
 		System.out.println("destroyAction called");
 		logger.debug("destroyAction called");

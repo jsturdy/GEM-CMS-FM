@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Calendar;
+import java.util.Random;
 
 import rcms.errorFormat.CMS.CMSError;
 import rcms.fm.fw.StateEnteredEvent;
@@ -53,7 +54,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	private QualifiedGroup qualifiedGroup = null;
 
         public Integer Sid              =  0;           // Session ID for database connections
-        public String RunSequenceName   =  "HCAL test"; // Run sequence name, for attaining a run sequence number
+        public String RunSequenceName   =  "GEM test"; // Run sequence name, for attaining a run sequence number
+        public Integer RunSeqNumber     =  0;
 	
 	public GEMEventHandler() throws rcms.fm.fw.EventHandlerException {
 		// this handler inherits UserStateNotificationHandler
@@ -129,6 +131,106 @@ public class GEMEventHandler extends UserStateNotificationHandler {
       functionManager.GEMRunInfo.setNameSpace(functionManager.GEM_NS);
 
       logger.info("[GEM " + functionManager.FMname + "] ... RunInfo accessor available.");
+    }
+  }
+
+  // class which makes the GEMINI fun messages      
+  protected class MoveTheGEMINI {
+
+    private Boolean movehimtotheright = true;
+    private Integer moves = 0;
+    private Integer offset = 0;
+    private Integer maxmoves = 30;
+    private String TheGEMINI ="♊";
+    private String TheLine = "";
+    private Random theDice;
+
+    public MoveTheGEMINI(Integer themaxmoves) {
+      movehimtotheright = true;
+      moves = 0;
+      offset = 0;
+      maxmoves = themaxmoves;
+      if (maxmoves < 30) { maxmoves = 30; }
+      TheLine = "";
+      theDice = new Random();
+      logger.debug("[GEM " + functionManager.FMname + "] The GEMINI should show up - Look at it as it moves through the sky");
+    }
+
+      public void movehim() {
+      TheLine = "";
+      if (movehimtotheright) {
+        moves++;
+        TheLine +="_";
+        for (int count=1; count < moves; count++) { 
+	    Integer starit = theDice.nextInt(10);
+	    if (starit < 9) { TheLine +="_"; }
+	    else { TheLine +="★"; }
+	}
+        TheLine += TheGEMINI;
+
+        if ((maxmoves-moves) > 6) {
+          Integer sayit = theDice.nextInt(10);
+          if (sayit == 9) {
+            Integer saywhat = theDice.nextInt(10);
+            if (saywhat >= 0 && saywhat <= 4) {
+              TheLine += " GEMINI calling Earth!";
+              offset = 22;
+            }
+            else if (saywhat == 5 && (maxmoves-moves) > 25) {
+              TheLine += " Swimming in dark matter!";
+              offset = 25;
+            }
+            else if (saywhat == 6 && (maxmoves-moves) > 12) {
+              TheLine += " Where am I?";
+              offset = 12;
+            }
+            else if (saywhat == 7 && (maxmoves-moves) > 20) {
+              TheLine += " Diving outter space";
+              offset = 20;
+            }
+            else if (saywhat == 8 && (maxmoves-moves) > 18) {
+              TheLine += " I have two faces!";
+              offset = 18;
+            }
+            else {
+              TheLine += " Hi!";
+              offset = 4;
+            }
+          }
+        }
+
+        for (int count=moves+offset; count < maxmoves; count++) { TheLine +="_"; }
+        offset = 0;
+        TheLine +="_";
+        if (moves==maxmoves) {
+          movehimtotheright = false;
+        }
+        else {
+          Integer wheretogo = theDice.nextInt(10);
+          if (wheretogo >= 7) {
+            movehimtotheright = false;
+          }
+        }
+      }
+      else {
+        TheLine +="_";
+        for (int count=moves; count > 1; count--) { TheLine +="_"; }
+        TheLine += TheGEMINI;
+        for (int count=maxmoves; count > moves; count--) { TheLine +="_"; }
+        TheLine +="_";
+        moves--;
+        if (moves<1) {
+          movehimtotheright = true;
+          moves = 0;
+        }
+        else {
+          Integer wheretogo = theDice.nextInt(10);
+          if (wheretogo >= 7) {
+            movehimtotheright = true;
+          }
+        }
+      }
+      functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(TheLine)));
     }
   }
 
@@ -413,15 +515,15 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			    RunNumberData rnd = getOfficialRunNumber();
 			    
 			    functionManager.RunNumber    = rnd.getRunNumber();
-			    //RunSeqNumber = rnd.getSequenceNumber();
+			    RunSeqNumber = rnd.getSequenceNumber();
 			    
 			    functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>("RUN_NUMBER", new IntegerT(functionManager.RunNumber)));
-			    //functionManager.getGEMparameterSet().put(new FunctionManagerParameter<IntegerT>("RUN_SEQ_NUMBER", new IntegerT(RunSeqNumber)));
-			    //logger.info("[GEM LVL1 " + functionManager.FMname + "] ... run number: " + functionManager.RunNumber + ", SequenceNumber: " + RunSeqNumber);
+			    functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>("RUN_SEQ_NUMBER", new IntegerT(RunSeqNumber)));
+			    logger.info("[GEM LVL1 " + functionManager.FMname + "] ... run number: " + functionManager.RunNumber + ", SequenceNumber: " + RunSeqNumber);
 			}
 			else{
 			    logger.error("[GEM LVL1 "+functionManager.FMname+"] Official RunNumber requested, but cannot establish RunInfo Connection. Is there a RunInfo DB? or is RunInfo DB down?");
-			    //logger.info("[GEM LVL1 "+functionManager.FMname+"] Going to use run number ="+functionManager.RunNumber+", RunSeqNumber = "+ RunSeqNumber);
+			    logger.info("[GEM LVL1 "+functionManager.FMname+"] Going to use run number ="+functionManager.RunNumber+", RunSeqNumber = "+ RunSeqNumber);
 			}
 
 			// check parameter set

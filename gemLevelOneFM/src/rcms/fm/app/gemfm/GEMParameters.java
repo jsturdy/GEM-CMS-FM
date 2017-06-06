@@ -32,7 +32,6 @@ public class GEMParameters {
 
 	public static final String STATE = "STATE";
 
-
 	public static final String ACTION_MSG = "ACTION_MSG";
 
 	public static final String ERROR_MSG = "ERROR_MSG";
@@ -42,14 +41,15 @@ public class GEMParameters {
 	
 
 	// for HCAL LUMI only
-	public static final String HCAL_LUMI_STATE = "HCAL_LUMI_STATE";
-	public static final String HCAL_LUMI_KEY = "HCAL_LUMI_KEY";
-	public static final String HCAL_LUMI_COMMAND = "HCAL_LUMI_COMMAND";
+	//public static final String HCAL_LUMI_STATE = "HCAL_LUMI_STATE";
+	//public static final String HCAL_LUMI_KEY = "HCAL_LUMI_KEY";
+	//public static final String HCAL_LUMI_COMMAND = "HCAL_LUMI_COMMAND";
 	
 	
 	// To be exported after initialize
 	public static final String INITIALIZED_WITH_SID = "INITIALIZED_WITH_SID";
 	public static final String INITIALIZED_WITH_GLOBAL_CONF_KEY = "INITIALIZED_WITH_GLOBAL_CONF_KEY";
+        //public static final String INITIALIZED_WITH_RUN_NUMBER = "INITIALIZED_WITH_RUN_NUMBER";
 
 	// To be exported after configure
 	public static final String CONFIGURED_WITH_FED_ENABLE_MASK = "CONFIGURED_WITH_FED_ENABLE_MASK";
@@ -66,6 +66,7 @@ public class GEMParameters {
 
 	public static final String RUN_NUMBER = "RUN_NUMBER";
 	public static final String RUN_KEY = "RUN_KEY";
+        public static final String RUN_SEQ_NUMBER = "RUN_SEQ_NUMBER";
 
 	public static final String FED_ENABLE_MASK = "FED_ENABLE_MASK";
 	public static final String TRIGGER_NUMBER_AT_PAUSE = "TRIGGER_NUMBER_AT_PAUSE";
@@ -90,7 +91,7 @@ public class GEMParameters {
 		/**
 		 * State of the Function Manager is currently in
 		 */
-		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT>(STATE, new StringT(""), Exported.READONLY));
+	        LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT>(STATE, new StringT("Created: GEMINI says hello world!"), Exported.READONLY));
 
 		/**
 		 * parameters for monitoring
@@ -103,19 +104,24 @@ public class GEMParameters {
 		 * Session Identifier
 		 */
 		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<IntegerT> (SID, new IntegerT(0), Exported.READONLY) );  // Database connection session identifier
+		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT> (GLOBAL_CONF_KEY, new StringT("not set"), Exported.READONLY) );
+		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<IntegerT> (RUN_NUMBER, new IntegerT(-1), Exported.READONLY) );
+		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT> (RUN_KEY, new StringT("not set"), Exported.READONLY) );
+		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<IntegerT> (RUN_SEQ_NUMBER, new IntegerT(-1), Exported.READONLY) );
+		
 		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT>(INITIALIZED_WITH_SID, new StringT("not set"), Exported.READONLY));  // Configuration information for l0:  SID on initialize
-		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT>(INITIALIZED_WITH_GLOBAL_CONF_KEY, new StringT(""), Exported.READONLY));
+		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT>(INITIALIZED_WITH_GLOBAL_CONF_KEY, new StringT("not set"), Exported.READONLY));
 				
-		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT>(CONFIGURED_WITH_FED_ENABLE_MASK, new StringT(""), Exported.READONLY));
-		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT>(CONFIGURED_WITH_RUN_KEY, new StringT(""), Exported.READONLY));
+		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT>(CONFIGURED_WITH_FED_ENABLE_MASK, new StringT("not set"), Exported.READONLY));
+		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT>(CONFIGURED_WITH_RUN_KEY, new StringT("not set"), Exported.READONLY));
 		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<IntegerT>(CONFIGURED_WITH_RUN_NUMBER, new IntegerT(-1), Exported.READONLY));
 		
 		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<IntegerT>(STARTED_WITH_RUN_NUMBER, new IntegerT(-1), Exported.READONLY));
 
 		/** special - for HCAL only */
-		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT>(HCAL_LUMI_STATE, new StringT(""), Exported.READWRITE));
-		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT>(HCAL_LUMI_COMMAND, new StringT(""), Exported.READWRITE));
-		LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT>(HCAL_LUMI_KEY, new StringT(""), Exported.READWRITE));
+		//LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT>(HCAL_LUMI_STATE, new StringT(""), Exported.READWRITE));
+		//LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT>(HCAL_LUMI_COMMAND, new StringT(""), Exported.READWRITE));
+		//LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT>(HCAL_LUMI_KEY, new StringT(""), Exported.READWRITE));
 		
 	}
 
