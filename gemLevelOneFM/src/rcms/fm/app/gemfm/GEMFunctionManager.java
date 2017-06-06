@@ -12,8 +12,20 @@ import rcms.fm.fw.parameter.type.BooleanT;
 
 import rcms.fm.fw.user.UserActionException;
 import rcms.fm.fw.user.UserFunctionManager;
+//import qualified resources
+import rcms.fm.resource.QualifiedGroup;
 import rcms.fm.resource.QualifiedResourceContainer;
+import rcms.fm.resource.QualifiedResourceContainer;
+//XDAQ from qualified source and others
 import rcms.fm.resource.qualifiedresource.XdaqApplicationContainer;
+import rcms.fm.resource.qualifiedresource.XdaqApplication;
+import rcms.fm.resource.qualifiedresource.XdaqExecutive;
+import rcms.fm.resource.qualifiedresource.FunctionManager;
+import rcms.resourceservice.db.resource.Resource;
+import rcms.resourceservice.db.resource.xdaq.XdaqApplicationResource;
+import rcms.resourceservice.db.resource.xdaq.XdaqExecutiveResource;
+import net.hep.cms.xdaqctl.WSESubscription; //what is this for?
+///////////////////////////
 import rcms.statemachine.definition.State;
 import rcms.statemachine.definition.StateMachineDefinitionException;
 import rcms.util.logger.RCMSLogger;
@@ -47,7 +59,13 @@ public class GEMFunctionManager extends UserFunctionManager {
 	/**
 	 * define specific application containers
 	 */
+        public XdaqApplicationContainer containerGEMSupervisor      = null;
+        public XdaqApplicationContainer containerTCDSControllers    = null;
+        public XdaqApplicationContainer containerTTCciControl       = null;
+        public XdaqApplicationContainer containerBU                 = null;
+        public XdaqApplicationContainer containerRU                  = null;
 	public XdaqApplicationContainer cEVM = null;
+        public XdaqApplicationContainer containerFEDStreamer         = null;
 
 	/**
 	 * <code>containerXdaqExecutive</code>: container of XdaqExecutive in the
@@ -59,13 +77,13 @@ public class GEMFunctionManager extends UserFunctionManager {
 	 * <code>containerFunctionManager</code>: container of FunctionManagers
 	 * in the running Group.
 	 */
-	//public QualifiedResourceContainer containerFunctionManager = null;
+	public QualifiedResourceContainer containerFunctionManager = null;
 
 	/**
 	 * <code>containerJobControl</code>: container of JobControl in the
 	 * running Group.
 	 */
-	//public QualifiedResourceContainer containerJobControl = null;
+	public QualifiedResourceContainer containerJobControl = null;
 
 	/**
 	 * <code>calcState</code>: Calculated State.
@@ -258,4 +276,39 @@ public class GEMFunctionManager extends UserFunctionManager {
 	public void setSoftErrorDetected(boolean softErrorDetected) {
 		this.softErrorDetected = softErrorDetected;
 	}
+
+  /**----------------------------------------------------------------------
+   * get all XDAQ executives and kill them
+   */
+    /*  protected void destroyXDAQ() {
+    // see if there is an exec with a supervisor and kill it first
+    URI supervExecURI = null;
+    if (containerGEMSupervisor != null) {
+      for (QualifiedResource qr : containerGEMSupervisor.getApplications()) {
+        Resource supervResource = containerGEMSupervisor.getApplications().get(0).getResource();
+        XdaqExecutiveResource qrSupervParentExec = ((XdaqApplicationResource)supervResource).getXdaqExecutiveResourceParent();
+        supervExecURI = qrSupervParentExec.getURI();
+        QualifiedResource qrExec = qualifiedGroup.seekQualifiedResourceOfURI(supervExecURI);
+        XdaqExecutive ex = (XdaqExecutive) qrExec;
+        ex.destroy();
+      }
+    }
+
+    // find all XDAQ executives and kill them
+    if (qualifiedGroup != null) {
+      List listExecutive = qualifiedGroup.seekQualifiedResourcesOfType(new XdaqExecutive());
+      Iterator it = listExecutive.iterator();
+      while (it.hasNext()) {
+        XdaqExecutive ex = (XdaqExecutive) it.next();
+        if (!ex.getURI().equals(supervExecURI)) {
+          ex.destroy();
+        }
+      }
+    }
+
+    // reset the qualified group so that the next time an init is sent all resources will be initialized again
+    QualifiedGroup qg = getQualifiedGroup();
+    if (qg != null) { qg.reset(); }
+    }*/
+
 }
