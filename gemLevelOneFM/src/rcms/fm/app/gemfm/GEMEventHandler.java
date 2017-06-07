@@ -20,8 +20,15 @@ import rcms.fm.fw.user.UserActionException;
 import rcms.fm.fw.user.UserStateNotificationHandler;
 import rcms.fm.resource.QualifiedGroup;
 import rcms.fm.resource.QualifiedResource;
+import rcms.fm.resource.QualifiedResourceContainer;
 import rcms.fm.resource.qualifiedresource.XdaqApplication;
 import rcms.fm.resource.qualifiedresource.XdaqApplicationContainer;
+import rcms.fm.resource.qualifiedresource.XdaqExecutive;
+import rcms.xdaqctl.XDAQParameter;
+import rcms.xdaqctl.XDAQMessage;
+import rcms.fm.resource.qualifiedresource.JobControl;
+import rcms.fm.resource.qualifiedresource.FunctionManager;
+import rcms.resourceservice.db.resource.fm.FunctionManagerResource;
 import rcms.stateFormat.StateNotification;
 import rcms.util.logger.RCMSLogger;
 
@@ -320,6 +327,10 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			functionManager.containerXdaqApplication = new XdaqApplicationContainer(xdaqList);
 			logger.debug("Application list : " + xdaqList.size() );
 			*/
+
+			//initialize all XDAQ executives
+			initXDAQ();
+
 			// Example: find "your" applications
 			// functionManager.containerYourClass = new XdaqApplicationContainer( 
 			//		functionManager.containerXdaqApplication.getApplicationsOfClass("yourClass"));
@@ -998,6 +1009,117 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 		functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
 		functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ERROR_MSG,new StringT("")));
 		functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(GEMParameters.TTS_TEST_FED_ID,new IntegerT(-1)));
+	}
+
+        protected void initXDAQ() {
+	    // Look if the configuration uses TCDS and handle accordingly.
+	    // First check if TCDS is being used, and if so, tell RCMS that the TCDS executives are already initialized.
+	    logger.info("[GEM " + functionManager.FMname + "] Initializing XDAQ applications...");
+	    Boolean usingTCDS = false;
+	    QualifiedGroup qg = functionManager.getQualifiedGroup();
+	    List<QualifiedResource> xdaqExecutiveList = qg.seekQualifiedResourcesOfType(new XdaqExecutive());
+	    for (QualifiedResource qr : xdaqExecutiveList) {
+		String hostName = qr.getResource().getHostName();
+		// ===WARNING!!!=== This hostname is hardcoded and should NOT be!!!
+		// TODO This needs to be moved out into userXML or a snippet!!!
+		if (hostName.equals("tcds-control-central.cms") || hostName.equals("tcds-control-904.cms904") ) {
+		    usingTCDS = true;
+		    logger.info("[GEM " + functionManager.FMname + "] initXDAQ() -- the TCDS executive on hostName " + hostName + " is being handled in a special way.");
+		    qr.setInitialized(true);
+		}
+	    }
+
+	    List<QualifiedResource> jobControlList = qg.seekQualifiedResourcesOfType(new JobControl());
+	    for (QualifiedResource qr: jobControlList) {
+		if (qr.getResource().getHostName().equals("tcds-control-central.cms") || qr.getResource().getHostName().equals("tcds-control-904.cms904") ) {
+		    logger.info("[GEM " + functionManager.FMname + "] Masking the  application with name " + qr.getName() + " running on host " + qr.getResource().getHostName() );
+		    qr.setActive(false);
+		}
+	    }
+
+	    // Now if we are using TCDS, give all of the TCDS applications the URN that they need.
+	    /*try {
+		qg.init();
+	    }
+	    catch (Exception e) {
+		// failed to init
+		StringWriter sw = new StringWriter();
+		e.printStackTrace( new PrintWriter(sw) );
+		System.out.println(sw.toString());
+		String errMessage = "[HCAL " + functionManager.FMname + "] " + this.getClass().toString() + " failed to initialize resources. Printing stacktrace: "+ sw.toString();
+		functionManager.goToError(errMessage,e);
+		}*/
+
+	    // find xdaq applications
+	    List<QualifiedResource> xdaqList = qg.seekQualifiedResourcesOfType(new XdaqApplication());
+	    functionManager.containerXdaqApplication = new XdaqApplicationContainer(xdaqList);
+	    logger.debug("[GEM " + functionManager.FMname + "] Number of XDAQ applications controlled: " + xdaqList.size() );
+
+	    // fill applications
+	    logger.info("[GEM " + functionManager.FMname + "] Retrieving GEM XDAQ applications ...");
+	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT("Retrieving GEM XDAQ applications ...")));
+
+	    functionManager.containerGEMSupervisor = new XdaqApplicationContainer(functionManager.containerXdaqApplication.getApplicationsOfClass("gemSupervisor"));
+	    if (!functionManager.containerGEMSupervisor.isEmpty()) {
+		logger.info("[GEM " + functionManager.FMname + "] GEM supervisor was not found!");
+	    }
+
+	    // TCDS apps -> Needs to be defined for GEM
+	    /*List<XdaqApplication> lpmList = functionManager.containerXdaqApplication.getApplicationsOfClass("tcds::lpm::LPMController");
+	    functionManager.containerlpmController = new XdaqApplicationContainer(lpmList);
+	    List<XdaqApplication> tcdsList = new ArrayList<XdaqApplication>();
+	    tcdsList.addAll(lpmList);
+	    tcdsList.addAll(functionManager.containerXdaqApplication.getApplicationsOfClass("tcds::ici::ICIController"));
+	    tcdsList.addAll(functionManager.containerXdaqApplication.getApplicationsOfClass("tcds::pi::PIController"));
+	    functionManager.containerTCDSControllers = new XdaqApplicationContainer(tcdsList);
+	    
+	    functionManager.containerhcalDCCManager = new XdaqApplicationContainer(functionManager.containerXdaqApplication.getApplicationsOfClass("hcalDCCManager"));
+	    functionManager.containerTTCciControl   = new XdaqApplicationContainer(functionManager.containerXdaqApplication.getApplicationsOfClass("ttc::TTCciControl"));
+
+	    // find out if HCAL supervisor is ready for async SOAP communication
+	    if (!functionManager.containerhcalSupervisor.isEmpty()) {
+
+		XDAQParameter pam = null;
+
+		String dowehaveanasynchcalSupervisor="undefined";
+
+		// ask for the status of the HCAL supervisor and wait until it is Ready or Failed
+		for (QualifiedResource qr : functionManager.containerhcalSupervisor.getApplications() ){
+
+		    try {
+			pam =((XdaqApplication)qr).getXDAQParameter();
+			pam.select(new String[] {"TriggerAdapterName", "PartitionState", "InitializationProgress","ReportStateToRCMS"});
+			pam.get();
+
+			dowehaveanasynchcalSupervisor = pam.getValue("ReportStateToRCMS");
+
+			logger.info("[HCAL " + functionManager.FMname + "] initXDAQ(): asking for the HCAL supervisor ReportStateToRCMS results is: " + dowehaveanasynchcalSupervisor);
+
+		    }
+		    catch (XDAQTimeoutException e) {
+			String errMessage = "[HCAL " + functionManager.FMname + "] Error! XDAQTimeoutException in initXDAQ() when checking the async SOAP capabilities ...\n Perhaps the HCAL supervisor application is dead!?";
+			functionManager.goToError(errMessage,e);
+		    }
+		    catch (XDAQException e) {
+			String errMessage = "[HCAL " + functionManager.FMname + "] Error! XDAQException in initXDAQ() when checking the async SOAP capabilities ...";
+			functionManager.goToError(errMessage,e);
+		    }
+		    
+		    logger.info("[HCAL " + functionManager.FMname + "] using async SOAP communication with HCAL supervisor ...");
+		}
+	    }
+	    else {
+		logger.info("[HCAL " + functionManager.FMname + "] Warning! No HCAL supervisor found in initXDAQ().\nThis happened when checking the async SOAP capabilities.\nThis is OK for a level1 FM.");
+	    }
+	    
+	    // finally, halt all LPM apps
+	    functionManager.haltLPMControllers();
+	    
+	    // define the condition state vectors only here since the group must have been qualified before and all containers are filled
+	    functionManager.defineConditionState();
+	    functionManager.getHCALparameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT("")));*/
+	    
+	    
 	}
 	
 }

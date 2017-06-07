@@ -207,7 +207,6 @@ public class GEMFunctionManager extends UserFunctionManager {
 		//
 		addEventHandler(new GEMErrorHandler());
 
-
 	}
 
     // get a session Id
