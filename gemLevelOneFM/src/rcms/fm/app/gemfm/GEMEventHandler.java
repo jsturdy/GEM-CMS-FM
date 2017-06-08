@@ -16,6 +16,8 @@ import rcms.fm.fw.parameter.ParameterSet;
 import rcms.fm.fw.parameter.type.IntegerT;
 import rcms.fm.fw.parameter.type.LongT;
 import rcms.fm.fw.parameter.type.StringT;
+import rcms.fm.fw.parameter.type.DoubleT;
+import rcms.fm.fw.parameter.type.VectorT;
 import rcms.fm.fw.user.UserActionException;
 import rcms.fm.fw.user.UserStateNotificationHandler;
 import rcms.fm.resource.QualifiedGroup;
@@ -327,6 +329,35 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			functionManager.containerXdaqApplication = new XdaqApplicationContainer(xdaqList);
 			logger.debug("Application list : " + xdaqList.size() );
 			*/
+
+			QualifiedGroup qg = functionManager.getQualifiedGroup();
+			VectorT<StringT> availableResources = new VectorT<StringT>();
+
+			List<QualifiedResource> qrList = qg.seekQualifiedResourcesOfType(new FunctionManager());
+			for (QualifiedResource qr : qrList) {
+			    logger.info("GEM function manager resource found: " + qr.getName());
+			    availableResources.add(new StringT(qr.getName()));
+			}
+
+			qrList = qg.seekQualifiedResourcesOfType(new XdaqExecutive());
+			for (QualifiedResource qr : qrList) {
+			    logger.info("GEM xdaq executive resource found: " + qr.getName());
+			    availableResources.add(new StringT(qr.getName()));
+			}
+
+			//Looking for job control resources			
+			qrList = qg.seekQualifiedResourcesOfType(new JobControl());
+			//logger.info("[GEM " + functionManager.FMname + "] Looking for job control resources");
+			for (QualifiedResource qr : qrList) {
+			    logger.info("GEM job control resource found: " + qr.getName());
+			    availableResources.add(new StringT(qr.getName()));
+			}
+
+			qrList = qg.seekQualifiedResourcesOfType(new XdaqApplication());
+			for (QualifiedResource qr : qrList) {
+			    logger.info("GEM xdaq application resource found: " + qr.getName());
+			    availableResources.add(new StringT(qr.getName()));
+			}
 
 			//initialize all XDAQ executives
 			initXDAQ();
