@@ -34,6 +34,10 @@ import rcms.resourceservice.db.resource.fm.FunctionManagerResource;
 import rcms.stateFormat.StateNotification;
 import rcms.util.logger.RCMSLogger;
 
+import net.hep.cms.xdaqctl.XDAQException;
+import net.hep.cms.xdaqctl.XDAQTimeoutException;
+import net.hep.cms.xdaqctl.XDAQMessageException;
+
 import rcms.util.logsession.LogSessionException;
 import rcms.util.logsession.LogSessionConnector;
 
@@ -608,6 +612,33 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			// set action
 			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
 
+
+			// sending some info to the GEM supervisor
+			{
+			    XDAQParameter pam = null;
+			    
+			    // prepare and set for all GEM supervisors the RunType
+			    for (QualifiedResource qr : functionManager.containerGEMSupervisor.getApplications() ){
+				try {
+				    pam =((XdaqApplication)qr).getXDAQParameter();
+				    
+				    pam.select(new String[] {"RunNumber"});
+				    pam.setValue("RunNumber",functionManager.RunNumber.toString());
+				    
+				    pam.send();
+				}
+				catch (XDAQTimeoutException e) {
+				    String errMessage = "[GEM " + functionManager.FMname + "] Error! XDAQTimeoutException: startAction() when trying to send the functionManager.RunNumber to the GEM supervisor\n Perhaps this application is dead!?";
+				    //functionManager.goToError(errMessage,e);
+				    logger.error(errMessage);
+				}
+				catch (XDAQException e) {
+				    String errMessage = "[GEM " + functionManager.FMname + "] Error! XDAQException: startAction() when trying to send the functionManager.RunNumber to the GEM supervisor";
+				    //functionManager.goToError(errMessage,e);
+				    logger.error(errMessage);
+				}
+			    }
+			}
 			
 			
 			logger.debug("startAction Executed");
@@ -1111,43 +1142,45 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    
 	    functionManager.containerhcalDCCManager = new XdaqApplicationContainer(functionManager.containerXdaqApplication.getApplicationsOfClass("hcalDCCManager"));
 	    functionManager.containerTTCciControl   = new XdaqApplicationContainer(functionManager.containerXdaqApplication.getApplicationsOfClass("ttc::TTCciControl"));
-
+	    */
 	    // find out if HCAL supervisor is ready for async SOAP communication
-	    if (!functionManager.containerhcalSupervisor.isEmpty()) {
+	    if (!functionManager.containerGEMSupervisor.isEmpty()) {
 
 		XDAQParameter pam = null;
 
-		String dowehaveanasynchcalSupervisor="undefined";
+		String dowehaveanasyncgemSupervisor="undefined";
 
-		// ask for the status of the HCAL supervisor and wait until it is Ready or Failed
-		for (QualifiedResource qr : functionManager.containerhcalSupervisor.getApplications() ){
+		// ask for the status of the GEM supervisor and wait until it is Ready or Failed
+		for (QualifiedResource qr : functionManager.containerGEMSupervisor.getApplications() ){
 
 		    try {
 			pam =((XdaqApplication)qr).getXDAQParameter();
 			pam.select(new String[] {"TriggerAdapterName", "PartitionState", "InitializationProgress","ReportStateToRCMS"});
 			pam.get();
 
-			dowehaveanasynchcalSupervisor = pam.getValue("ReportStateToRCMS");
+			dowehaveanasyncgemSupervisor = pam.getValue("ReportStateToRCMS");
 
-			logger.info("[HCAL " + functionManager.FMname + "] initXDAQ(): asking for the HCAL supervisor ReportStateToRCMS results is: " + dowehaveanasynchcalSupervisor);
+			logger.info("[GEM " + functionManager.FMname + "] initXDAQ(): asking for the GEM supervisor ReportStateToRCMS results is: " + dowehaveanasyncgemSupervisor);
 
 		    }
 		    catch (XDAQTimeoutException e) {
-			String errMessage = "[HCAL " + functionManager.FMname + "] Error! XDAQTimeoutException in initXDAQ() when checking the async SOAP capabilities ...\n Perhaps the HCAL supervisor application is dead!?";
-			functionManager.goToError(errMessage,e);
+			String errMessage = "[GEM " + functionManager.FMname + "] Error! XDAQTimeoutException in initXDAQ() when checking the async SOAP capabilities ...\n Perhaps the GEM supervisor application is dead!?";
+			//functionManager.goToError(errMessage,e);
+			logger.error(errMessage);
 		    }
 		    catch (XDAQException e) {
-			String errMessage = "[HCAL " + functionManager.FMname + "] Error! XDAQException in initXDAQ() when checking the async SOAP capabilities ...";
-			functionManager.goToError(errMessage,e);
+			String errMessage = "[GEM " + functionManager.FMname + "] Error! XDAQException in initXDAQ() when checking the async SOAP capabilities ...";
+			//functionManager.goToError(errMessage,e);
+			logger.error(errMessage);
 		    }
 		    
-		    logger.info("[HCAL " + functionManager.FMname + "] using async SOAP communication with HCAL supervisor ...");
+		    logger.info("[GEM " + functionManager.FMname + "] using async SOAP communication with GEM supervisor ...");
 		}
 	    }
 	    else {
 		logger.info("[HCAL " + functionManager.FMname + "] Warning! No HCAL supervisor found in initXDAQ().\nThis happened when checking the async SOAP capabilities.\nThis is OK for a level1 FM.");
 	    }
-	    
+	    /*
 	    // finally, halt all LPM apps
 	    functionManager.haltLPMControllers();
 	    
