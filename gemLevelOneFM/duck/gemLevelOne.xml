@@ -32,7 +32,7 @@
                      qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqApplication"
                      instance="0" />
     <XdaqApplication className="gem::hw::amc13::AMC13Manager" hostname="gem904daq01" port="20000"
-                     urn="urn:xdaq-application:lid=50"
+                     urn="urn:xdaq-application:lid=60"
                      qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqApplication"
                      instance="0" />
     <XdaqApplication className="gem::hw::amc13::AMC13Readout" hostname="gem904daq01" port="20000"
@@ -43,7 +43,7 @@
     <!-- FEDKit XDAQ Applications - TO BE ADDED -->
     <!-- job control -->
     <Service name="JobControl"
-             hostname="gem904daq01" port="9999" urn="urn:xdaq-application:lid=10"
+             hostname="gem904daq01" port="39999" urn="urn:xdaq-application:lid=10"
              qualifiedResourceType="rcms.fm.resource.qualifiedresource.JobControl" />
   </FunctionManager>
 </Configuration>
