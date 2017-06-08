@@ -1059,9 +1059,12 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    logger.info("[GEM " + functionManager.FMname + "] Retrieving GEM XDAQ applications ...");
 	    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT("Retrieving GEM XDAQ applications ...")));
 
-	    functionManager.containerGEMSupervisor = new XdaqApplicationContainer(functionManager.containerXdaqApplication.getApplicationsOfClass("gemSupervisor"));
+	    functionManager.containerGEMSupervisor = new XdaqApplicationContainer(functionManager.containerXdaqApplication.getApplicationsOfClass("GEMSupervisor"));
 	    if (!functionManager.containerGEMSupervisor.isEmpty()) {
 		logger.info("[GEM " + functionManager.FMname + "] GEM supervisor was not found!");
+	    }
+	    else{
+		logger.info("[GEM " + functionManager.FMname + "] GEM supervisor found! Welcome to GEMINI XDAQ control :)");
 	    }
 
 	    // TCDS apps -> Needs to be defined for GEM
