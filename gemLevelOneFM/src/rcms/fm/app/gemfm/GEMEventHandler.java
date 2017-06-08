@@ -359,6 +359,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			    availableResources.add(new StringT(qr.getName()));
 			}
 
+			functionManager.getParameterSet().put(new FunctionManagerParameter<VectorT<StringT>>("AVAILABLE_RESOURCES",availableResources));
+
 			//initialize all XDAQ executives
 			initXDAQ();
 
