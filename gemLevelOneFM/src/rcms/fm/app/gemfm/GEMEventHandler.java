@@ -23,6 +23,7 @@ import rcms.fm.fw.user.UserStateNotificationHandler;
 import rcms.fm.resource.QualifiedGroup;
 import rcms.fm.resource.QualifiedResource;
 import rcms.fm.resource.QualifiedResourceContainer;
+import rcms.fm.resource.QualifiedResourceContainerException;
 import rcms.fm.resource.qualifiedresource.XdaqApplication;
 import rcms.fm.resource.qualifiedresource.XdaqApplicationContainer;
 import rcms.fm.resource.qualifiedresource.XdaqExecutive;
@@ -368,6 +369,20 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			//initialize all XDAQ executives
 			initXDAQ();
 
+			if (!functionManager.containerGEMSupervisor.isEmpty()) {
+			    try {
+				functionManager.containerGEMSupervisor.execute(GEMInputs.INITIALIZE);
+			    }
+			    catch (QualifiedResourceContainerException e) {
+				String errMessage = "[GEM " + functionManager.FMname + "] Error! QualifiedResourceContainerException: Not able to send initialize to the GEM supervisor :(";
+				logger.error(errMessage,e);
+				//functionManager.sendCMSError(errMessage);
+				functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
+				functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(errMessage)));
+				//if (TestMode.equals("off")) { functionManager.firePriorityEvent(HCALInputs.SETERROR); functionManager.ErrorState = true; return;}
+			    }
+			}			
+
 			// Example: find "your" applications
 			// functionManager.containerYourClass = new XdaqApplicationContainer( 
 			//		functionManager.containerXdaqApplication.getApplicationsOfClass("yourClass"));
@@ -524,6 +539,22 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			//((FunctionManagerParameter<StringT>)functionManager.getParameterSet().get(GEMParameters.CONFIGURED_WITH_RUN_KEY)).setValue(new StringT(runKey));
 			//((FunctionManagerParameter<StringT>)functionManager.getParameterSet().get(GEMParameters.CONFIGURED_WITH_FED_ENABLE_MASK)).setValue(new StringT(fedEnableMask));
 
+			
+			if (!functionManager.containerGEMSupervisor.isEmpty()) {
+			    try {
+				functionManager.containerGEMSupervisor.execute(GEMInputs.CONFIGURE);
+			    }
+			    catch (QualifiedResourceContainerException e) {
+				String errMessage = "[GEM " + functionManager.FMname + "] Error! QualifiedResourceContainerException: Not able to send configure to the GEM supervisor :(";
+				logger.error(errMessage,e);
+				//functionManager.sendCMSError(errMessage);
+				functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
+				functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(errMessage)));
+				//if (TestMode.equals("off")) { functionManager.firePriorityEvent(HCALInputs.SETERROR); functionManager.ErrorState = true; return;}
+			    }
+			}
+
+
 			// leave intermediate state
 			functionManager.fireEvent( GEMInputs.SETCONFIGURED );
 			
@@ -575,7 +606,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			}
 
 			// check parameter set
-			if (parameterSet.size()==0 || parameterSet.get(GEMParameters.RUN_NUMBER) == null )  {
+			/*if (parameterSet.size()==0 || parameterSet.get(GEMParameters.RUN_NUMBER) == null )  {
 
 				// go to error, we require parameters
 				String errMsg = "startAction: no parameters given with start command.";
@@ -589,7 +620,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 				// go to error state
 				functionManager.fireEvent( GEMInputs.SETERROR );
 				return;
-			}
+				}*/
 			
 			// get the run number from the start command
 			Integer runNumber = ((IntegerT)parameterSet.get(GEMParameters.RUN_NUMBER).getValue()).getInteger();
