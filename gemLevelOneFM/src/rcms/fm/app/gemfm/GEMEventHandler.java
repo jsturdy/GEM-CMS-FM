@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.Calendar;
 import java.util.Random;
 
+import java.io.StringWriter;
+import java.io.PrintWriter;
+
 import rcms.errorFormat.CMS.CMSError;
 import rcms.fm.fw.StateEnteredEvent;
 import rcms.fm.fw.parameter.CommandParameter;
@@ -27,6 +30,7 @@ import rcms.fm.resource.QualifiedResourceContainerException;
 import rcms.fm.resource.qualifiedresource.XdaqApplication;
 import rcms.fm.resource.qualifiedresource.XdaqApplicationContainer;
 import rcms.fm.resource.qualifiedresource.XdaqExecutive;
+import rcms.fm.resource.qualifiedresource.XdaqExecutiveConfiguration;
 import rcms.xdaqctl.XDAQParameter;
 import rcms.xdaqctl.XDAQMessage;
 import rcms.fm.resource.qualifiedresource.JobControl;
@@ -348,6 +352,12 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			for (QualifiedResource qr : qrList) {
 			    logger.info("GEM xdaq executive resource found: " + qr.getName());
 			    availableResources.add(new StringT(qr.getName()));
+			    //Snippet to get XDAQExecutive xml config
+			    XdaqExecutive exec = (XdaqExecutive)qr;
+			    XdaqExecutiveConfiguration config =  exec.getXdaqExecutiveConfiguration();
+			    String ExecXML = config.getXml();
+			    //functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("XML_Executive",new StringT(ExecXML)));
+			    logger.info("Executive config "+ ExecXML);
 			}
 
 			//Looking for job control resources			
@@ -356,6 +366,11 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			for (QualifiedResource qr : qrList) {
 			    logger.info("GEM job control resource found: " + qr.getName());
 			    availableResources.add(new StringT(qr.getName()));
+			    //Snippet to get JobControl xml config
+			    /*XdaqExecutive exec = (XdaqExecutive)qr;
+			    XdaqExecutiveConfiguration config =  exec.getXdaqExecutiveConfiguration();
+			    String ExecXML = config.getXml();
+			    logger.info("JobControl config "+ ExecXML);*/
 			}
 
 			qrList = qg.seekQualifiedResourcesOfType(new XdaqApplication());
@@ -1133,7 +1148,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    }
 
 	    // Now if we are using TCDS, give all of the TCDS applications the URN that they need.
-	    /*try {
+	    try {
 		qg.init();
 	    }
 	    catch (Exception e) {
@@ -1141,9 +1156,10 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 		StringWriter sw = new StringWriter();
 		e.printStackTrace( new PrintWriter(sw) );
 		System.out.println(sw.toString());
-		String errMessage = "[HCAL " + functionManager.FMname + "] " + this.getClass().toString() + " failed to initialize resources. Printing stacktrace: "+ sw.toString();
-		functionManager.goToError(errMessage,e);
-		}*/
+		String errMessage = "[GEM " + functionManager.FMname + "] " + this.getClass().toString() + " failed to initialize resources. Printing stacktrace: "+ sw.toString();
+		//functionManager.goToError(errMessage,e);
+		logger.error(errMessage);
+	    }
 
 	    // find xdaq applications
 	    List<QualifiedResource> xdaqList = qg.seekQualifiedResourcesOfType(new XdaqApplication());
@@ -1174,7 +1190,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    functionManager.containerhcalDCCManager = new XdaqApplicationContainer(functionManager.containerXdaqApplication.getApplicationsOfClass("hcalDCCManager"));
 	    functionManager.containerTTCciControl   = new XdaqApplicationContainer(functionManager.containerXdaqApplication.getApplicationsOfClass("ttc::TTCciControl"));
 	    */
-	    // find out if HCAL supervisor is ready for async SOAP communication
+	    // find out if GEM supervisor is ready for async SOAP communication
 	    if (!functionManager.containerGEMSupervisor.isEmpty()) {
 
 		XDAQParameter pam = null;
