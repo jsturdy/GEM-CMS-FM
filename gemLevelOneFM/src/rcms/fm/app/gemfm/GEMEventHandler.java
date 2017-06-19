@@ -274,7 +274,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			logger.debug("initAction called.");
 			
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("Initializing")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("Initialize called")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Initializing")));
 		
 			// get the parameters of the command
 			Integer sid;
@@ -366,8 +367,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			for (QualifiedResource qr : qrList) {
 			    logger.info("GEM job control resource found: " + qr.getName());
 			    availableResources.add(new StringT(qr.getName()));
-			    //Snippet to get JobControl xml config
-			    /*XdaqExecutive exec = (XdaqExecutive)qr;
+			    //Snippet to get JobControl xml config - not sure it is possible to have this....
+			    /*JobControl exec = (JobControl)qr;
 			    XdaqExecutiveConfiguration config =  exec.getXdaqExecutiveConfiguration();
 			    String ExecXML = config.getXml();
 			    logger.info("JobControl config "+ ExecXML);*/
@@ -417,6 +418,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			
 			// set action
 			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Initialized - Halted")));
 			
 			logger.info("initAction Executed");
 		}
@@ -446,7 +448,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 				logger.debug("resetAction called.");
 				
 				// set action
-				functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("Resetting")));
+				functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("Reset called")));
+				functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Resetting")));
 				
 				/************************************************
 				 * PUT YOUR CODE HERE							
@@ -460,6 +463,9 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 				// Clean-up of the Function Manager parameters
 				cleanUpFMParameters();
 				
+				functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
+				functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Reset - Halted")));
+
 				logger.info("resetAction Executed");
 		}	
 	}
@@ -517,7 +523,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			logger.info("Executing configureAction");
 			
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("configuring")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("Configure action called")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Configuring")));
 			
 			// get the parameters of the command
 			//Integer runNumber;
@@ -575,6 +582,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			
 			// set action
 			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Configured")));
 
 			
 			
@@ -600,7 +608,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			logger.info("Executing startAction");
 			
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("starting")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("Started action called!")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Starting!!!")));
 
 			// get the parameters of the command
 			ParameterSet<CommandParameter> parameterSet = getUserFunctionManager().getLastInput().getParameterSet();
@@ -687,6 +696,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			}
 			
 			
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Running!!!")));
 			logger.debug("startAction Executed");
 			
 		}
@@ -711,7 +722,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			logger.info("Executing pauseAction");
 			
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("pausing")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("Pause action issued")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Pausing")));
 			
 			/************************************************
 			 * PUT YOUR CODE HERE							
@@ -722,6 +734,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			
 			// set action
 			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Paused")));
 			
 			logger.debug("pausingAction Executed");
 			
@@ -746,7 +759,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			logger.info("Executing stopAction");
 			
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("stopping")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("Stop requested")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Stopping")));
 			
 			/************************************************
 			 * PUT YOUR CODE HERE							
@@ -757,6 +771,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			
 			// set action
 			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Stopped - Configured")));
 			
 			logger.debug("stopAction Executed");
 			
@@ -781,7 +796,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			logger.info("Executing resumeAction");
 			
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("resuming")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("Resume casted")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Resuming")));
 			
 			/************************************************
 			 * PUT YOUR CODE HERE							
@@ -795,6 +811,9 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			// Clean-up of the Function Manager parameters
 			cleanUpFMParameters();
 		
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Running - Resumed")));
+
 			logger.debug("resumeAction Executed");
 			
 		}
@@ -818,7 +837,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			logger.info("Executing haltAction");
 			
 			// set action
-			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("halting")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("Requested to halt")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Halting")));
 			
 			/************************************************
 			 * PUT YOUR CODE HERE							
@@ -837,6 +857,9 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			// Clean-up of the Function Manager parameters
 			cleanUpFMParameters();
 			
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
+			functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Halted")));
+
 			logger.debug("haltAction Executed");
 		}
 	}	
