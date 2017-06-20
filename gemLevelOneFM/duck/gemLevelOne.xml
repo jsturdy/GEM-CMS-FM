@@ -13,7 +13,7 @@
 &lt;/rcmsWatchover&gt;
 &lt;/root&gt;</configFile>
     <!-- GEMSupervisor XDAQ Application -->
-    <XdaqExecutive hostname="gem904daq01" port="20000"
+    <XdaqExecutive hostname="gem904daq01.cern.ch" port="20000"
                    urn="urn:xdaq-application:lid=0"
                    qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqExecutive"
                    instance="0"
@@ -25,31 +25,31 @@
       <!-- <configFile location="file">/home/sturdy/gemdev/gem-daq-code/gemdaq-testing/gemsupervisor/xml/gemsupervisor_new.xml</configFile> -->
       <configFile location="file">/home/jose/GEM_Commissioning/NewTemplate/GEM-CMS-FM/gemLevelOneFM/duck/gemsupervisor_gem904daq01.xml</configFile>
     </XdaqExecutive>
-    <XdaqApplication className="gem::supervisor::GEMSupervisor" hostname="gem904daq01" port="20000"
+    <!-- job control -->
+    <Service name="jobcontrol"
+             hostname="gem904daq01.cern.ch" port="39999" urn="/urn:xdaq-application:lid=10"
+             qualifiedResourceType="rcms.fm.resource.qualifiedresource.JobControl" />
+    <!-- GEM XDAQ Applications-->
+    <XdaqApplication className="gem::supervisor::GEMSupervisor" hostname="gem904daq01.cern.ch" port="20000"
                      urn="urn:xdaq-application:lid=40"
                      qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqApplication"
                      instance="0" />
-    <XdaqApplication className="gem::hw::glib::GLIBManager" hostname="gem904daq01" port="20000"
+    <XdaqApplication className="gem::hw::glib::GLIBManager" hostname="gem904daq01.cern.ch" port="20000"
                      urn="urn:xdaq-application:lid=30"
                      qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqApplication"
                      instance="0" />
-    <XdaqApplication className="gem::hw::optohybrid::OptoHybridManager" hostname="gem904daq01" port="20000"
+    <XdaqApplication className="gem::hw::optohybrid::OptoHybridManager" hostname="gem904daq01.cern.ch" port="20000"
                      urn="urn:xdaq-application:lid=50"
                      qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqApplication"
                      instance="0" />
-    <XdaqApplication className="gem::hw::amc13::AMC13Manager" hostname="gem904daq01" port="20000"
+    <XdaqApplication className="gem::hw::amc13::AMC13Manager" hostname="gem904daq01.cern.ch" port="20000"
                      urn="urn:xdaq-application:lid=60"
                      qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqApplication"
                      instance="0" />
-    <XdaqApplication className="gem::hw::amc13::AMC13Readout" hostname="gem904daq01" port="20000"
+    <XdaqApplication className="gem::hw::amc13::AMC13Readout" hostname="gem904daq01.cern.ch" port="20000"
                      urn="urn:xdaq-application:lid=260"
                      qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqApplication"
                      instance="0" />
-
     <!-- FEDKit XDAQ Applications - TO BE ADDED -->
-    <!-- job control -->
-    <Service name="JobControl"
-             hostname="gem904daq01" port="39999" urn="urn:xdaq-application:lid=10"
-             qualifiedResourceType="rcms.fm.resource.qualifiedresource.JobControl" />
   </FunctionManager>
 </Configuration>
