@@ -7,11 +7,11 @@
 		   sourceURL="http://localhost:10000/functionmanagers/gemlevelOneFM.jar" 
 		   className="rcms.fm.app.gemfm.GEMFunctionManager">
     <!-- Asyncrhonous configuration -->
-    <!--<configFile><root>
-	<rcmsWatchover>
-	  <xdaq:watchover xmlns:xdaq="http://xdaq.web.cern.ch/xdaq/xsd/2005/ErrorNotification-11.xsd">rcmsexampleapplication</xdaq:watchover>
-	</rcmsWatchover>
-      </root></configFile>-->
+    <configFile>&lt;root&gt;
+&lt;rcmsWatchover&gt;
+&lt;xdaq:watchover xmlns:xdaq="http://xdaq.web.cern.ch/xdaq/xsd/2005/ErrorNotification-11.xsd"&gt;rcmsexampleapplication&lt;/xdaq:watchover&gt;
+&lt;/rcmsWatchover&gt;
+&lt;/root&gt;</configFile>
     <!-- GEMSupervisor XDAQ Application -->
     <XdaqExecutive hostname="gem904daq01" port="20000"
                    urn="urn:xdaq-application:lid=0"
