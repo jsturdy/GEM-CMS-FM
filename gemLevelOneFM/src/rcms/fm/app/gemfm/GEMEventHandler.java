@@ -368,10 +368,10 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			    logger.info("GEM job control resource found: " + qr.getName());
 			    availableResources.add(new StringT(qr.getName()));
 			    //Snippet to get JobControl xml config - not sure it is possible to have this....
-			    /*JobControl exec = (JobControl)qr;
-			    XdaqExecutiveConfiguration config =  exec.getXdaqExecutiveConfiguration();
-			    String ExecXML = config.getXml();
-			    logger.info("JobControl config "+ ExecXML);*/
+			    /*JobControl JC = (JobControl)qr;
+			    XdaqExecutiveConfiguration JCconfig =  JC.getXdaqExecutiveConfiguration();
+			    String JCXML = JCconfig.getXml();
+			    logger.info("JobControl config "+ JCXML);*/
 			}
 
 			qrList = qg.seekQualifiedResourcesOfType(new XdaqApplication());
@@ -1248,7 +1248,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 		}
 	    }
 	    else {
-		logger.info("[HCAL " + functionManager.FMname + "] Warning! No HCAL supervisor found in initXDAQ().\nThis happened when checking the async SOAP capabilities.\nThis is OK for a level1 FM.");
+		logger.info("[GEM " + functionManager.FMname + "] Warning! No GEM supervisor found in initXDAQ().\nThis happened when checking the async SOAP capabilities.\nThis is OK for a level1 FM.");
 	    }
 	    /*
 	    // finally, halt all LPM apps

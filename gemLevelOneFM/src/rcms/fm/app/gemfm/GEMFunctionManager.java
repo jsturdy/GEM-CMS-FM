@@ -1,5 +1,11 @@
 package rcms.fm.app.gemfm;
 
+import java.net.URI;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.Arrays;
 
 import rcms.fm.fw.parameter.CommandParameter;
 import rcms.fm.fw.parameter.ParameterSet;
@@ -14,6 +20,7 @@ import rcms.fm.fw.user.UserActionException;
 import rcms.fm.fw.user.UserFunctionManager;
 //import qualified resources
 import rcms.fm.resource.QualifiedGroup;
+import rcms.fm.resource.QualifiedResource;
 import rcms.fm.resource.QualifiedResourceContainer;
 import rcms.fm.resource.QualifiedResourceContainer;
 //XDAQ from qualified source and others
@@ -175,6 +182,9 @@ public class GEMFunctionManager extends UserFunctionManager {
 		//if (RunType.equals("local") && !containerFMChildren.isEmpty()) { closeSessionId(); }
 		closeSessionId(); //NEEDS TO BE CORRECTED TO ONLY BE CALLED IN LOCAL RUNS
 
+		// retrieve the Function Managers and kill themDestroy all XDAQ applications
+		destroyXDAQ();
+
 		System.out.println("destroyAction executed");
 		logger.debug("destroyAction executed");
 	}
@@ -276,38 +286,45 @@ public class GEMFunctionManager extends UserFunctionManager {
 		this.softErrorDetected = softErrorDetected;
 	}
 
-  /**----------------------------------------------------------------------
-   * get all XDAQ executives and kill them
-   */
-    /*  protected void destroyXDAQ() {
-    // see if there is an exec with a supervisor and kill it first
-    URI supervExecURI = null;
-    if (containerGEMSupervisor != null) {
-      for (QualifiedResource qr : containerGEMSupervisor.getApplications()) {
-        Resource supervResource = containerGEMSupervisor.getApplications().get(0).getResource();
-        XdaqExecutiveResource qrSupervParentExec = ((XdaqApplicationResource)supervResource).getXdaqExecutiveResourceParent();
-        supervExecURI = qrSupervParentExec.getURI();
-        QualifiedResource qrExec = qualifiedGroup.seekQualifiedResourceOfURI(supervExecURI);
-        XdaqExecutive ex = (XdaqExecutive) qrExec;
-        ex.destroy();
-      }
+    /**----------------------------------------------------------------------
+     * get all XDAQ executives and kill them
+     */
+    protected void destroyXDAQ() {
+	QualifiedGroup qg = getQualifiedGroup();
+	
+	// see if there is an exec with a supervisor and kill it first
+	URI supervExecURI = null;
+	if (containerGEMSupervisor != null) {
+	    for (QualifiedResource qr : containerGEMSupervisor.getApplications()) {
+		Resource supervResource = containerGEMSupervisor.getApplications().get(0).getResource();
+		XdaqExecutiveResource qrSupervParentExec = ((XdaqApplicationResource)supervResource).getXdaqExecutiveResourceParent();
+		supervExecURI = qrSupervParentExec.getURI();
+		QualifiedResource qrExec = qualifiedGroup.seekQualifiedResourceOfURI(supervExecURI);
+		XdaqExecutive ex = (XdaqExecutive) qrExec;
+		ex.destroy();
+	    }
+	}
+	
+	// find all XDAQ executives and kill them
+	if (qualifiedGroup != null) {
+	    List<QualifiedResource> qrList = qg.seekQualifiedResourcesOfType(new XdaqExecutive());
+	    for (QualifiedResource qr : qrList) {
+		XdaqExecutive exec = (XdaqExecutive)qr;
+		exec.destroy();
+	    }
+	    /*List listExecutive = qualifiedGroup.seekQualifiedResourcesOfType(new XdaqExecutive());
+	    Iterator it = listExecutive.iterator();
+	    while (it.hasNext()) {
+		XdaqExecutive ex = (XdaqExecutive) it.next();
+		if (!ex.getURI().equals(supervExecURI)) {
+		    ex.destroy();
+		    }
+		    }*/
+	}
+
+	// reset the qualified group so that the next time an init is sent all resources will be initialized again
+	//QualifiedGroup qg = getQualifiedGroup();
+	if (qg != null) { qg.reset(); }
     }
-
-    // find all XDAQ executives and kill them
-    if (qualifiedGroup != null) {
-      List listExecutive = qualifiedGroup.seekQualifiedResourcesOfType(new XdaqExecutive());
-      Iterator it = listExecutive.iterator();
-      while (it.hasNext()) {
-        XdaqExecutive ex = (XdaqExecutive) it.next();
-        if (!ex.getURI().equals(supervExecURI)) {
-          ex.destroy();
-        }
-      }
-    }
-
-    // reset the qualified group so that the next time an init is sent all resources will be initialized again
-    QualifiedGroup qg = getQualifiedGroup();
-    if (qg != null) { qg.reset(); }
-    }*/
-
+	
 }
