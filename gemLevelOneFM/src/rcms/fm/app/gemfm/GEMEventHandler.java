@@ -357,8 +357,11 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			    XdaqExecutive exec = (XdaqExecutive)qr;
 			    XdaqExecutiveConfiguration config =  exec.getXdaqExecutiveConfiguration();
 			    String ExecXML = config.getXml();
+			    String EnvironmentLoaded = config.getEnvironmentString();
 			    //functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("XML_Executive",new StringT(ExecXML)));
+			    functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("Environment_settings",new StringT(EnvironmentLoaded)));
 			    logger.info("Executive config "+ ExecXML);
+			    logger.info("Environment settings "+ EnvironmentLoaded);
 			}
 
 			//Looking for job control resources			
