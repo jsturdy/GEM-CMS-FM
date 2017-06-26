@@ -18,10 +18,10 @@
                    qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqExecutive"
                    instance="0"
                    pathToExecutive="/opt/xdaq/bin/xdaq.exe"
-                   unixUser="gemuser"
+                   unixUser="sturdy"
                    logLevel="DEBUG"
                    logURL="file:/tmp/local_for_GEM_tests.log"
-		   environmentString="HOME=/home/sturdy BUILD_HOME=/home/sturdy/gemdev GEM_OS_PROJECT=cmsgemos LD_LIBRARY_PATH=${BUILD_HOME}/${GEM_OS_PROJECT}/gemHwMonitor/lib/linux/x86_64_slc6:${BUILD_HOME}/${GEM_OS_PROJECT}/gemsupervisor/lib/linux/x86_64_slc6:${BUILD_HOME}/${GEM_OS_PROJECT}/gemhardware/lib/linux/x86_64_slc6:${BUILD_HOME}/${GEM_OS_PROJECT}/gemreadout/lib/linux/x86_64_slc6:${BUILD_HOME}/${GEM_OS_PROJECT}/gemutils/lib/linux/x86_64_slc6:${BUILD_HOME}/${GEM_OS_PROJECT}/gembase/lib/linux/x86_64_slc6:/opt/cactus/lib:/opt/xdaq/lib PATH=/bin:/usr/bin XDAQ_ROOT=/opt/xdaq XDAQ_SETUP_ROOT=/opt/xdaq/share XDAQ_ZONE=gem904 XDAQ_DOCUMENT_ROOT=/data/xdaq/sturdy XDAQ_PLATFORM=x86_64_slc6 XDAQ_OS=linux">
+		   environmentString="HOME=/home/sturdy BUILD_HOME=/home/sturdy/gemdev GEM_OS_PROJECT=cmsgemos LD_LIBRARY_PATH=/home/sturdy/gemdev/cmsgemos/gemHwMonitor/lib/linux/x86_64_slc6:/home/sturdy/gemdev/cmsgemos/gemsupervisor/lib/linux/x86_64_slc6:/home/sturdy/gemdev/cmsgemos/gemhardware/lib/linux/x86_64_slc6:/home/sturdy/gemdev/cmsgemos/gemreadout/lib/linux/x86_64_slc6:/home/sturdy/gemdev/cmsgemos/gemutils/lib/linux/x86_64_slc6:/home/sturdy/gemdev/cmsgemos/gembase/lib/linux/x86_64_slc6:/opt/cactus/lib:/opt/xdaq/lib PATH=/bin:/usr/bin XDAQ_ROOT=/opt/xdaq XDAQ_SETUP_ROOT=/opt/xdaq/share XDAQ_ZONE=gem904 XDAQ_DOCUMENT_ROOT=/data/xdaq/sturdy XDAQ_PLATFORM=x86_64_slc6 XDAQ_OS=linux">
       <!-- <configFile location="file">/home/sturdy/gemdev/gem-daq-code/gemdaq-testing/gemsupervisor/xml/gemsupervisor_new.xml</configFile> -->
       <configFile location="file">/home/jose/GEM_Commissioning/NewTemplate/GEM-CMS-FM/gemLevelOneFM/duck/gemsupervisor_gem904daq01.xml</configFile>
     </XdaqExecutive>
