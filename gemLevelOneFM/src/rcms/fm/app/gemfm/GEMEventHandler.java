@@ -370,6 +370,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			for (QualifiedResource qr : qrList) {
 			    logger.info("GEM job control resource found: " + qr.getName());
 			    availableResources.add(new StringT(qr.getName()));
+			    JobControl JC = (JobControl)qr;
+			    JC.executeCommand();
 			    //Snippet to get JobControl xml config - not sure it is possible to have this....
 			    /*JobControl JC = (JobControl)qr;
 			    XdaqExecutiveConfiguration JCconfig =  JC.getXdaqExecutiveConfiguration();
