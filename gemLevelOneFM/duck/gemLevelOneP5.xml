@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" user="gemdev" path="JoseTesting/template">
+  <FunctionManager name="template"
+		   hostname="localhost"
+		   port="40000"
+		   qualifiedResourceType="rcms.fm.resource.qualifiedresource.FunctionManager" 
+		   sourceURL="http://cmsrc-gemdev.cms:40000/functionmanagers/JoseTesting/gemlevelOneFM.jar" 
+		   className="rcms.fm.app.gemfm.GEMFunctionManager">
+    <!-- Asyncrhonous configuration -->
+    <configFile>&lt;root&gt;
+&lt;rcmsWatchover&gt;
+&lt;xdaq:watchover xmlns:xdaq="http://xdaq.web.cern.ch/xdaq/xsd/2005/ErrorNotification-11.xsd"&gt;rcmsexampleapplication&lt;/xdaq:watchover&gt;
+&lt;/rcmsWatchover&gt;
+&lt;/root&gt;</configFile>
+    <!-- GEMSupervisor XDAQ Application -->
+    <XdaqExecutive hostname="srv-s2g18-33-01.cms" port="40100"
+                   urn="urn:xdaq-application:lid=0"
+                   qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqExecutive"
+                   instance="0"
+                   pathToExecutive="/opt/xdaq/bin/xdaq.exe"
+                   unixUser="gempro"
+                   logLevel="DEBUG"
+                   logURL="file:/tmp/local_for_GEM_tests.log"
+		   environmentString="HOME=/nfshome0/gemdev BUILD_HOME=/nfshome0/gemdev/src/gemdev GEM_OS_PROJECT=cmsgemos LD_LIBRARY_PATH=/nfshome0/gemdev/src/cmsgemos/gemsupervisor/lib/linux/x86_64_slc6:/nfshome0/gemdev/src/cmsgemos/gemhardware/lib/linux/x86_64_slc6:/nfshome0/gemdev/src/cmsgemos/gemreadout/lib/linux/x86_64_slc6:/nfshome0/gemdev/src/cmsgemos/gemutils/lib/linux/x86_64_slc6:/nfshome0/gemdev/src/cmsgemos/gembase/lib/linux/x86_64_slc6:/opt/cactus/lib:/opt/xdaq/lib PATH=/bin:/usr/bin XDAQ_ROOT=/opt/xdaq XDAQ_SETUP_ROOT=/opt/xdaq/share XDAQ_ZONE=gem-daq01 XDAQ_DOCUMENT_ROOT=/nfshome0/gemdev/xdaq/htdocs XDAQ_PLATFORM=x86_64_slc6 XDAQ_OS=linux">
+      <configFile location="file">/home/jose/GEM_Commissioning/NewTemplate/GEM-CMS-FM/gemLevelOneFM/duck/gemsupervisor_P5.xml</configFile>
+    </XdaqExecutive>
+    <!-- job control -->
+    <Service name="jobcontrol"
+             hostname="srv-s2g18-33-01.cms" port="39999" urn="/urn:xdaq-application:lid=10"
+             qualifiedResourceType="rcms.fm.resource.qualifiedresource.JobControl" />
+    <!-- GEM XDAQ Applications-->
+    <XdaqApplication className="gem::supervisor::GEMSupervisor" hostname="srv-s2g18-33-01.cms" port="40101"
+                     urn="urn:xdaq-application:lid=254"
+                     qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqApplication"
+                     instance="0" />
+    <!-- <XdaqApplication className="gem::hw::glib::GLIBManager" hostname="gem904daq01.cern.ch" port="20000"
+                     urn="urn:xdaq-application:gem::hw::glib::GLIBManager:lid=30"
+                     qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqApplication"
+                     instance="0" />
+    <XdaqApplication className="gem::hw::optohybrid::OptoHybridManager" hostname="gem904daq01.cern.ch" port="20000"
+                     urn="urn:xdaq-application:gem::hw::optohybrid::OptoHybridManager:lid=50"
+                     qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqApplication"
+                     instance="0" />
+    <XdaqApplication className="gem::hw::amc13::AMC13Manager" hostname="gem904daq01.cern.ch" port="20000"
+                     urn="urn:xdaq-application:gem::hw::amc13::AMC13Manager:lid=255"
+                     qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqApplication"
+                     instance="0" />
+    <XdaqApplication className="gem::hw::amc13::AMC13Readout" hostname="gem904daq01.cern.ch" port="20000"
+                     urn="urn:xdaq-application:gem::hw::amc13::AMC13Readout:lid=260"
+                     qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqApplication"
+                     instance="0" /> -->
+    <!-- TCDS XDAQ applications -->
+    <!-- <XdaqApplication className="tcds::pi::PIController" hostname="tcds-control-904.cms904" port="20000"
+                     urn="urn:xdaq-application:lid=503"
+                     qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqApplication"
+                     instance="0" />
+    <XdaqApplication className="tcds::ici::ICIController" hostname="tcds-control-904.cms904" port="20000"
+                     urn="urn:xdaq-application:lid=303"
+                     qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqApplication"
+                     instance="0" /> -->
+    <!-- FEDKit XDAQ Applications - TO BE ADDED -->
+  </FunctionManager>
+</Configuration>
