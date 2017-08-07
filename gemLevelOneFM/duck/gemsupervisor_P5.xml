@@ -193,10 +193,10 @@
 
   <xc:Context url="http://tcds-control-csc-pri.cms:2104">
     <xc:Application class="tcds::ici::ICIController" id="301" instance="0" network="local" >
-    </Application>
+    </xc:Application>
 
     <xc:Application class="tcds::pi::PIController"   id="501" instance="0" network="local" >
-    </Application>
+    </xc:Application>
   </xc:Context>
 
 </xc:Partition>
