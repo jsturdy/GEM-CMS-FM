@@ -176,13 +176,21 @@
       </properties>
     </xc:Application>
 
-    <xc:Module>${XDAQ_ROOT}/lib/libxdaq2rc.so</xc:Module>
+    <xc:Module>/opt/xdaq/lib/libxdaq2rc.so</xc:Module>
+
+    <xc:Module>/nfshome0/gemdev/src/cmsgemos/gemutils/lib/linux/x86_64_slc6/libgemutils.so</xc:Module>
+    <xc:Module>/nfshome0/gemdev/src/cmsgemos/gembase/lib/linux/x86_64_slc6/libgembase.so</xc:Module>
+    <xc:Module>/nfshome0/gemdev/src/cmsgemos/gemsupervisor/lib/linux/x86_64_slc6/libgemsupervisor.so</xc:Module>
+    <xc:Module>/nfshome0/gemdev/src/cmsgemos/gemreadout/lib/linux/x86_64_slc6/libgemreadout.so</xc:Module>
+    <xc:Module>/nfshome0/gemdev/src/cmsgemos/gemhardware/lib/linux/x86_64_slc6/libgemhardware.so</xc:Module>
+
+    <!--<xc:Module>${XDAQ_ROOT}/lib/libxdaq2rc.so</xc:Module>
 
     <xc:Module>${BUILD_HOME}/${GEM_OS_PROJECT}/gemutils/lib/${XDAQ_OS}/${XDAQ_PLATFORM}/libgemutils.so</xc:Module>
     <xc:Module>${BUILD_HOME}/${GEM_OS_PROJECT}/gembase/lib/${XDAQ_OS}/${XDAQ_PLATFORM}/libgembase.so</xc:Module>
     <xc:Module>${BUILD_HOME}/${GEM_OS_PROJECT}/gemsupervisor/lib/${XDAQ_OS}/${XDAQ_PLATFORM}/libgemsupervisor.so</xc:Module>
     <xc:Module>${BUILD_HOME}/${GEM_OS_PROJECT}/gemreadout/lib/${XDAQ_OS}/${XDAQ_PLATFORM}/libgemreadout.so</xc:Module>
-    <xc:Module>${BUILD_HOME}/${GEM_OS_PROJECT}/gemhardware/lib/${XDAQ_OS}/${XDAQ_PLATFORM}/libgemhardware.so</xc:Module>
+    <xc:Module>${BUILD_HOME}/${GEM_OS_PROJECT}/gemhardware/lib/${XDAQ_OS}/${XDAQ_PLATFORM}/libgemhardware.so</xc:Module>-->
 
   </xc:Context>
 
