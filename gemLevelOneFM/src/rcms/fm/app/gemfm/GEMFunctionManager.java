@@ -45,253 +45,259 @@ import rcms.util.logsession.LogSessionConnector;
 import rcms.utilities.runinfo.RunInfo;
 
 /**
- * Example of Function Machine for controlling an Level 1 Function Manager.
- * 
+ * GEM Level 1 Function Manager.
+ *
  * @author Andrea Petrucci, Alexander Oh, Michele Gulmini
- * @maintainer Jose Ruiz
+ * @maintainer Jose Ruiz, Jared Sturdy
  */
+
 public class GEMFunctionManager extends UserFunctionManager {
 
-	/**
-	 * <code>RCMSLogger</code>: RCMS log4j Logger
-	 */
-	static RCMSLogger logger = new RCMSLogger(GEMFunctionManager.class);
-        public LogSessionConnector logSessionConnector;  // Connector for logsession DB
+    /**
+     * <code>RCMSLogger</code>: RCMS log4j Logger
+     */
+    static RCMSLogger logger = new RCMSLogger(GEMFunctionManager.class);
+    public LogSessionConnector logSessionConnector;  // Connector for logsession DB
 
-	/**
-	 * define some containers
-	 */
-	public XdaqApplicationContainer containerXdaqApplication = null;
+    /**
+     * define some containers
+     */
+    public XdaqApplicationContainer containerXdaqApplication        = null;
+    public XdaqApplicationContainer containerXdaqServiceApplication = null;
 
-	/**
-	 * define specific application containers
-	 */
-        public XdaqApplicationContainer containerGEMSupervisor      = null;
-        public XdaqApplicationContainer containerTCDSControllers    = null;
-        public XdaqApplicationContainer containerTTCciControl       = null;
-        public XdaqApplicationContainer containerBU                 = null;
-        public XdaqApplicationContainer containerRU                  = null;
-	public XdaqApplicationContainer cEVM = null;
-        public XdaqApplicationContainer containerFEDStreamer         = null;
+    /**
+     * define specific application containers
+     */
+    public XdaqApplicationContainer containerGEMSupervisor   = null;
+    public XdaqApplicationContainer containerAMC13Manager    = null;
+    public XdaqApplicationContainer containerICIController   = null;
+    public XdaqApplicationContainer containerPIController    = null;
+    public XdaqApplicationContainer containerLPMController   = null;
+    public XdaqApplicationContainer containerTCDSControllers = null;
+    public XdaqApplicationContainer containerTTCciControl    = null;
+    public XdaqApplicationContainer containerBU              = null;
+    public XdaqApplicationContainer containerRU              = null;
+    public XdaqApplicationContainer cEVM                     = null;
+    public XdaqApplicationContainer containerFEDStreamer     = null;
 
-	/**
-	 * <code>containerXdaqExecutive</code>: container of XdaqExecutive in the
-	 * running Group.
-	 */
-	public XdaqApplicationContainer containerXdaqExecutive = null;
+    /**
+     * <code>containerXdaqExecutive</code>: container of XdaqExecutive in the
+     * running Group.
+     */
+    public XdaqApplicationContainer containerXdaqExecutive = null;
 
-	/**
-	 * <code>containerFunctionManager</code>: container of FunctionManagers
-	 * in the running Group.
-	 */
-	public QualifiedResourceContainer containerFunctionManager = null;
+    /**
+     * <code>containerFunctionManager</code>: container of FunctionManagers
+     * in the running Group.
+     */
+    public QualifiedResourceContainer containerFunctionManager = null;
 
-	/**
-	 * <code>containerJobControl</code>: container of JobControl in the
-	 * running Group.
-	 */
-	public QualifiedResourceContainer containerJobControl = null;
+    /**
+     * <code>containerJobControl</code>: container of JobControl in the
+     * running Group.
+     */
+    public QualifiedResourceContainer containerJobControl = null;
 
-	/**
-	 * <code>calcState</code>: Calculated State.
-	 */
-	public State calcState = null;
+    /**
+     * <code>calcState</code>: Calculated State.
+     */
+    public State calcState = null;
 
-	// In the template FM we store whether we are degraded in a boolean
-	boolean degraded = false;         
+    // In the template FM we store whether we are degraded in a boolean
+    boolean degraded = false;
 
-	// In the template FM we store whether we have detected a softError in a boolean
-	boolean softErrorDetected=false;
+    // In the template FM we store whether we have detected a softError in a boolean
+    boolean softErrorDetected=false;
 
-        // connector to the RunInfo database
-        public RunInfo GEMRunInfo = null;    
+    // connector to the RunInfo database
+    public RunInfo GEMRunInfo = null;
 
-        // set from the controlled EventHandler
-        public String  RunType = "";
-        public Integer RunNumber = 0;
-        //public Integer CachedRunNumber = 0;
+    // set from the controlled EventHandler
+    public String  RunType = "";
+    public Integer RunNumber = 0;
+    //public Integer CachedRunNumber = 0;
 
-        // HCAL RunInfo namespace, the FM name will be added in the createAction() method                   
-        public String GEM_NS = "CMS.";
+    // HCAL RunInfo namespace, the FM name will be added in the createAction() method
+    public String GEM_NS = "CMS.";
 
-        public String FMname = "empty";
-	
-	/**
-	 * Instantiates an MyFunctionManager.
-	 */
-	public GEMFunctionManager() {
-		//
-		// Any State Machine Implementation must provide the framework
-		// with some information about itself.
-		//
+    public String FMname = "empty";
 
-		// make the parameters available
-		addParameters();
+    /**
+     * Instantiates an MyFunctionManager.
+     */
+    public GEMFunctionManager() {
+        //
+        // Any State Machine Implementation must provide the framework
+        // with some information about itself.
+        //
 
-	}
+        // make the parameters available
+        addParameters();
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see rcms.statemachine.user.UserStateMachine#createAction()
-	 */
-	public void createAction(ParameterSet<CommandParameter> pars) throws UserActionException {
-		//
-		// This method is called by the framework when the Function Manager is
-		// created.
+    }
 
-		System.out.println("createAction called.");
-		logger.debug("createAction called.");
+    /*
+     * (non-Javadoc)
+     *
+     * @see rcms.statemachine.user.UserStateMachine#createAction()
+     */
+    public void createAction(ParameterSet<CommandParameter> pars) throws UserActionException {
+        //
+        // This method is called by the framework when the Function Manager is
+        // created.
 
-		// Retrieve the configuration for this Function Manager from the Group
-		//FunctionManagerResource fmConf = ((FunctionManagerResource) qualifiedGroup.getGroup().getThisResource());
+        System.out.println("createAction called.");
+        logger.debug("createAction called.");
 
-		//FMname = fmConf.getName();
+        // Retrieve the configuration for this Function Manager from the Group
+        //FunctionManagerResource fmConf = ((FunctionManagerResource) qualifiedGroup.getGroup().getThisResource());
 
-		// get log session connector
-		logger.debug("Get log session connector started");
-		logSessionConnector = getLogSessionConnector();
-		logger.debug("Get log session connector finished");
+        //FMname = fmConf.getName();
 
-		// get session ID
-		logger.debug("Get session ID started");
-		getSessionId();
-		logger.debug("Get session ID finished");
+        // get log session connector
+        logger.debug("Get log session connector started");
+        logSessionConnector = getLogSessionConnector();
+        logger.debug("Get log session connector finished");
 
-		System.out.println("createAction executed.");
-		logger.debug("createAction executed.");
+        // get session ID
+        logger.debug("Get session ID started");
+        getSessionId();
+        logger.debug("Get session ID finished");
 
-	}
+        System.out.println("createAction executed.");
+        logger.debug("createAction executed.");
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see rcms.statemachine.user.UserStateMachine#destroyAction()
-	 */
-	public void destroyAction() throws UserActionException {
-		//
-		// This method is called by the framework when the Function Manager is
-		// destroyed.
-		//
-	    //qualifiedGroup.destroy();
-	    
-		System.out.println("destroyAction called");
-		logger.debug("destroyAction called");
+    }
 
-		// try to close any open session ID only if we are in local run mode i.e. not CDAQ and not miniDAQ runs and if it's a LV1FM 
-		//if (RunType.equals("local") && !containerFMChildren.isEmpty()) { closeSessionId(); }
-		closeSessionId(); //NEEDS TO BE CORRECTED TO ONLY BE CALLED IN LOCAL RUNS
+    /*
+     * (non-Javadoc)
+     *
+     * @see rcms.statemachine.user.UserStateMachine#destroyAction()
+     */
+    public void destroyAction() throws UserActionException {
+        //
+        // This method is called by the framework when the Function Manager is
+        // destroyed.
+        //
+        //qualifiedGroup.destroy();
 
-		// retrieve the Function Managers and kill themDestroy all XDAQ applications
-		destroyXDAQ();
+        System.out.println("destroyAction called");
+        logger.debug("destroyAction called");
 
-		System.out.println("destroyAction executed");
-		logger.debug("destroyAction executed");
-	}
+        // try to close any open session ID only if we are in local run mode i.e. not CDAQ and not miniDAQ runs and if it's a LV1FM
+        //if (RunType.equals("local") && !containerFMChildren.isEmpty()) { closeSessionId(); }
+        closeSessionId(); //NEEDS TO BE CORRECTED TO ONLY BE CALLED IN LOCAL RUNS
 
-	/**
-	 * add parameters to parameterSet. After this they are accessible.
-	 */
-	private void addParameters() {
+        // retrieve the Function Managers and kill themDestroy all XDAQ applications
+        destroyXDAQ();
 
-		// add parameters to parameter Set so they are visible.
-		parameterSet = GEMParameters.LVL_ONE_PARAMETER_SET;
+        System.out.println("destroyAction executed");
+        logger.debug("destroyAction executed");
+    }
 
-	}
+    /**
+     * add parameters to parameterSet. After this they are accessible.
+     */
+    private void addParameters() {
 
-	public void init() throws StateMachineDefinitionException,
-			rcms.fm.fw.EventHandlerException {
+        // add parameters to parameter Set so they are visible.
+        parameterSet = GEMParameters.LVL_ONE_PARAMETER_SET;
 
-		//
-		// Set first of all the State Machine Definition
-		//
-		setStateMachineDefinition(new GEMStateMachineDefinition());
+    }
 
-		//
-		// Add event handler
-		//
-		addEventHandler(new GEMEventHandler());
+    public void init() throws StateMachineDefinitionException,
+                              rcms.fm.fw.EventHandlerException {
 
-		//
-		// Add error handler
-		//
-		addEventHandler(new GEMErrorHandler());
+        //
+        // Set first of all the State Machine Definition
+        //
+        setStateMachineDefinition(new GEMStateMachineDefinition());
 
-	}
+        //
+        // Add event handler
+        //
+        addEventHandler(new GEMEventHandler());
+
+        //
+        // Add error handler
+        //
+        addEventHandler(new GEMErrorHandler());
+
+    }
 
     // get a session Id
     protected void getSessionId() {
-      String user = getQualifiedGroup().getGroup().getDirectory().getUser();
-      String description = getQualifiedGroup().getGroup().getDirectory().getFullPath();
-      int sessionId = 0;
+        String user = getQualifiedGroup().getGroup().getDirectory().getUser();
+        String description = getQualifiedGroup().getGroup().getDirectory().getFullPath();
+        int sessionId = 0;
 
-      logger.debug("[GEM base] Log session connector: " + logSessionConnector );
+        logger.debug("[GEM base] Log session connector: " + logSessionConnector );
 
-      if (logSessionConnector != null) {
-        try {
-          sessionId = logSessionConnector.createSession( user, description );
-          logger.debug("[GEM base] New session Id obtained =" + sessionId );
+        if (logSessionConnector != null) {
+            try {
+                sessionId = logSessionConnector.createSession( user, description );
+                logger.debug("[GEM base] New session Id obtained =" + sessionId );
+            }
+            catch (LogSessionException e1) {
+                logger.warn("[GEM base] Could not get session ID, using default = " + sessionId + ". Exception: ",e1);
+            }
         }
-        catch (LogSessionException e1) {
-          logger.warn("[GEM base] Could not get session ID, using default = " + sessionId + ". Exception: ",e1);
+        else {
+            logger.warn("[GEM base] logSessionConnector = " + logSessionConnector + ", using default = " + sessionId + ".");
         }
-      }
-      else {
-        logger.warn("[GEM base] logSessionConnector = " + logSessionConnector + ", using default = " + sessionId + ".");
-      }
 
-      // put the session ID into parameter set
-      getParameterSet().get("SID").setValue(new IntegerT(sessionId));
+        // put the session ID into parameter set
+        getParameterSet().get("SID").setValue(new IntegerT(sessionId));
     }
 
-  // close session Id. This routine is called always when functionmanager gets destroyed.
-  protected void closeSessionId() {
-    if (logSessionConnector != null) {
-      int sessionId = 0;
-      try {
-        sessionId = ((IntegerT)getParameterSet().get("SID").getValue()).getInteger();
-      }
-      catch (Exception e) {
-        logger.warn("[GEM " + FMname + "] Could not get sessionId for closing session.\nNot closing session.\nThis is OK if no sessionId was requested from within GEM land, i.e. global runs.",e);
-      }
-      try {
-        logger.debug("[GEM " + FMname + "] Trying to close log sessionId = " + sessionId );
-        logSessionConnector.closeSession(sessionId);
-        logger.debug("[GEM " + FMname + "] ... closed log sessionId = " + sessionId );
-      }
-      catch (LogSessionException e1) {
-        logger.warn("[GEM " + FMname + "] Could not close sessionId, but sessionId was requested and used.\nThis is OK only for global runs.\nException: ",e1);
-      }
+    // close session Id. This routine is called always when functionmanager gets destroyed.
+    protected void closeSessionId() {
+        if (logSessionConnector != null) {
+            int sessionId = 0;
+            try {
+                sessionId = ((IntegerT)getParameterSet().get("SID").getValue()).getInteger();
+            }
+            catch (Exception e) {
+                logger.warn("[GEM " + FMname + "] Could not get sessionId for closing session.\nNot closing session.\nThis is OK if no sessionId was requested from within GEM land, i.e. global runs.",e);
+            }
+            try {
+                logger.debug("[GEM " + FMname + "] Trying to close log sessionId = " + sessionId );
+                logSessionConnector.closeSession(sessionId);
+                logger.debug("[GEM " + FMname + "] ... closed log sessionId = " + sessionId );
+            }
+            catch (LogSessionException e1) {
+                logger.warn("[GEM " + FMname + "] Could not close sessionId, but sessionId was requested and used.\nThis is OK only for global runs.\nException: ",e1);
+            }
+        }
+
     }
 
-  }
-	
-	public boolean isDegraded() {
-		// FM may check whether it is currently degraded if such functionality exists
-		return degraded;
-	}
-	
-	public boolean hasSoftError() {
-		// FM may check whether the system has a soft error if such functionality exists
-		return softErrorDetected;
-	}
-	
-	// only needed if FM cannot check for degradation
-	public void setDegraded(boolean degraded) {
-		this.degraded = degraded;
-	}
-	
-	// only needed if FM cannot check for softError
-	public void setSoftErrorDetected(boolean softErrorDetected) {
-		this.softErrorDetected = softErrorDetected;
-	}
+    public boolean isDegraded() {
+        // FM may check whether it is currently degraded if such functionality exists
+        return degraded;
+    }
+
+    public boolean hasSoftError() {
+        // FM may check whether the system has a soft error if such functionality exists
+        return softErrorDetected;
+    }
+
+    // only needed if FM cannot check for degradation
+    public void setDegraded(boolean degraded) {
+        this.degraded = degraded;
+    }
+
+    // only needed if FM cannot check for softError
+    public void setSoftErrorDetected(boolean softErrorDetected) {
+        this.softErrorDetected = softErrorDetected;
+    }
 
     /**----------------------------------------------------------------------
      * get all XDAQ executives and kill them
      */
     protected void destroyXDAQ() {
 	QualifiedGroup qg = getQualifiedGroup();
-	
+
 	// see if there is an exec with a supervisor and kill it first
 	URI supervExecURI = null;
 	if (containerGEMSupervisor != null) {
@@ -304,7 +310,7 @@ public class GEMFunctionManager extends UserFunctionManager {
 		ex.destroy();
 	    }
 	}
-	
+
 	// find all XDAQ executives and kill them
 	if (qualifiedGroup != null) {
 	    List<QualifiedResource> qrList = qg.seekQualifiedResourcesOfType(new XdaqExecutive());
@@ -313,18 +319,17 @@ public class GEMFunctionManager extends UserFunctionManager {
 		exec.destroy();
 	    }
 	    /*List listExecutive = qualifiedGroup.seekQualifiedResourcesOfType(new XdaqExecutive());
-	    Iterator it = listExecutive.iterator();
-	    while (it.hasNext()) {
-		XdaqExecutive ex = (XdaqExecutive) it.next();
-		if (!ex.getURI().equals(supervExecURI)) {
-		    ex.destroy();
-		    }
-		    }*/
+              Iterator it = listExecutive.iterator();
+              while (it.hasNext()) {
+              XdaqExecutive ex = (XdaqExecutive) it.next();
+              if (!ex.getURI().equals(supervExecURI)) {
+              ex.destroy();
+              }
+              }*/
 	}
 
 	// reset the qualified group so that the next time an init is sent all resources will be initialized again
 	//QualifiedGroup qg = getQualifiedGroup();
 	if (qg != null) { qg.reset(); }
     }
-	
 }
