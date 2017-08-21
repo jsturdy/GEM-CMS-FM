@@ -119,10 +119,14 @@ public class GEMStateMachineDefinition extends UserStateMachineDefinition {
 
         // define parameters for tts testing command
         //
-        CommandParameter<IntegerT> ttsTestFedid   = new CommandParameter<IntegerT>(GEMParameters.TTS_TEST_FED_ID, new IntegerT(-1));
-        CommandParameter<StringT>  ttsTestMode    = new CommandParameter<StringT>(GEMParameters.TTS_TEST_MODE,    new StringT(""));
-        CommandParameter<StringT>  ttsTestPattern = new CommandParameter<StringT>(GEMParameters.TTS_TEST_PATTERN, new StringT(""));
-        CommandParameter<IntegerT> ttsTestSequenceRepeat = new CommandParameter<IntegerT>(GEMParameters.TTS_TEST_SEQUENCE_REPEAT, new IntegerT(-1));
+        CommandParameter<IntegerT> ttsTestFedid          = new CommandParameter<IntegerT>(GEMParameters.TTS_TEST_FED_ID,
+                                                                                          new IntegerT(-1));
+        CommandParameter<StringT>  ttsTestMode           = new CommandParameter<StringT>(GEMParameters.TTS_TEST_MODE,
+                                                                                         new StringT(""));
+        CommandParameter<StringT>  ttsTestPattern        = new CommandParameter<StringT>(GEMParameters.TTS_TEST_PATTERN,
+                                                                                         new StringT(""));
+        CommandParameter<IntegerT> ttsTestSequenceRepeat = new CommandParameter<IntegerT>(GEMParameters.TTS_TEST_SEQUENCE_REPEAT,
+                                                                                          new IntegerT(-1));
 
         // define parameter set
         ParameterSet<CommandParameter> ttsTestParameters = new ParameterSet<CommandParameter>();

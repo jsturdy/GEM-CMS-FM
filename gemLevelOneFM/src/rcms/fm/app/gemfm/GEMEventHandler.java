@@ -74,7 +74,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 
     private QualifiedGroup qualifiedGroup = null;
 
-    public Integer Sid              =  0;           // Session ID for database connections
+    public Integer mSID              =  0;           // Session ID for database connections
     public String RunSequenceName   =  "GEM test"; // Run sequence name, for attaining a run sequence number
     public Integer RunSeqNumber     =  0;
 
@@ -124,15 +124,15 @@ public class GEMEventHandler extends UserStateNotificationHandler {
         // check availability of runInfo DB
         RunInfoConnectorIF ric = functionManager.getRunInfoConnector();
         // Get SID from parameter
-        Sid = ((IntegerT)functionManager.getParameterSet().get(GEMParameters.SID).getValue()).getInteger();
+        mSID = ((IntegerT)functionManager.getParameterSet().get(GEMParameters.SID).getValue()).getInteger();
         if ( ric == null ) {
             logger.error("[GEM FM::" + functionManager.FMname + "] RunInfoConnector is empty i.e. Is there a RunInfo DB or is it down?");
 
             // by default give run number 0
-            return new RunNumberData(new Integer(Sid),new Integer(0),functionManager.getOwner(),Calendar.getInstance().getTime());
+            return new RunNumberData(new Integer(mSID),new Integer(0),functionManager.getOwner(),Calendar.getInstance().getTime());
         } else {
             RunSequenceNumber rsn = new RunSequenceNumber(ric,functionManager.getOwner(),RunSequenceName);
-            RunNumberData rnd = rsn.createRunSequenceNumber(Sid);
+            RunNumberData rnd = rsn.createRunSequenceNumber(mSID);
 
             logger.info("[GEM FM::" + functionManager.FMname + "] received run number: " + rnd.getRunNumber()
                         + " and sequence number: " + rnd.getSequenceNumber());
@@ -150,10 +150,10 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                         + functionManager.GEM_NS + " now ...");
 
             //Get SID from parameter
-            Sid = ((IntegerT)functionManager.getParameterSet().get(GEMParameters.SID).getValue()).getInteger();
+            mSID = ((IntegerT)functionManager.getParameterSet().get(GEMParameters.SID).getValue()).getInteger();
 
             RunInfoConnectorIF ric = functionManager.getRunInfoConnector();
-            functionManager.GEMRunInfo =  new RunInfo(ric,Sid,Integer.valueOf(functionManager.RunNumber));
+            functionManager.GEMRunInfo =  new RunInfo(ric,mSID,Integer.valueOf(functionManager.RunNumber));
 
             functionManager.GEMRunInfo.setNameSpace(functionManager.GEM_NS);
 
@@ -297,10 +297,10 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                 // ParameterSet<CommandParameter> parameterSet = getUserFunctionManager().getLastInput().getParameterSet();
                 ParameterSet parameterSet = functionManager.getParameterSet();
                 if (parameterSet.get(GEMParameters.SID) != null) {
-                    Sid = ((IntegerT)parameterSet.get(GEMParameters.SID).getValue()).getInteger();
+                    mSID = ((IntegerT)parameterSet.get(GEMParameters.SID).getValue()).getInteger();
                     ((FunctionManagerParameter<IntegerT>)functionManager.getParameterSet()
                      .get(GEMParameters.INITIALIZED_WITH_SID))
-                        .setValue(new IntegerT(Sid));
+                        .setValue(new IntegerT(mSID));
                     logger.info("[GEM FM::" + functionManager.FMname + "] INITIALIZED_WITH_SID has been set");
                     /*
                     // For the moment this parameter is only here to show if it is correctly set after initialization
@@ -317,7 +317,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                 logger.error(msg, e);
                 // notify error
                 sendCMSError(msg);
-                //go to error state
+                // go to error state
                 functionManager.fireEvent( GEMInputs.SETERROR );
                 return;
             }
@@ -437,7 +437,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             // set exported parameters
             ((FunctionManagerParameter<IntegerT>)functionManager.getParameterSet()
              .get(GEMParameters.INITIALIZED_WITH_SID))
-                .setValue(new IntegerT(Sid));
+                .setValue(new IntegerT(mSID));
             ((FunctionManagerParameter<StringT>)functionManager.getParameterSet()
              .get(GEMParameters.INITIALIZED_WITH_GLOBAL_CONF_KEY))
                 .setValue(new StringT(globalConfKey));
@@ -1739,9 +1739,12 @@ public class GEMEventHandler extends UserStateNotificationHandler {
     private void cleanUpFMParameters()
     {
         // Clean-up of the Function Manager parameters
-        functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
-        functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ERROR_MSG,new StringT("")));
-        functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(GEMParameters.TTS_TEST_FED_ID,new IntegerT(-1)));
+        functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
+                                                                                    new StringT("")));
+        functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>(GEMParameters.ERROR_MSG,
+                                                                                    new StringT("")));
+        functionManager.getParameterSet().put(new FunctionManagerParameter<IntegerT>(GEMParameters.TTS_TEST_FED_ID,
+                                                                                     new IntegerT(-1)));
     }
 
     protected void initXDAQ()
