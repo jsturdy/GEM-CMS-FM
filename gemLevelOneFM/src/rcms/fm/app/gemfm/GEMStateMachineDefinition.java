@@ -3,9 +3,12 @@ package rcms.fm.app.gemfm;
 import rcms.fm.fw.parameter.CommandParameter;
 import rcms.fm.fw.parameter.ParameterException;
 import rcms.fm.fw.parameter.ParameterSet;
+
 import rcms.fm.fw.parameter.type.IntegerT;
 import rcms.fm.fw.parameter.type.LongT;
 import rcms.fm.fw.parameter.type.StringT;
+import rcms.fm.fw.parameter.type.VectorT;
+
 import rcms.fm.fw.user.UserStateMachineDefinition;
 import rcms.statemachine.definition.State;
 import rcms.statemachine.definition.StateMachineDefinitionException;
@@ -96,17 +99,17 @@ public class GEMStateMachineDefinition extends UserStateMachineDefinition {
         // make these invisible
         GEMInputs.SETCONFIGURED.setVisualizable(false);
 
-        //      left visualizable for testing
+        // left visualizable for testing
         //
-        //		GEMInputs.SETRUNNING.setVisualizable(false);
-        //		GEMInputs.SETRUNNINGDEGRADED.setVisualizable(false);
-        //		GEMInputs.SETRUNNINGSOFTERRORDETECTED.setVisualizable(false);
+        // GEMInputs.SETRUNNING.setVisualizable(false);
+        // GEMInputs.SETRUNNINGDEGRADED.setVisualizable(false);
+        // GEMInputs.SETRUNNINGSOFTERRORDETECTED.setVisualizable(false);
 
         GEMInputs.SETPAUSED.setVisualizable(false);
         GEMInputs.SETRESUMED.setVisualizable(false);
+        GEMInputs.SETHALTED.setVisualizable(false);
         GEMInputs.SETRESUMEDDEGRADED.setVisualizable(false);
         GEMInputs.SETRESUMEDSOFTERRORDETECTED.setVisualizable(false);
-        GEMInputs.SETHALTED.setVisualizable(false);
         GEMInputs.SETTTSTEST_MODE.setVisualizable(false);
 
         //
@@ -116,9 +119,9 @@ public class GEMStateMachineDefinition extends UserStateMachineDefinition {
 
         // define parameters for tts testing command
         //
-        CommandParameter<IntegerT> ttsTestFedid = new CommandParameter<IntegerT>(GEMParameters.TTS_TEST_FED_ID, new IntegerT(-1));
-        CommandParameter<StringT> ttsTestMode = new CommandParameter<StringT>(GEMParameters.TTS_TEST_MODE, new StringT(""));
-        CommandParameter<StringT> ttsTestPattern = new CommandParameter<StringT>(GEMParameters.TTS_TEST_PATTERN, new StringT(""));
+        CommandParameter<IntegerT> ttsTestFedid   = new CommandParameter<IntegerT>(GEMParameters.TTS_TEST_FED_ID, new IntegerT(-1));
+        CommandParameter<StringT>  ttsTestMode    = new CommandParameter<StringT>(GEMParameters.TTS_TEST_MODE,    new StringT(""));
+        CommandParameter<StringT>  ttsTestPattern = new CommandParameter<StringT>(GEMParameters.TTS_TEST_PATTERN, new StringT(""));
         CommandParameter<IntegerT> ttsTestSequenceRepeat = new CommandParameter<IntegerT>(GEMParameters.TTS_TEST_SEQUENCE_REPEAT, new IntegerT(-1));
 
         // define parameter set
@@ -139,8 +142,10 @@ public class GEMStateMachineDefinition extends UserStateMachineDefinition {
         //
         // define parameters for Initialize command
         //
-        CommandParameter<IntegerT> initializeSid = new CommandParameter<IntegerT>(GEMParameters.SID, new IntegerT(0));
-        CommandParameter<StringT> initializeGlobalConfigurationKey = new CommandParameter<StringT>(GEMParameters.GLOBAL_CONF_KEY, new StringT(""));
+        CommandParameter<IntegerT> initializeSid                    = new CommandParameter<IntegerT>(GEMParameters.SID,
+                                                                                                     new IntegerT(0));
+        CommandParameter<StringT>  initializeGlobalConfigurationKey = new CommandParameter<StringT>(GEMParameters.GLOBAL_CONF_KEY,
+                                                                                                    new StringT(""));
 
         // define parameter set
         ParameterSet<CommandParameter> initializeParameters = new ParameterSet<CommandParameter>();
@@ -157,9 +162,18 @@ public class GEMStateMachineDefinition extends UserStateMachineDefinition {
         //
         // define parameters for Configure command
         //
-        CommandParameter<StringT> configureFedEnableMask = new CommandParameter<StringT>(GEMParameters.FED_ENABLE_MASK, new StringT(""));
-        CommandParameter<IntegerT> configureRunNumber = new CommandParameter<IntegerT>(GEMParameters.RUN_NUMBER, new IntegerT(-1));
-        CommandParameter<StringT> configureRunKey = new CommandParameter<StringT>(GEMParameters.RUN_KEY, new StringT(""));
+        CommandParameter<StringT>  configureFedEnableMask = new CommandParameter<StringT>(GEMParameters.FED_ENABLE_MASK,
+                                                                                          new StringT(""));
+        CommandParameter<IntegerT> configureRunNumber     = new CommandParameter<IntegerT>(GEMParameters.RUN_NUMBER,
+                                                                                           new IntegerT(-1));
+        CommandParameter<StringT>  configureRunKey        = new CommandParameter<StringT>(GEMParameters.RUN_KEY,
+                                                                                          new StringT(""));
+        CommandParameter<StringT>  configureLPMHWCfg      = new CommandParameter<StringT>(GEMParameters.LPM_HW_CFG,
+                                                                                          new StringT("N/A"));
+        CommandParameter<StringT>  configureICIHWCfg      = new CommandParameter<StringT>(GEMParameters.ICI_HW_CFG,
+                                                                                          new StringT("N/A"));
+        CommandParameter<StringT>  configurePIHWCfg       = new CommandParameter<StringT>(GEMParameters.PI_HW_CFG,
+                                                                                          new StringT("N/A"));
 
         // define parameter set
         ParameterSet<CommandParameter> configureParameters = new ParameterSet<CommandParameter>();
@@ -167,6 +181,9 @@ public class GEMStateMachineDefinition extends UserStateMachineDefinition {
             configureParameters.add(configureFedEnableMask);
             configureParameters.add(configureRunNumber);
             configureParameters.add(configureRunKey);
+            configureParameters.add(configureLPMHWCfg);
+            configureParameters.add(configureICIHWCfg);
+            configureParameters.add(configurePIHWCfg);
         } catch (ParameterException nothing) {
             // Throws an exception if a parameter is duplicate
             throw new StateMachineDefinitionException( "Could not add to configureParameters. Duplicate Parameter?", nothing );
