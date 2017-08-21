@@ -357,10 +357,10 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                 // JC.executeCommand(); // BUG!!! executeCommand is not a function//
                 // Snippet to get JobControl xml config - not sure it is possible to have this....
                 /*
-                JobControl JC = (JobControl)qr;
-                XdaqExecutiveConfiguration JCconfig =  JC.getXdaqExecutiveConfiguration();
-                String JCXML = JCconfig.getXml();
-                logger.info("JobControl config "+ JCXML);
+                  JobControl JC = (JobControl)qr;
+                  XdaqExecutiveConfiguration JCconfig =  JC.getXdaqExecutiveConfiguration();
+                  String JCXML = JCconfig.getXml();
+                  logger.info("JobControl config "+ JCXML);
                 */
             }
 
@@ -436,11 +436,11 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             /*
             // set exported parameters
             ((FunctionManagerParameter<IntegerT>)functionManager.getParameterSet()
-             .get(GEMParameters.INITIALIZED_WITH_SID))
-                .setValue(new IntegerT(mSID));
+            .get(GEMParameters.INITIALIZED_WITH_SID))
+            .setValue(new IntegerT(mSID));
             ((FunctionManagerParameter<StringT>)functionManager.getParameterSet()
-             .get(GEMParameters.INITIALIZED_WITH_GLOBAL_CONF_KEY))
-                .setValue(new StringT(globalConfKey));
+            .get(GEMParameters.INITIALIZED_WITH_GLOBAL_CONF_KEY))
+            .setValue(new StringT(globalConfKey));
             */
 
             // go to HALT
@@ -621,9 +621,9 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                 fedEnableMask = ((CommandParameter<StringT>)parameterSet.get(GEMParameters.FED_ENABLE_MASK)).getValue().toString();
 
                 /*
-                runNumber     = ((IntegerT)parameterSet.get(GEMParameters.RUN_NUMBER).getValue()).getInteger();
-                runKey        = ((StringT)parameterSet.get(GEMParameters.RUN_KEY).getValue()).toString();
-                fedEnableMask = ((StringT)parameterSet.get(GEMParameters.FED_ENABLE_MASK).getValue()).toString();
+                  runNumber     = ((IntegerT)parameterSet.get(GEMParameters.RUN_NUMBER).getValue()).getInteger();
+                  runKey        = ((StringT)parameterSet.get(GEMParameters.RUN_KEY).getValue()).toString();
+                  fedEnableMask = ((StringT)parameterSet.get(GEMParameters.FED_ENABLE_MASK).getValue()).toString();
                 */
             } catch (Exception e) {
                 // go to error, we require parameters
@@ -686,20 +686,20 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             // need to send the FED_ENABLE_MASK to the EVM and BU
             // need to configure first the EVM then BU and then the FerolController
             /*
-            if (functionManager.containerFEDKIT != null) {
-                if (!functionManager.containerFEDKIT.isEmpty()) {
-                    try {
-                        logger.info("[GEM FM::" + functionManager.FMname + "] Trying to configure uFEDKIT resources on configure.");
-                        functionManager.containerFEDKIT.execute(GEMInputs.CONFIGURE);
-                    } catch (QualifiedResourceContainerException e) {
-                        String errMsg = "[GEM FM::" + functionManager.FMname + "] configureAction: " + e.getMessage();
-                        logger.error(errMsg);
-                        //functionManager.sendCMSError(msg);
-                        functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(errMsg)));
-                    }
-                }
-            }
+              if (functionManager.containerFEDKIT != null) {
+              if (!functionManager.containerFEDKIT.isEmpty()) {
+              try {
+              logger.info("[GEM FM::" + functionManager.FMname + "] Trying to configure uFEDKIT resources on configure.");
+              functionManager.containerFEDKIT.execute(GEMInputs.CONFIGURE);
+              } catch (QualifiedResourceContainerException e) {
+              String errMsg = "[GEM FM::" + functionManager.FMname + "] configureAction: " + e.getMessage();
+              logger.error(errMsg);
+              //functionManager.sendCMSError(msg);
+              functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
+              functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(errMsg)));
+              }
+              }
+              }
             */
 
             if (functionManager.containerEVM != null) {
@@ -837,8 +837,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             /*
             // Set the run number in the Function Manager parameters
             ((FunctionManagerParameter<IntegerT>)functionManager.getParameterSet()
-             .get(GEMParameters.STARTED_WITH_RUN_NUMBER))
-                .setValue(new IntegerT(runNumber));
+            .get(GEMParameters.STARTED_WITH_RUN_NUMBER))
+            .setValue(new IntegerT(runNumber));
             */
 
             // START GEMFSMApplications
@@ -882,21 +882,21 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             // ENABLE? ferol/EVM/BU/RU?
             // need to start first the EVM then BU and then the FerolController
             /*
-            if (functionManager.containerFEDKIT != null) {
-                if (!functionManager.containerFEDKIT.isEmpty()) {
-                    try {
-                        logger.info("[GEM FM::" + functionManager.FMname + "] Trying to enable uFEDKIT resources on start.");
-                        functionManager.containerFEDKIT.execute(GEMInputs.ENABLE);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "[GEM FM::" + functionManager.FMname + "] startAction: " + e.getMessage();
-                        logger.error(msg);
-                        functionManager.goToError(msg,e);
-                        // functionManager.sendCMSError(msg);  // when do this rather than goToError, or both?
-                        functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
+              if (functionManager.containerFEDKIT != null) {
+              if (!functionManager.containerFEDKIT.isEmpty()) {
+              try {
+              logger.info("[GEM FM::" + functionManager.FMname + "] Trying to enable uFEDKIT resources on start.");
+              functionManager.containerFEDKIT.execute(GEMInputs.ENABLE);
+              } catch (QualifiedResourceContainerException e) {
+              String msg = "[GEM FM::" + functionManager.FMname + "] startAction: " + e.getMessage();
+              logger.error(msg);
+              functionManager.goToError(msg,e);
+              // functionManager.sendCMSError(msg);  // when do this rather than goToError, or both?
+              functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
+              functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
+              }
+              }
+              }
             */
 
             if (functionManager.containerEVM != null) {
@@ -1040,19 +1040,19 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             /*
             // PAUSE ferol/EVM/BU/RU?
             if (functionManager.containerFEDKIT != null) {
-                if (!functionManager.containerFEDKIT.isEmpty()) {
-                    try {
-                        logger.info("[GEM FM::" + functionManager.FMname + "] Trying to pause uFEDKIT resources on pause.");
-                        functionManager.containerFEDKIT.execute(GEMInputs.PAUSE);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "[GEM FM::" + functionManager.FMname + "] pauseAction: " + e.getMessage();
-                        functionManager.goToError(msg,e);
-                        // functionManager.sendCMSError(msg);  // when do this rather than goToError, or both?
-                        functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                        logger.error(msg);
-                    }
-                }
+            if (!functionManager.containerFEDKIT.isEmpty()) {
+            try {
+            logger.info("[GEM FM::" + functionManager.FMname + "] Trying to pause uFEDKIT resources on pause.");
+            functionManager.containerFEDKIT.execute(GEMInputs.PAUSE);
+            } catch (QualifiedResourceContainerException e) {
+            String msg = "[GEM FM::" + functionManager.FMname + "] pauseAction: " + e.getMessage();
+            functionManager.goToError(msg,e);
+            // functionManager.sendCMSError(msg);  // when do this rather than goToError, or both?
+            functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
+            functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
+            logger.error(msg);
+            }
+            }
             }
             */
 
@@ -1134,21 +1134,21 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             // ? ferol/EVM/BU/RU?
             // stop ferol then BU then EVM
             /*
-            if (functionManager.containerFEDKIT != null) {
-                if (!functionManager.containerFEDKIT.isEmpty()) {
-                    try {
-                        logger.info("[GEM FM::" + functionManager.FMname + "] Trying to stop uFEDKIT resources on stop.");
-                        functionManager.containerFEDKIT.execute(GEMInputs.STOP);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "[GEM FM::" + functionManager.FMname + "] stopAction: " + e.getMessage();
-                        functionManager.goToError(msg,e);
-                        // functionManager.sendCMSError(msg);  // when do this rather than goToError, or both?
-                        functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                        logger.error(msg);
-                    }
-                }
-            }
+              if (functionManager.containerFEDKIT != null) {
+              if (!functionManager.containerFEDKIT.isEmpty()) {
+              try {
+              logger.info("[GEM FM::" + functionManager.FMname + "] Trying to stop uFEDKIT resources on stop.");
+              functionManager.containerFEDKIT.execute(GEMInputs.STOP);
+              } catch (QualifiedResourceContainerException e) {
+              String msg = "[GEM FM::" + functionManager.FMname + "] stopAction: " + e.getMessage();
+              functionManager.goToError(msg,e);
+              // functionManager.sendCMSError(msg);  // when do this rather than goToError, or both?
+              functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
+              functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
+              logger.error(msg);
+              }
+              }
+              }
             */
 
             if (functionManager.containerEVM != null) {
@@ -1165,7 +1165,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                     }
                 }
             }
-            
+
             if (functionManager.containerBU != null) {
                 if (!functionManager.containerBU.isEmpty()) {
                     try {
@@ -1194,7 +1194,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                         functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(errMsg)));
                     }
                 }
-            }            
+            }
 
             // leave intermediate state
             functionManager.fireEvent( GEMInputs.SETCONFIGURED );
@@ -1278,19 +1278,19 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             // RESUME? ferol/EVM/BU/RU?
             // need to resume first the EVM then BU and then the FerolController
             if (functionManager.containerFEDKIT != null) {
-                if (!functionManager.containerFEDKIT.isEmpty()) {
-                    try {
-                        logger.info("[GEM FM::" + functionManager.FMname + "] Trying to enable uFEDKIT resources on start.");
-                        functionManager.containerFEDKIT.execute(GEMInputs.ENABLE);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "[GEM FM::" + functionManager.FMname + "] startAction: " + e.getMessage();
-                        logger.error(msg);
-                        functionManager.goToError(msg,e);
-                        // functionManager.sendCMSError(msg);  // when do this rather than goToError, or both?
-                        functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
+            if (!functionManager.containerFEDKIT.isEmpty()) {
+            try {
+            logger.info("[GEM FM::" + functionManager.FMname + "] Trying to enable uFEDKIT resources on start.");
+            functionManager.containerFEDKIT.execute(GEMInputs.ENABLE);
+            } catch (QualifiedResourceContainerException e) {
+            String msg = "[GEM FM::" + functionManager.FMname + "] startAction: " + e.getMessage();
+            logger.error(msg);
+            functionManager.goToError(msg,e);
+            // functionManager.sendCMSError(msg);  // when do this rather than goToError, or both?
+            functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
+            functionManager.getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
+            }
+            }
             }
             */
 
@@ -1823,10 +1823,11 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 
         if ( qg.getRegistryEntry(GEMParameters.SID) == null) {
             Integer sid = ((IntegerT)functionManager.getParameterSet().get(GEMParameters.SID).getValue()).getInteger();
+
             qg.putRegistryEntry(GEMParameters.SID, sid);
-            logger.warn("[GEM "+ functionManager.FMname + "] Just set the SID of QG to "+ sid);
+            logger.info("[GEM "+ functionManager.FMname + "] Just set the SID of QG to " + sid);
         } else{
-            logger.info("[GEM "+ functionManager.FMname + "] SID of QG is "+ qg.getRegistryEntry(GEMParameters.SID));
+            logger.info("[GEM "+ functionManager.FMname + "] SID of QG is " + qg.getRegistryEntry(GEMParameters.SID));
         }
 
         // Now if we are using TCDS, give all of the TCDS applications the URN that they need.
@@ -1844,6 +1845,9 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             logger.error(msg);
             // functionManager.goToError(msg,e);
         }
+
+        msg = "[GEM FM::" + functionManager.FMname + "] initialized the qualified group";
+        logger.info(msg);
 
         // find xdaq applications
         List<QualifiedResource> xdaqAppList        = qg.seekQualifiedResourcesOfType(new XdaqApplication());
