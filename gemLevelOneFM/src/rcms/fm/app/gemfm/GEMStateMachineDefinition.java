@@ -24,7 +24,9 @@ import rcms.statemachine.definition.StateMachineDefinitionException;
 
 public class GEMStateMachineDefinition extends UserStateMachineDefinition {
 
-    public GEMStateMachineDefinition() throws StateMachineDefinitionException {
+    public GEMStateMachineDefinition()
+        throws StateMachineDefinitionException
+    {
         //
         // Defines the States for this Finite State Machine.
         //
@@ -146,7 +148,7 @@ public class GEMStateMachineDefinition extends UserStateMachineDefinition {
         //
         // define parameters for Initialize command
         //
-        CommandParameter<IntegerT> initializeSid                    = new CommandParameter<IntegerT>(GEMParameters.SID,
+        CommandParameter<IntegerT> initializeSID                    = new CommandParameter<IntegerT>(GEMParameters.SID,
                                                                                                      new IntegerT(0));
         CommandParameter<StringT>  initializeGlobalConfigurationKey = new CommandParameter<StringT>(GEMParameters.GLOBAL_CONF_KEY,
                                                                                                     new StringT(""));
@@ -154,7 +156,7 @@ public class GEMStateMachineDefinition extends UserStateMachineDefinition {
         // define parameter set
         ParameterSet<CommandParameter> initializeParameters = new ParameterSet<CommandParameter>();
         try {
-            initializeParameters.add(initializeSid);
+            initializeParameters.add(initializeSID);
             initializeParameters.add(initializeGlobalConfigurationKey);
         } catch (ParameterException nothing) {
             // Throws an exception if a parameter is duplicate
@@ -166,6 +168,8 @@ public class GEMStateMachineDefinition extends UserStateMachineDefinition {
         //
         // define parameters for Configure command
         //
+        CommandParameter<IntegerT> configureSID           = new CommandParameter<IntegerT>(GEMParameters.SID,
+                                                                                           new IntegerT(0));
         CommandParameter<StringT>  configureFedEnableMask = new CommandParameter<StringT>(GEMParameters.FED_ENABLE_MASK,
                                                                                           new StringT(""));
         CommandParameter<IntegerT> configureRunNumber     = new CommandParameter<IntegerT>(GEMParameters.RUN_NUMBER,
@@ -182,12 +186,13 @@ public class GEMStateMachineDefinition extends UserStateMachineDefinition {
         // define parameter set
         ParameterSet<CommandParameter> configureParameters = new ParameterSet<CommandParameter>();
         try {
-            configureParameters.add(configureFedEnableMask);
+            configureParameters.add(configureSID);
+            // configureParameters.add(configureFedEnableMask);
             configureParameters.add(configureRunNumber);
             configureParameters.add(configureRunKey);
-            configureParameters.add(configureLPMHWCfg);
-            configureParameters.add(configureICIHWCfg);
-            configureParameters.add(configurePIHWCfg);
+            // configureParameters.add(configureLPMHWCfg);
+            // configureParameters.add(configureICIHWCfg);
+            // configureParameters.add(configurePIHWCfg);
         } catch (ParameterException nothing) {
             // Throws an exception if a parameter is duplicate
             throw new StateMachineDefinitionException( "Could not add to configureParameters. Duplicate Parameter?", nothing );
