@@ -22,7 +22,9 @@ public class GEMErrorHandler extends UserErrorHandler {
      */
     static RCMSLogger logger = new RCMSLogger(GEMEventHandler.class);
 
-    public GEMErrorHandler() throws EventHandlerException {
+    public GEMErrorHandler()
+        throws EventHandlerException
+    {
         // this handler inherits UserErrorHandler
         // so it is already registered for Error events
 
@@ -31,14 +33,16 @@ public class GEMErrorHandler extends UserErrorHandler {
 
     }
 
-    public void init() throws rcms.fm.fw.EventHandlerException {
+    public void init()
+        throws rcms.fm.fw.EventHandlerException
+    {
 
     }
 
 
-    public void errorHandler(Object obj) throws UserActionException {
-
+    public void errorHandler(Object obj)
+        throws UserActionException
+    {
         System.out.println("errorHandler() Got an event: " + obj.getClass() );
-
     }
 }
