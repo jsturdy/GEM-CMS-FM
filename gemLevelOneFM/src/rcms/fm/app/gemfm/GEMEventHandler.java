@@ -103,13 +103,18 @@ public class GEMEventHandler extends UserStateNotificationHandler {
     public GEMEventHandler()
         throws rcms.fm.fw.EventHandlerException
     {
-        String msgPrefix = "[GEM FM::" + m_gemFM.m_FMname + "] GEMEventHandler::GEMEventHandler(): ";
+        // String msgPrefix = "[GEM FM::" + m_gemFM.m_FMname + "] GEMEventHandler::GEMEventHandler(): ";
+        String msgPrefix = "[GEM FM] GEMEventHandler::GEMEventHandler(): ";
+
         // this handler inherits UserStateNotificationHandler
         // so it is already registered for StateNotification events
+        logger.info(msgPrefix + "Starting");
 
         // Let's register also the StateEnteredEvent triggered when the FSM enters in a new state.
+        logger.info(msgPrefix + "Subscribing StateEnteredEvent events");
         subscribeForEvents(StateEnteredEvent.class);
 
+        logger.info(msgPrefix + "Adding action callbacks");
         addAction(GEMStates.INITIALIZING,           "initAction");
         addAction(GEMStates.CONFIGURING,            "configureAction");
         addAction(GEMStates.HALTING,                "haltAction");
@@ -128,20 +133,29 @@ public class GEMEventHandler extends UserStateNotificationHandler {
         addAction(GEMStates.RUNNINGDEGRADED,          "runningDegradedAction");           // for testing with external inputs
         addAction(GEMStates.RUNNINGSOFTERRORDETECTED, "runningSoftErrorDetectedAction");  // for testing with external inputs
         addAction(GEMStates.RUNNING,                  "runningAction");                   // for testing with external inputs
+
+        logger.info(msgPrefix + "Done");
     }
 
 
     public void init()
         throws rcms.fm.fw.EventHandlerException
     {
-        String msgPrefix = "[GEM FM::" + m_gemFM.m_FMname + "] GEMEventHandler::init(): ";
+        String msgPrefix = "[GEM FM:: " + ((GEMFunctionManager)getUserFunctionManager()).m_FMname
+            + "] GEMEventHandler::GEMEventHandler(): ";
+        // String msgPrefix = "[GEM FM::" + m_gemFM.m_FMname + "] GEMEventHandler::init(): ";
 
-        m_gemFM   = (GEMFunctionManager) getUserFunctionManager();
+        logger.info(msgPrefix + "Starting");
+
+        logger.info(msgPrefix + "Getting the user function manager");
+        m_gemFM   = (GEMFunctionManager)getUserFunctionManager();
+        logger.info(msgPrefix + "Getting the FM qualified group");
         m_gemQG   = m_gemFM.getQualifiedGroup();
+        logger.info(msgPrefix + "Getting the FM parameter set");
         m_gemPSet = (ParameterSet<FunctionManagerParameter>)m_gemFM.getParameterSet();
 
         // debug
-        logger.debug(msgPrefix + "init() called");
+        logger.debug(msgPrefix + "Done");
     }
 
 

@@ -335,17 +335,24 @@ public class GEMFunctionManager extends UserFunctionManager {
         throws StateMachineDefinitionException,
                rcms.fm.fw.EventHandlerException
     {
+        String msgPrefix = "[GEM FM:: " + m_FMname + " GEMFunctionManager::init(): ";
+
         // Set first of all the State Machine Definition
+        logger.info(msgPrefix + "Setting the state machine definition");
         setStateMachineDefinition(new GEMStateMachineDefinition());
 
         // Add event handler
+        logger.info(msgPrefix + "Adding the GEMEventHandler");
         addEventHandler(new GEMEventHandler());
 
         // Add error handler
+        logger.info(msgPrefix + "Adding the GEMErrorHandler");
         addEventHandler(new GEMErrorHandler());
 
         // Add state notification handler
+        logger.info(msgPrefix + "Creating the state notification handler");
         m_stateNotificationHandler = new GEMStateNotificationHandler();
+        logger.info(msgPrefix + "Adding state notification handler");
         addEventHandler(m_stateNotificationHandler);
     }
 
@@ -353,18 +360,20 @@ public class GEMFunctionManager extends UserFunctionManager {
     @SuppressWarnings("unchecked") // SHOULD REALLY MAKE SURE THAT THIS IS NECESSARY AND NOT JUST DUE TO BAD JAVA
         protected void getSessionId()
     {
+        String msgPrefix = "[GEM FM:: " + m_FMname + " GEMFunctionManager::getSessionId(): ";
+
         String user        = getQualifiedGroup().getGroup().getDirectory().getUser();
         String description = getQualifiedGroup().getGroup().getDirectory().getFullPath();
         int sessionId      = 0;
 
-        logger.debug("[GEM base] Log session connector: " + logSessionConnector );
+        logger.debug(msgPrefix + "Log session connector: " + logSessionConnector );
 
         if (logSessionConnector != null) {
             try {
                 sessionId = logSessionConnector.createSession( user, description );
-                logger.info("[GEM base] New session Id obtained =" + sessionId );
+                logger.info(msgPrefix + "New session Id obtained =" + sessionId );
             } catch (LogSessionException e1) {
-                logger.warn("[GEM base] Could not get session ID, using default = " + sessionId + ".\n"
+                logger.warn(msgPrefix + "Could not get session ID, using default = " + sessionId + ".\n"
                             + "Exception: ", e1);
             }
         } else {
@@ -486,7 +495,8 @@ public class GEMFunctionManager extends UserFunctionManager {
     /**----------------------------------------------------------------------
      * Get the sequence for TCDS tasks
      */
-    public TaskSequence getTCDSTaskSequence(Input input)
+    // public TaskSequence getTCDSTaskSequence(Input input)
+    public void getTCDSTaskSequence(Input input)
         throws UserActionException
     {
         TaskSequence tcdsSequence = null;
@@ -504,13 +514,14 @@ public class GEMFunctionManager extends UserFunctionManager {
 
         // Input is RESET
 
-        return tcdsSequence;
+        // return tcdsSequence;
     }
 
     /**----------------------------------------------------------------------
      * Get command parameters for TCDS applications
      */
-    public Map<String, ParameterSet<CommandParameter> > getTCDSCommandParameters(Input input)
+    // public Map<String, ParameterSet<CommandParameter> > getTCDSCommandParameters(Input input)
+    public void getTCDSCommandParameters(Input input)
         throws UserActionException
     {
         Map<String, ParameterSet<CommandParameter> > tcdsParameters = null;
@@ -523,7 +534,7 @@ public class GEMFunctionManager extends UserFunctionManager {
         // Input is RESUME
         // Input is RESET
 
-        return tcdsParameters;
+        // return tcdsParameters;
     }
 
     /**----------------------------------------------------------------------

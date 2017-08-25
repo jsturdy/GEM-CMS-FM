@@ -18,6 +18,11 @@ import rcms.util.logger.RCMSLogger;
 public class GEMErrorHandler extends UserErrorHandler {
 
     /**
+     * <code>m_gemFM</code>: GEMFunctionManager
+     */
+    GEMFunctionManager m_gemFM = null;
+
+    /**
      * <code>RCMSLogger</code>: RCMS log4j logger.
      */
     static RCMSLogger logger = new RCMSLogger(GEMEventHandler.class);
@@ -27,22 +32,28 @@ public class GEMErrorHandler extends UserErrorHandler {
     {
         // this handler inherits UserErrorHandler
         // so it is already registered for Error events
+        String msgPrefix = "[GEM FM] GEMEventHandler::GEMEventHandler(): ";
 
         // error handler
-        addAction(State.ANYSTATE,"errorHandler");
+        addAction(State.ANYSTATE, "errorHandler");
 
     }
 
     public void init()
         throws rcms.fm.fw.EventHandlerException
     {
+        String msgPrefix = "[GEM FM:: " + ((GEMFunctionManager)getUserFunctionManager()).m_FMname + "] GEMErrorHandler::init(): ";
 
+        logger.info(msgPrefix + "Getting the user function manager");
+        m_gemFM = (GEMFunctionManager)getUserFunctionManager();
     }
 
 
     public void errorHandler(Object obj)
         throws UserActionException
     {
-        System.out.println("errorHandler() Got an event: " + obj.getClass() );
+        String msgPrefix = "[GEM FM:: " + m_gemFM.m_FMname + "] GEMErrorHandler::errorHandler(): ";
+        System.out.println(msgPrefix + "Got an event: " + obj.getClass() );
+        logger.error(msgPrefix + "Got an event: " + obj.getClass() );
     }
 }
