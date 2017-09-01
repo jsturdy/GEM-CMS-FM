@@ -2,10 +2,19 @@ package rcms.fm.app.gemfm;
 
 import java.net.URI;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Arrays;
+
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.net.URL;
+import java.net.MalformedURLException;
 
 import rcms.fm.fw.parameter.CommandParameter;
 import rcms.fm.fw.parameter.ParameterSet;
@@ -41,6 +50,7 @@ import rcms.resourceservice.db.resource.fm.FunctionManagerResource;
 
 import rcms.util.logsession.LogSessionException;
 import rcms.util.logsession.LogSessionConnector;
+import rcms.errorFormat.CMS.CMSError;
 
 import rcms.utilities.runinfo.RunInfo;
 
@@ -67,12 +77,12 @@ public class GEMFunctionManager extends UserFunctionManager {
 	 * define specific application containers
 	 */
         public XdaqApplicationContainer containerGEMSupervisor      = null;
-        public XdaqApplicationContainer containerTCDSControllers    = null;
-        public XdaqApplicationContainer containerTTCciControl       = null;
+        //public XdaqApplicationContainer containerTCDSControllers    = null;
+        /*public XdaqApplicationContainer containerTTCciControl       = null;
         public XdaqApplicationContainer containerBU                 = null;
         public XdaqApplicationContainer containerRU                  = null;
 	public XdaqApplicationContainer cEVM = null;
-        public XdaqApplicationContainer containerFEDStreamer         = null;
+        public XdaqApplicationContainer containerFEDStreamer         = null;*/
 
 	/**
 	 * <code>containerXdaqExecutive</code>: container of XdaqExecutive in the
@@ -111,11 +121,15 @@ public class GEMFunctionManager extends UserFunctionManager {
         public Integer RunNumber = 0;
         //public Integer CachedRunNumber = 0;
 
-        // HCAL RunInfo namespace, the FM name will be added in the createAction() method                   
+        // GEM RunInfo namespace, the FM name will be added in the createAction() method                   
         public String GEM_NS = "CMS.";
 
-        public String FMname = "empty";
+        public String FMname = "GEMFM";
+
+        // switch to find out if FM is available
+        private boolean destroyed = false;
 	
+
 	/**
 	 * Instantiates an MyFunctionManager.
 	 */
@@ -184,6 +198,8 @@ public class GEMFunctionManager extends UserFunctionManager {
 
 		// retrieve the Function Managers and kill themDestroy all XDAQ applications
 		destroyXDAQ();
+
+		destroyed = true;
 
 		System.out.println("destroyAction executed");
 		logger.debug("destroyAction executed");
@@ -286,6 +302,9 @@ public class GEMFunctionManager extends UserFunctionManager {
 		this.softErrorDetected = softErrorDetected;
 	}
 
+    public boolean isDestroyed() {
+	return destroyed;
+    }
     /**----------------------------------------------------------------------
      * get all XDAQ executives and kill them
      */
@@ -326,5 +345,49 @@ public class GEMFunctionManager extends UserFunctionManager {
 	//QualifiedGroup qg = getQualifiedGroup();
 	if (qg != null) { qg.reset(); }
     }
+
+    @SuppressWarnings("unchecked")
+	protected void sendCMSError(String errMessage){
 	
+	// create a new error notification msg
+	CMSError error = getErrorFactory().getCMSError();
+	error.setDateTime(new Date().toString());
+	error.setMessage(errMessage);
+	
+	// update error msg parameter for GUI
+	getParameterSet().get("ERROR_MSG").setValue(new StringT(errMessage));
+	
+	// send error
+      try {
+	  getParentErrorNotifier().sendError(error);
+      }
+      catch (Exception e) {
+	  logger.warn("[GEM " + FMname + "] " + getClass().toString() + ": Failed to send error message " + errMessage);
+      }
+    }
+
+    /**----------------------------------------------------------------------
+     * go to the error state, setting messages and so forth, with exception
+     */
+    public void goToError(String errMessage, Exception e) {
+	errMessage += " Message from the caught exception is: "+e.getMessage();
+	goToError(errMessage);
+    }
+    
+    /**----------------------------------------------------------------------
+     * go to the error state, setting messages and so forth, without exception
+     */
+    public void goToError(String errMessage) {
+	logger.error(errMessage);
+	sendCMSError(errMessage);
+	getParameterSet().get("STATE").setValue(new StringT("Error"));
+	getParameterSet().get("ACTION_MSG").setValue(new StringT(errMessage));
+	/*getParameterSet().get("STATE").setValue(new StringT(errMessage));
+	getParameterSet().put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
+	getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(errMessage)));
+	getParameterSet().put(new FunctionManagerParameter<StringT>("SUPERVISOR_ERROR",new StringT(errMessage)));*/
+	//Input errInput = new Input(GEMInputs.SETERROR);
+	//errInput.setReason(errMessage);
+    }
+    
 }
