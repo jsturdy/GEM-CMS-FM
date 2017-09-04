@@ -754,9 +754,9 @@ public class GEMFunctionManager extends UserFunctionManager {
         }
     }
 
-    public boolean isDestroyed() {
+    /*public boolean isDestroyed() {
 	return destroyed;
-    }
+	}*/
     /**----------------------------------------------------------------------
      * get all XDAQ executives and kill them
      */
