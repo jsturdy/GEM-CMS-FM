@@ -18,10 +18,10 @@
                    qualifiedResourceType="rcms.fm.resource.qualifiedresource.XdaqExecutive"
                    instance="0"
                    pathToExecutive="/opt/xdaq/bin/xdaq.exe"
-                   unixUser="gempro"
+                   unixUser="gemdev"
                    logLevel="DEBUG"
                    logURL="file:/tmp/local_for_GEM_tests.log"
-		   environmentString="HOME=/nfshome0/gemdev BUILD_HOME=/nfshome0/gemdev/src/gemdev GEM_OS_PROJECT=cmsgemos LD_LIBRARY_PATH=/nfshome0/gemdev/src/cmsgemos/gemsupervisor/lib/linux/x86_64_slc6:/nfshome0/gemdev/src/cmsgemos/gemhardware/lib/linux/x86_64_slc6:/nfshome0/gemdev/src/cmsgemos/gemreadout/lib/linux/x86_64_slc6:/nfshome0/gemdev/src/cmsgemos/gemutils/lib/linux/x86_64_slc6:/nfshome0/gemdev/src/cmsgemos/gembase/lib/linux/x86_64_slc6:/opt/cactus/lib:/opt/xdaq/lib PATH=/bin:/usr/bin XDAQ_ROOT=/opt/xdaq XDAQ_SETUP_ROOT=/opt/xdaq/share XDAQ_ZONE=gem-daq01 XDAQ_DOCUMENT_ROOT=/nfshome0/gemdev/xdaq/htdocs XDAQ_PLATFORM=x86_64_slc6 XDAQ_OS=linux">
+		   environmentString="HOME=/nfshome0/gemdev BUILD_HOME=/nfshome0/gemdev/src GEM_OS_PROJECT=cmsgemos LD_LIBRARY_PATH=/nfshome0/gemdev/src/cmsgemos/gemsupervisor/lib/linux/x86_64_slc6:/nfshome0/gemdev/src/cmsgemos/gemhardware/lib/linux/x86_64_slc6:/nfshome0/gemdev/src/cmsgemos/gemreadout/lib/linux/x86_64_slc6:/nfshome0/gemdev/src/cmsgemos/gemutils/lib/linux/x86_64_slc6:/nfshome0/gemdev/src/cmsgemos/gembase/lib/linux/x86_64_slc6:/opt/cactus/lib:/opt/xdaq/lib PATH=/bin:/usr/bin XDAQ_ROOT=/opt/xdaq XDAQ_SETUP_ROOT=/opt/xdaq/share XDAQ_ZONE=gem-daq01 XDAQ_DOCUMENT_ROOT=/nfshome0/gemdev/xdaq/htdocs XDAQ_PLATFORM=x86_64_slc6 XDAQ_OS=linux">
       <configFile location="file">/home/jose/GEM_Commissioning/NewTemplate/GEM-CMS-FM/gemLevelOneFM/duck/gemsupervisor_P5.xml</configFile>
     </XdaqExecutive>
     <!-- job control -->
