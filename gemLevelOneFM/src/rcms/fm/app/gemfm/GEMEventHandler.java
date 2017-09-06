@@ -2034,10 +2034,13 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                     pam =((XdaqApplication)qr).getXDAQParameter();
                     logger.info(msgPrefix + "initXDAQ: got parameters, selecting:");
 
-                    pam.select(new String[] {"TriggerAdapterName", "PartitionState", "InitializationProgress","ReportStateToRCMS"});
+                    //pam.select(new String[] {"TriggerAdapterName", "PartitionState", "InitializationProgress","ReportStateToRCMS"});
+                    pam.select(new String[] {"HandleTCDS"});
                     logger.info(msgPrefix + "initXDAQ: parameters selected, getting:");
                     pam.get();
-                    logger.info(msgPrefix + "initXDAQ: got selectedparameters!");
+		    boolean DoesSupervisorHandleTCDS =  pam.getValue("HandleTCDS");
+                    logger.info(msgPrefix + "initXDAQ: got selected parameters!");
+		    logger.info(msgPrefix + "HandleTCDS: " + DoesSupervisorHandleTCDS);
 
                     dowehaveanasyncgemSupervisor = pam.getValue("ReportStateToRCMS");
                     msg = msgPrefix + "initXDAQ(): asking for the GEM supervisor "
