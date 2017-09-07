@@ -203,7 +203,6 @@ public class GEMFunctionManager extends UserFunctionManager {
 
         // make the parameters available
         addParameters();
-
     }
 
     /*
@@ -218,9 +217,11 @@ public class GEMFunctionManager extends UserFunctionManager {
         // This method is called by the framework when the Function Manager is
         // created.
 
-        String msg = "[GEM FM::" + m_FMname + "] createAction called.";
-        System.out.println(msg);
-        logger.debug(msg);
+        String msgPrefix = "[GEM FM] GEMFunctionManager::createAction(ParameterSet<CommandParameter>): ";
+
+        System.out.println(msgPrefix + "createAction called.");
+        logger.debug(msgPrefix + "createAction called.");
+
         m_gemQG = qualifiedGroup;
         // Retrieve the configuration for this Function Manager from the Group
         FunctionManagerResource fmConf = ((FunctionManagerResource) m_gemQG.getGroup().getThisResource());
@@ -235,6 +236,8 @@ public class GEMFunctionManager extends UserFunctionManager {
         dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));;
         m_utcFMtimeofstart = dateFormatter.format(m_FMtimeofstart);
 
+        msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::createAction(ParameterSet<CommandParameter>): ";
+
         // set statelistener URL
         try {
             URL fmURL = new URL(m_FMurl);
@@ -243,7 +246,7 @@ public class GEMFunctionManager extends UserFunctionManager {
             String rcmsStateListenerProtocol = fmURL.getProtocol();
             m_rcmsStateListenerURL = rcmsStateListenerProtocol+"://"+rcmsStateListenerHost+":"+rcmsStateListenerPort+"/rcms";
         } catch (MalformedURLException e) {
-            String errMsg = "[GEM FM::" + m_FMname + "] Error! MalformedURLException in createAction" + e.getMessage();
+            String errMsg = msgPrefix + "Error! MalformedURLException in createAction" + e.getMessage();
             logger.error(errMsg,e);
             sendCMSError(errMsg);
             getParameterSet().put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
@@ -252,16 +255,16 @@ public class GEMFunctionManager extends UserFunctionManager {
         }
 
         // get log session connector
-        logger.info("[GEM FM::" + m_FMname + "] Get log session connector started");
+        logger.info(msgPrefix + "Get log session connector started");
         logSessionConnector = getLogSessionConnector();
-        logger.info("[GEM FM::" + m_FMname + "] Get log session connector finished");
+        logger.info(msgPrefix + "Get log session connector finished");
 
         // get session ID // NEEDS TO BE REMOVED FOR GLOBAL OPERATIONS
-        logger.info("[GEM FM::" + m_FMname + "] Get session ID started");
+        logger.info(msgPrefix + "Get session ID started");
         getSessionId();
-        logger.info("[GEM FM::" + m_FMname + "] Get session ID finished");
+        logger.info(msgPrefix + "Get session ID finished");
 
-        logger.debug("[GEM FM::" + m_FMname + "] createAction executed.");
+        logger.debug(msgPrefix + "createAction executed.");
     }
 
     /*
@@ -278,8 +281,10 @@ public class GEMFunctionManager extends UserFunctionManager {
         //
         //m_gemQG.destroy();
 
-        System.out.println("[GEM FM::" + m_FMname + "] destroyAction called");
-        logger.debug("[GEM FM::" + m_FMname + "] destroyAction called");
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::destroyAction(): ";
+
+        System.out.println(msgPrefix + "destroyAction called");
+        logger.debug(msgPrefix + "destroyAction called");
 
         // try to close any open session ID only if we are in local run mode i.e. not CDAQ and not miniDAQ runs and if it's a LV1FM
         // if (RunType.equals("local") && !containerFMChildren.isEmpty()) { closeSessionId(); }
@@ -299,10 +304,10 @@ public class GEMFunctionManager extends UserFunctionManager {
         if (c_tcdsControllers != null){
             if (!c_tcdsControllers.isEmpty()) {
                 try {
-                    logger.info("[GEM FM::" + m_FMname + "] Trying to halt TCDS on destroy.");
+                    logger.info(msgPrefix + "Trying to halt TCDS on destroy.");
                     haltTCDSControllers();
                 } catch (UserActionException e) {
-                    String msg = "[GEM FM::" + m_FMname + "] destroyAction: got an exception while halting TCDS";
+                    String msg = msgPrefix + "destroyAction: got an exception while halting TCDS";
                     logger.error(msg + ": " + e);
                     goToError(msg,e);
                 }
@@ -314,12 +319,12 @@ public class GEMFunctionManager extends UserFunctionManager {
         //     throw e;
         // }
 
-        String msg = "[GEM FM::" + m_FMname + "] destroyAction: destroying the Qualified Group";
+        String msg = msgPrefix + "destroyAction: destroying the Qualified Group";
         logger.info(msg);
         this.getQualifiedGroup().destroy();
 
-        System.out.println("[GEM FM::" + m_FMname + "] destroyAction executed");
-        logger.debug("[GEM FM::" + m_FMname + "] destroyAction executed");
+        System.out.println(msgPrefix + "destroyAction executed");
+        logger.debug(msgPrefix + "destroyAction executed");
     }
 
     /**
@@ -335,7 +340,7 @@ public class GEMFunctionManager extends UserFunctionManager {
         throws StateMachineDefinitionException,
                rcms.fm.fw.EventHandlerException
     {
-        String msgPrefix = "[GEM FM:: " + m_FMname + " GEMFunctionManager::init(): ";
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::init(): ";
 
         // Set first of all the State Machine Definition
         logger.info(msgPrefix + "Setting the state machine definition");
@@ -360,7 +365,7 @@ public class GEMFunctionManager extends UserFunctionManager {
     @SuppressWarnings("unchecked") // SHOULD REALLY MAKE SURE THAT THIS IS NECESSARY AND NOT JUST DUE TO BAD JAVA
         protected void getSessionId()
     {
-        String msgPrefix = "[GEM FM:: " + m_FMname + " GEMFunctionManager::getSessionId(): ";
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::getSessionId(): ";
 
         String user        = getQualifiedGroup().getGroup().getDirectory().getUser();
         String description = getQualifiedGroup().getGroup().getDirectory().getFullPath();
@@ -390,22 +395,24 @@ public class GEMFunctionManager extends UserFunctionManager {
     // close session Id. This routine is called always when functionmanager gets destroyed.
     protected void closeSessionId()
     {
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::closeSessionId(): ";
+
         if (logSessionConnector != null) {
             int sessionId = 0;
             try {
                 sessionId = ((IntegerT)getParameterSet().get(GEMParameters.SID).getValue()).getInteger();
             } catch (Exception e) {
-                logger.warn("[GEM FM::" + m_FMname + "] Could not get sessionId for closing session.\n"
+                logger.warn(msgPrefix + "Could not get sessionId for closing session.\n"
                             + "Not closing session.\n"
                             + "(This is OK if no sessionId was requested from within GEM land, i.e. global runs)."
                             + "Exception: ", e);
             }
             try {
-                logger.debug("[GEM FM::" + m_FMname + "] Trying to close log sessionId = " + sessionId );
+                logger.debug(msgPrefix + "Trying to close log sessionId = " + sessionId );
                 logSessionConnector.closeSession(sessionId);
-                logger.debug("[GEM FM::" + m_FMname + "] ... closed log sessionId = " + sessionId );
+                logger.debug(msgPrefix + "... closed log sessionId = " + sessionId );
             } catch (LogSessionException e1) {
-                logger.warn("[GEM FM::" + m_FMname + "] Could not close sessionId, but sessionId was requested and used.\n"
+                logger.warn(msgPrefix + "Could not close sessionId, but sessionId was requested and used.\n"
                             + "This is OK only for global runs.\n"
                             + "Exception: ", e1);
             }
@@ -417,30 +424,36 @@ public class GEMFunctionManager extends UserFunctionManager {
     public boolean isDegraded()
     {
         // FM may check whether it is currently degraded if such functionality exists
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::isDegraded(): ";
         return degraded;
     }
 
     public boolean hasSoftError()
     {
         // FM may check whether the system has a soft error if such functionality exists
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::hasSoftError(): ";
         return softErrorDetected;
     }
 
     // only needed if FM cannot check for degradation
     public void setDegraded(boolean degraded)
     {
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::setDegraded(boolean): ";
         this.degraded = degraded;
     }
 
     // only needed if FM cannot check for softError
     public void setSoftErrorDetected(boolean softErrorDetected)
     {
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::setSoftErrorDetected(boolean): ";
         this.softErrorDetected = softErrorDetected;
     }
 
     @SuppressWarnings("unchecked")
         protected void sendCMSError(String errMessage)
     {
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::sendCMSError(String): ";
+
         // create a new error notification msg
         CMSError error = getErrorFactory().getCMSError();
         error.setDateTime(new Date().toString());
@@ -453,7 +466,7 @@ public class GEMFunctionManager extends UserFunctionManager {
         try {
             getParentErrorNotifier().sendError(error);
         } catch (Exception e) {
-            logger.warn("[GEM FM::" + m_FMname + "] " + getClass().toString() + ": Failed to send error message " + errMessage);
+            logger.warn(msgPrefix + "" + getClass().toString() + ": Failed to send error message " + errMessage);
         }
     }
 
@@ -462,6 +475,8 @@ public class GEMFunctionManager extends UserFunctionManager {
      * set the current Action
      */
     public void setAction(String action) {
+
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::setAction(String): ";
 
         getParameterSet().put(new FunctionManagerParameter<StringT>
                               ("ACTION_MSG",new StringT(action)));
@@ -473,6 +488,7 @@ public class GEMFunctionManager extends UserFunctionManager {
      */
     public void goToError(String errMessage, Exception e)
     {
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::goToError(String, Exception): ";
         errMessage += " Message from the caught exception is: "+e.getMessage();
         goToError(errMessage);
     }
@@ -482,7 +498,9 @@ public class GEMFunctionManager extends UserFunctionManager {
      */
     public void goToError(String errMessage)
     {
-        logger.error("[GEM FM::" + m_FMname + "] " + errMessage);
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::goToError(String): ";
+
+        logger.error(msgPrefix + "" + errMessage);
         sendCMSError(errMessage);
         getParameterSet().put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
         getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(errMessage)));
@@ -499,6 +517,8 @@ public class GEMFunctionManager extends UserFunctionManager {
     public void getTCDSTaskSequence(Input input)
         throws UserActionException
     {
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::getTCDSTaskSequence(Input): ";
+
         TaskSequence tcdsSequence = null;
         // Input is INITIALIZE/HALT
         // LPM then iCI, then PI
@@ -524,6 +544,7 @@ public class GEMFunctionManager extends UserFunctionManager {
     public void getTCDSCommandParameters(Input input)
         throws UserActionException
     {
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::getTCDSCommandParameters(Input): ";
         Map<String, ParameterSet<CommandParameter> > tcdsParameters = null;
         // Input is INITIALIZE
         // Input is HALT
@@ -543,23 +564,25 @@ public class GEMFunctionManager extends UserFunctionManager {
     public void haltTCDSControllers()
         throws UserActionException
     {
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::haltTCDSControllers(): ";
+
         // ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
         // int sessionId = ((IntegerT)getParameterSet().get(GEMParameters.SID).getValue()).getInteger();
         // pSet.put(new FunctionManagerParameter<IntegerT>("SID", new IntegerT(sessionId)));
 
         try {
             if (!c_lpmControllers.isEmpty()) {
-                logger.info("[GEM FM::" + m_FMname + "]  Sending halt to LPM ");
+                logger.info(msgPrefix + " Sending halt to LPM ");
                 c_lpmControllers.execute(GEMInputs.HALT);
                 // if LPM is not a service app, need to provide rcmsURL
                 //lpmApp.execute(GEMInputs.HALT,"test",m_rcmsStateListenerURL);
             }
             if (!c_iciControllers.isEmpty()) {
-                logger.info("[GEM FM::" + m_FMname + "]  Sending halt to iCI ");
+                logger.info(msgPrefix + " Sending halt to iCI ");
                 c_iciControllers.execute(GEMInputs.HALT);
             }
             if (!c_piControllers.isEmpty()) {
-                logger.info("[GEM FM::" + m_FMname + "]  Sending halt to PI ");
+                logger.info(msgPrefix + " Sending halt to PI ");
                 c_piControllers.execute(GEMInputs.HALT);
             }
         } catch (QualifiedResourceContainerException e) {
@@ -579,6 +602,8 @@ public class GEMFunctionManager extends UserFunctionManager {
     public void configureTCDSControllers()
         throws UserActionException
     {
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::configureTCDSControllers(): ";
+
         try {
             TaskSequence configureTaskSeq = new TaskSequence(GEMStates.CONFIGURING,GEMInputs.SETCONFIGURE);
 
@@ -587,7 +612,7 @@ public class GEMFunctionManager extends UserFunctionManager {
             Input configureInputPI  = new Input(GEMInputs.CONFIGURE.toString());
             SimpleTask lpmConfigureTask,piConfigureTask,iciConfigureTask;
             if (!c_lpmControllers.isEmpty()) {
-                logger.info("[GEM FM::" + m_FMname + "]  Sending configure to LPM ");
+                logger.info(msgPrefix + " Sending configure to LPM ");
                 // add LPM configuration string to CommandParameter
                 ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
                 pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
@@ -605,7 +630,7 @@ public class GEMFunctionManager extends UserFunctionManager {
             }
 
             if (!c_piControllers.isEmpty()) {
-                logger.info("[GEM FM::" + m_FMname + "]  Sending configure to PI ");
+                logger.info(msgPrefix + " Sending configure to PI ");
                 // add PI configuration string to CommandParameter
                 ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
                 pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
@@ -623,7 +648,7 @@ public class GEMFunctionManager extends UserFunctionManager {
             }
 
             if (!c_iciControllers.isEmpty()) {
-                logger.info("[GEM FM::" + m_FMname + "]  Sending configure to iCI ");
+                logger.info(msgPrefix + " Sending configure to iCI ");
                 // add ICI configuration string to CommandParameter
                 ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
                 pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
@@ -662,19 +687,21 @@ public class GEMFunctionManager extends UserFunctionManager {
     public void enableTCDSControllers()
         throws UserActionException
     {
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::enableTCDSControllers(): ";
+
         try {
             if (!c_lpmControllers.isEmpty()) {
-                logger.info("[GEM FM::" + m_FMname + "]  Sending enable to LPM ");
+                logger.info(msgPrefix + " Sending enable to LPM ");
                 c_lpmControllers.execute(GEMInputs.ENABLE);
                 // if LPM is not a service app, need to provide rcmsURL
                 //lpmApp.execute(GEMInputs.ENABLE,"test",m_rcmsStateListenerURL);
             }
             if (!c_piControllers.isEmpty()) {
-                logger.info("[GEM FM::" + m_FMname + "]  Sending enable to PI ");
+                logger.info(msgPrefix + " Sending enable to PI ");
                 c_piControllers.execute(GEMInputs.ENABLE);
             }
             if (!c_iciControllers.isEmpty()) {
-                logger.info("[GEM FM::" + m_FMname + "]  Sending enable to iCI ");
+                logger.info(msgPrefix + " Sending enable to iCI ");
                 c_iciControllers.execute(GEMInputs.ENABLE);
             }
         } catch (QualifiedResourceContainerException e) {
@@ -694,19 +721,21 @@ public class GEMFunctionManager extends UserFunctionManager {
     public void stopTCDSControllers()
         throws UserActionException
     {
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::stopTCDSControllers(): ";
+
         try {
             if (!c_lpmControllers.isEmpty()) {
-                logger.info("[GEM FM::" + m_FMname + "]  Sending stop to LPM ");
+                logger.info(msgPrefix + " Sending stop to LPM ");
                 c_lpmControllers.execute(GEMInputs.STOP);
                 // if LPM is not a service app, need to provide rcmsURL
                 //lpmApp.execute(GEMInputs.STOP,"test",m_rcmsStateListenerURL);
             }
             if (!c_iciControllers.isEmpty()) {
-                logger.info("[GEM FM::" + m_FMname + "]  Sending stop to iCI ");
+                logger.info(msgPrefix + " Sending stop to iCI ");
                 c_iciControllers.execute(GEMInputs.STOP);
             }
             if (!c_piControllers.isEmpty()) {
-                logger.info("[GEM FM::" + m_FMname + "]  Sending stop to PI ");
+                logger.info(msgPrefix + " Sending stop to PI ");
                 c_piControllers.execute(GEMInputs.STOP);
             }
         } catch (QualifiedResourceContainerException e) {
@@ -726,19 +755,21 @@ public class GEMFunctionManager extends UserFunctionManager {
     public void pauseTCDSControllers()
         throws UserActionException
     {
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::pauseTCDSControllers(): ";
+
         try {
             if (!c_lpmControllers.isEmpty()) {
-                logger.info("[GEM FM::" + m_FMname + "]  Sending pause to LPM ");
+                logger.info(msgPrefix + " Sending pause to LPM ");
                 c_lpmControllers.execute(GEMInputs.PAUSE);
                 // if LPM is not a service app, need to provide rcmsURL
                 //lpmApp.execute(GEMInputs.PAUSE,"test",m_rcmsStateListenerURL);
             }
             if (!c_iciControllers.isEmpty()) {
-                logger.info("[GEM FM::" + m_FMname + "]  Sending pause to iCI ");
+                logger.info(msgPrefix + " Sending pause to iCI ");
                 c_iciControllers.execute(GEMInputs.PAUSE);
             }
             if (!c_piControllers.isEmpty()) {
-                logger.info("[GEM FM::" + m_FMname + "]  Sending pause to PI ");
+                logger.info(msgPrefix + " Sending pause to PI ");
                 c_piControllers.execute(GEMInputs.PAUSE);
             }
         } catch (QualifiedResourceContainerException e) {
@@ -758,33 +789,35 @@ public class GEMFunctionManager extends UserFunctionManager {
     protected void destroyXDAQ()
         throws UserActionException
     {
-        logger.info("[GEM FM::" + m_FMname + "] destroyXDAQ called");
-	QualifiedGroup qg = getQualifiedGroup();
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::destroyXDAQ(): ";
+
+        logger.info(msgPrefix + "destroyXDAQ called");
+	// QualifiedGroup qg = getQualifiedGroup();
 
 	// see if there is an exec with a supervisor and kill it first
 	URI supervExecURI = null;
 	if (c_gemSupervisors != null) {
             if (!c_gemSupervisors.isEmpty()) {
-                logger.info("[GEM FM::" + m_FMname + "] destroyXDAQ: killing GEMSupervisor executives ("
+                logger.info(msgPrefix + "destroyXDAQ: killing GEMSupervisor executives ("
                             + c_gemSupervisors.getApplications().size() + ")");
                 for (QualifiedResource qr : c_gemSupervisors.getApplications()) {
                     // Resource supervResource = c_gemSupervisors.getApplications().get(0).getResource();
-                    logger.info("[GEM FM::" + m_FMname + "] destroyXDAQ: killing executive for supervisor process "
+                    logger.info(msgPrefix + "destroyXDAQ: killing executive for supervisor process "
                                 + qr.getName());
                     Resource supervResource = qr.getResource();
-                    logger.info("[GEM FM::" + m_FMname + "] destroyXDAQ: got supervisor resource " + qr.getName());
+                    logger.info(msgPrefix + "destroyXDAQ: got supervisor resource " + qr.getName());
                     XdaqExecutiveResource qrSupervParentExec =
                         ((XdaqApplicationResource)supervResource).getXdaqExecutiveResourceParent();
-                    logger.info("[GEM FM::" + m_FMname + "] destroyXDAQ: got supervisor executive "
+                    logger.info(msgPrefix + "destroyXDAQ: got supervisor executive "
                                 + qrSupervParentExec.getApplicationClassName());
                     supervExecURI = qrSupervParentExec.getURI();
                     QualifiedResource qrExec = m_gemQG.seekQualifiedResourceOfURI(supervExecURI);
                     XdaqExecutive     ex     = (XdaqExecutive) qrExec;
-                    logger.info("[GEM FM::" + m_FMname + "] destroyXDAQ: killing supervisor executive with URI "
+                    logger.info(msgPrefix + "destroyXDAQ: killing supervisor executive with URI "
                                 + supervExecURI.toString()
                                 + ", executive initialized: " + ex.isInitialized());
                     try {
-                        logger.info("[GEM FM::" + m_FMname + "] destroyXDAQ: killing supervisor executive " + ex.getName());
+                        logger.info(msgPrefix + "destroyXDAQ: killing supervisor executive " + ex.getName());
                         // ex.destroy();
                         ex.killMe();
                     } catch ( Exception e) {
@@ -796,29 +829,29 @@ public class GEMFunctionManager extends UserFunctionManager {
                         throw (UserActionException) e;
                     }
                 }
-                logger.info("[GEM FM::" + m_FMname + "] destroyXDAQ: done killing supervisor executives");
+                logger.info(msgPrefix + "destroyXDAQ: done killing supervisor executives");
             } else {
-                logger.warn("[GEM FM::" + m_FMname + "] destroyXDAQ: unable to find GEMSupervisor executives");
+                logger.warn(msgPrefix + "destroyXDAQ: unable to find GEMSupervisor executives");
             }
         } else {
-            logger.warn("[GEM FM::" + m_FMname + "] destroyXDAQ: unable to find GEMSupervisor container");
+            logger.warn(msgPrefix + "destroyXDAQ: unable to find GEMSupervisor container");
         }
 
 	// find all XDAQ executives and kill them
 	if (m_gemQG != null) {
             // if (!m_gemQG.isEmpty()) {
-            List<QualifiedResource> qrList = qg.seekQualifiedResourcesOfType(new XdaqExecutive());
-            logger.info("[GEM FM::" + m_FMname + "] destroyXDAQ: killing all other executives("
+            List<QualifiedResource> qrList = m_gemQG.seekQualifiedResourcesOfType(new XdaqExecutive());
+            logger.info(msgPrefix + "destroyXDAQ: killing all other executives("
                         + qrList.size() + ") in the QualifiedGroup");
             for (QualifiedResource qr : qrList) {
-                logger.info("[GEM FM::" + m_FMname + "] destroyXDAQ: killing executive " + qr.getName());
+                logger.info(msgPrefix + "destroyXDAQ: killing executive " + qr.getName());
                 XdaqExecutive exec = (XdaqExecutive)qr;
-                logger.info("[GEM FM::" + m_FMname + "] destroyXDAQ: supervisor URI:" + supervExecURI.toString()
+                logger.info(msgPrefix + "destroyXDAQ: supervisor URI:" + supervExecURI.toString()
                             + ", executive URI" + exec.getURI().toString()
                             + ", executive initialized: " + exec.isInitialized());
                 if (!exec.getURI().equals(supervExecURI))
                     try {
-                        logger.info("[GEM FM::" + m_FMname + "] destroyXDAQ: killing executive " + exec.getName());
+                        logger.info(msgPrefix + "destroyXDAQ: killing executive " + exec.getName());
                         // exec.destroy();
                         exec.killMe();
                     } catch ( Exception e) {
@@ -838,26 +871,30 @@ public class GEMFunctionManager extends UserFunctionManager {
             //         ex.destroy();
             //     }
             // }
-            logger.info("[GEM FM::" + m_FMname + "] destroyXDAQ: done killing executives");
+            logger.info(msgPrefix + "destroyXDAQ: done killing executives");
             // } else {
-            //     logger.warn("[GEM FM::" + m_FMname + "] destroyXDAQ: unable to find executives in the QualifiedGroup");
+            //     logger.warn(msgPrefix + "destroyXDAQ: unable to find executives in the QualifiedGroup");
             // }
         } else {
-            logger.warn("[GEM FM::" + m_FMname + "] destroyXDAQ: unable to find the QualifiedGroup");
+            logger.warn(msgPrefix + "destroyXDAQ: unable to find the QualifiedGroup");
         }
 
 	// reset the qualified group so that the next time an init is sent all resources will be initialized again
 	//QualifiedGroup qg = getQualifiedGroup();
-        logger.info("[GEM FM::" + m_FMname + "] destroyXDAQ: resetting the QualifiedGroup");
-	if (qg != null) { qg.reset(); }
+        logger.info(msgPrefix + "destroyXDAQ: resetting the QualifiedGroup");
+	if (m_gemQG != null) {
+            m_gemQG.reset();
+        }
 
-        logger.info("[GEM FM::" + m_FMname + "] destroyXDAQ: done!");
+        logger.info(msgPrefix + "destroyXDAQ: done!");
     }
 
 
     private void submitTaskList(TaskSequence taskList)
         throws UserActionException
     {
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::submitTaskList(TaskSequence): ";
+
         // Make sure that task list belongs to active state we are in
         if (!taskList.getState().equals(this.getState())) {
             String msg = "taskList does not belong to this state \n "
@@ -868,9 +905,9 @@ public class GEMFunctionManager extends UserFunctionManager {
         }
 
         try {
-            logger.info("[GEM FM::" + m_FMname + "]  before taskList.completion(): " + taskList.completion());
+            logger.info(msgPrefix + " before taskList.completion(): " + taskList.completion());
             taskList.startExecution();
-            logger.info("[GEM FM::" + m_FMname + "]  after taskList.completion(): " + taskList.completion());
+            logger.info(msgPrefix + " after taskList.completion(): " + taskList.completion());
         } catch (EventHandlerException e) {
             String msg = e.getMessage();
             this.getParameterSet().get(GEMParameters.ERROR_MSG)
@@ -883,10 +920,10 @@ public class GEMFunctionManager extends UserFunctionManager {
 
         while ( activeTask == null || activeTask.isCompleted()) {
             if (activeTask != null)
-                logger.info("[GEM FM::" + m_FMname + "]  activeTask: " + activeTask + " completed.");
+                logger.info(msgPrefix + " activeTask: " + activeTask + " completed.");
 
             if (taskList.isEmpty()) {
-                logger.warn("[GEM FM::" + m_FMname + "]  taskList is empty, tasks may have completed");
+                logger.warn(msgPrefix + " taskList is empty, tasks may have completed");
                 this.getParameterSet().get(GEMParameters.ACTION_MSG)
                     .setValue(new StringT("Tasks completed."));
                 this.fireEvent(taskList.getCompletionEvent());
@@ -895,7 +932,7 @@ public class GEMFunctionManager extends UserFunctionManager {
                 break;
             } else {
                 activeTask = (Task)taskList.removeFirst();
-                logger.info("[GEM FM::" + m_FMname + "]  Start new task: " + activeTask.getDescription());
+                logger.info(msgPrefix + " Start new task: " + activeTask.getDescription());
                 this.getParameterSet().get(GEMParameters.ACTION_MSG)
                     .setValue( new StringT("Executing: " + activeTask.getDescription()));
                 try {
@@ -915,7 +952,9 @@ public class GEMFunctionManager extends UserFunctionManager {
      *
      * @see rcms.statemachine.user.IUserStateMachine#getUpdatedState()
      */
-    public State getUpdatedState() {
+    public State getUpdatedState()
+    {
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::getUpdatedState(): ";
 
         // This method is called by the framework when a Function Manager is
         // created (after createAction).
@@ -945,22 +984,27 @@ public class GEMFunctionManager extends UserFunctionManager {
      * Example of calculation of State derived from the State of the controlled
      * resources.
      */
-    public void defineConditionState() {
+    public void defineConditionState()
+    {
+        String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::defineConditionState(): ";
 
         // The getAll methods must be called only when the m_gemQG is
         // initialized.
-        logger.debug("[GEM FM::" + m_FMname + "] defineConditionState");
+        logger.debug(msgPrefix + "defineConditionState");
 
         // Conditions for State OFF
         StateVector initialConds = new StateVector();
         initialConds.registerConditionState(c_tcdsControllers, GEMStates.HALTED);
+        initialConds.registerConditionState(c_uFEDKIT,         GEMStates.HALTED);
         initialConds.registerConditionState(c_gemSupervisors,  GEMStates.INITIAL);
         initialConds.registerConditionState(c_FMs,             GEMStates.INITIAL);
+        initialConds.registerConditionState(c_uFEDKIT,         GEMStates.HALTED);
         initialConds.setResultState(GEMStates.INITIAL);
 
         // Conditions for State HALTED
         StateVector haltedConds = new StateVector();
         haltedConds.registerConditionState(c_tcdsControllers, GEMStates.HALTED);
+        haltedConds.registerConditionState(c_uFEDKIT,         GEMStates.HALTED);
         haltedConds.registerConditionState(c_gemSupervisors,  GEMStates.HALTED);
         haltedConds.registerConditionState(c_FMs,             GEMStates.HALTED);
         haltedConds.setResultState(GEMStates.HALTED);
@@ -968,13 +1012,47 @@ public class GEMFunctionManager extends UserFunctionManager {
         // Conditions for State CONFIGURED
         StateVector configuredConds = new StateVector();
         configuredConds.registerConditionState(c_tcdsControllers, GEMStates.CONFIGURED);
+        configuredConds.registerConditionState(c_uFEDKIT,         GEMStates.CONFIGURED);
         configuredConds.registerConditionState(c_gemSupervisors,  GEMStates.CONFIGURED);
         configuredConds.registerConditionState(c_FMs,             GEMStates.CONFIGURED);
         configuredConds.setResultState(GEMStates.CONFIGURED);
 
+        // // Conditions for State RUNNING/ENABLED
+        // StateVector runningConds = new StateVector();
+        // runningConds.registerConditionState(c_tcdsControllers, GEMStates.RUNNING);
+        // runningConds.registerConditionState(c_uFEDKIT,         GEMStates.RUNNING);
+        // runningConds.registerConditionState(c_gemSupervisors,  GEMStates.RUNNING);
+        // runningConds.registerConditionState(c_FMs,             GEMStates.RUNNING);
+        // runningConds.setResultState(GEMStates.RUNNING);
+
+        // // Conditions for State RUNNINGDEGRADED
+        // StateVector runningdegradedConds = new StateVector();
+        // runningdegradedConds.registerConditionState(c_tcdsControllers, GEMStates.RUNNINGDEGRADED);
+        // runningdegradedConds.registerConditionState(c_uFEDKIT,         GEMStates.RUNNINGDEGRADED);
+        // runningdegradedConds.registerConditionState(c_gemSupervisors,  GEMStates.RUNNINGDEGRADED);
+        // runningdegradedConds.registerConditionState(c_FMs,             GEMStates.RUNNINGDEGRADED);
+        // runningdegradedConds.setResultState(GEMStates.RUNNINGDEGRADED);
+
+        // // Conditions for State RUNNINGSOFTERRORDETECTED
+        // StateVector runningsofterrordetectedConds = new StateVector();
+        // runningsofterrordetectedConds.registerConditionState(c_tcdsControllers, GEMStates.RUNNINGSOFTERRORDETECTED);
+        // runningsofterrordetectedConds.registerConditionState(c_uFEDKIT,         GEMStates.RUNNINGSOFTERRORDETECTED);
+        // runningsofterrordetectedConds.registerConditionState(c_gemSupervisors,  GEMStates.RUNNINGSOFTERRORDETECTED);
+        // runningsofterrordetectedConds.registerConditionState(c_FMs,             GEMStates.RUNNINGSOFTERRORDETECTED);
+        // runningsofterrordetectedConds.setResultState(GEMStates.RUNNINGSOFTERRORDETECTED);
+
+        // // Conditions for State PAUSED
+        // StateVector pausedConds = new StateVector();
+        // pausedConds.registerConditionState(c_tcdsControllers, GEMStates.PAUSED);
+        // pausedConds.registerConditionState(c_uFEDKIT,         GEMStates.PAUSED);
+        // pausedConds.registerConditionState(c_gemSupervisors,  GEMStates.PAUSED);
+        // pausedConds.registerConditionState(c_FMs,             GEMStates.PAUSED);
+        // pausedConds.setResultState(GEMStates.PAUSED);
+
         // Conditions for State ERROR
         StateVector errorConds = new StateVector();
         errorConds.registerConditionState(c_tcdsControllers, GEMStates.ERROR);
+        errorConds.registerConditionState(c_uFEDKIT,         GEMStates.ERROR);
         errorConds.registerConditionState(c_gemSupervisors,  GEMStates.ERROR);
         errorConds.registerConditionState(c_FMs,             GEMStates.ERROR);
         errorConds.setResultState(GEMStates.ERROR);
@@ -986,8 +1064,12 @@ public class GEMFunctionManager extends UserFunctionManager {
         m_svCalc.add(initialConds);
         m_svCalc.add(haltedConds);
         m_svCalc.add(configuredConds);
+        // m_svCalc.add(runningConds);
+        // m_svCalc.add(runningdegradedConds);
+        // m_svCalc.add(runningsofterrordetectedConds);
+        // m_svCalc.add(pausedConds);
         m_svCalc.add(errorConds);
 
-        logger.debug("[GEM FM::" + m_FMname + "] Condition States defined");
+        logger.debug(msgPrefix + "Condition States defined");
     }
 }

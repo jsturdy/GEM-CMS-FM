@@ -185,18 +185,18 @@ public class GEMStateMachineDefinition extends UserStateMachineDefinition {
 
         // define parameter set
         ParameterSet<CommandParameter> configureParameters = new ParameterSet<CommandParameter>();
-        try {
-            configureParameters.add(configureSID);
-            // configureParameters.add(configureFedEnableMask);
-            configureParameters.add(configureRunNumber);
-            configureParameters.add(configureRunKey);
-            // configureParameters.add(configureLPMHWCfg);
-            // configureParameters.add(configureICIHWCfg);
-            // configureParameters.add(configurePIHWCfg);
-        } catch (ParameterException nothing) {
-            // Throws an exception if a parameter is duplicate
-            throw new StateMachineDefinitionException( "Could not add to configureParameters. Duplicate Parameter?", nothing );
-        }
+        // try {
+        //     // configureParameters.add(configureSID);
+        //     // configureParameters.add(configureFedEnableMask);
+        //     // configureParameters.add(configureRunNumber);
+        //     // configureParameters.add(configureRunKey);
+        //     // configureParameters.add(configureLPMHWCfg);
+        //     // configureParameters.add(configureICIHWCfg);
+        //     // configureParameters.add(configurePIHWCfg);
+        // } catch (ParameterException nothing) {
+        //     // Throws an exception if a parameter is duplicate
+        //     throw new StateMachineDefinitionException( "Could not add to configureParameters. Duplicate Parameter?", nothing );
+        // }
 
         GEMInputs.CONFIGURE.setParameters(configureParameters);
 
