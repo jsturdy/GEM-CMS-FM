@@ -559,7 +559,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                 m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
                 logger.error(msgPrefix + msg, e);
             }
-                        
+
             // force TCDS HALTED
             if (m_gemFM.c_tcdsControllers != null) {
                 if (!m_gemFM.c_tcdsControllers.isEmpty()) {
@@ -844,7 +844,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                         //m_gemFM.sendCMSError(msg);
                         m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
                         m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    } 
+                    }
                 }
             }
 

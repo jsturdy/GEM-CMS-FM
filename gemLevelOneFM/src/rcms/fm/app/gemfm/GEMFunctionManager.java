@@ -840,7 +840,7 @@ public class GEMFunctionManager extends UserFunctionManager {
             logger.warn(msgPrefix + "unable to find GEMSupervisor container");
         }
         */
-        
+
 	// find all XDAQ executives and kill them
 	if (m_gemQG != null) {
             List<QualifiedResource> qrList = m_gemQG.seekQualifiedResourcesOfType(new XdaqExecutive());
@@ -858,7 +858,8 @@ public class GEMFunctionManager extends UserFunctionManager {
                     exec.destroy();
                     // exec.killMe();
                 } catch ( Exception e) {
-                    String msg = "Exception when destroying executive named:" + exec.getName() + " with URI " + exec.getURI().toString();
+                    String msg = "Exception when destroying executive named:" + exec.getName()
+                        + " with URI " + exec.getURI().toString();
                     logger.error(msgPrefix + msg, e);
                     goToError(msg,e);
                     throw (UserActionException) e;
