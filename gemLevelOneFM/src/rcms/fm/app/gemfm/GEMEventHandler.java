@@ -315,7 +315,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
              * PUT YOUR CODE HERE
              ***********************************************/
 
-            logger.info(msgPrefix + "Recieved Initialize state notification");
+            logger.info(msgPrefix + "Received Initialize state notification");
 
             return;
         } else if (obj instanceof StateEnteredEvent) {
@@ -525,7 +525,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
              * PUT YOUR CODE HERE
              ***********************************************/
 
-            logger.info(msgPrefix + "Recieved Reset state notification");
+            logger.info(msgPrefix + "Received Reset state notification");
 
             return;
         } else if (obj instanceof StateEnteredEvent) {
@@ -639,7 +639,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
              * PUT YOUR CODE HERE
              ***********************************************/
 
-            logger.info(msgPrefix + "Recieved Recover state notification");
+            logger.info(msgPrefix + "Received Recover state notification");
 
             return;
         } else if (obj instanceof StateEnteredEvent) {
@@ -680,7 +680,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
              * PUT YOUR CODE HERE
              ***********************************************/
 
-            logger.info(msgPrefix + "Recieved Configure state notification");
+            logger.info(msgPrefix + "Received Configure state notification");
 
             return;
         } else if (obj instanceof StateEnteredEvent) {
@@ -1758,7 +1758,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
              * PUT YOUR CODE HERE
              ***********************************************/
 
-            logger.info(msgPrefix + "Recieved ColdResetting state notification");
+            logger.info(msgPrefix + "Received ColdResetting state notification");
 
             return;
         } else if (obj instanceof StateEnteredEvent) {
@@ -1799,7 +1799,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
              * PUT YOUR CODE HERE
              ***********************************************/
 
-            logger.info(msgPrefix + "Recieved FixSoftError state notification");
+            logger.info(msgPrefix + "Received FixSoftError state notification");
 
             return;
         } else if (obj instanceof StateEnteredEvent) {
@@ -1884,7 +1884,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
         String msgPrefix = "[GEM FM::" + m_gemFM.m_FMname + "] GEMEventHandler::runningSoftErrorDetectedAction(): ";
 
         if (obj instanceof StateEnteredEvent) {
-            logger.info(msgPrefix + "Recieved RunningSoftErrorDetected state notification");
+            logger.info(msgPrefix + "Received RunningSoftErrorDetected state notification");
 
             // do not touch degraded
             m_gemFM.setSoftErrorDetected(true);
@@ -1907,7 +1907,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
         String msgPrefix = "[GEM FM::" + m_gemFM.m_FMname + "] GEMEventHandler::runningAction(): ";
 
         if (obj instanceof StateEnteredEvent) {
-            logger.info(msgPrefix + "Recieved Running state notification");
+            logger.info(msgPrefix + "Received Running state notification");
 
             m_gemFM.setDegraded(false);
             m_gemFM.setSoftErrorDetected(false);

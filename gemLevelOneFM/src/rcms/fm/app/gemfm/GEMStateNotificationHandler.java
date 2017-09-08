@@ -60,9 +60,15 @@ public class GEMStateNotificationHandler extends UserEventHandler  {
         StateNotification notification = (StateNotification)notice;
         String            actualState  = m_gemFM.getState().getStateString();
 
+        logger.info(msgPrefix + "current state is: " + actualState
+                    + ", processing state notification: " + notification
+                    + ", taskSequence: " + m_taskSequence
+                    + ", activeTask: " + m_activeTask);
+                    // + ", isCompleted: " + m_activeTask.isCompleted());
+
         if (m_gemFM.getState().equals(GEMStates.ERROR)) {
-            String msg = msgPrefix + "is in error state: " + m_gemFM.getState();
-            logger.warn(msg);
+            String msg = "is in error state: " + m_gemFM.getState();
+            logger.warn(msgPrefix + msg);
             return;
         }
 
@@ -72,8 +78,8 @@ public class GEMStateNotificationHandler extends UserEventHandler  {
         // do a while loop to cover synchronous tasks which finish immediately
         while (m_activeTask == null || m_activeTask.isCompleted()) {
             if (m_activeTask != null) {
-                String msg = msgPrefix + "m_activeTask: " + m_activeTask + " completed.";
-                logger.info(msg);
+                String msg = "m_activeTask: " + m_activeTask + " completed.";
+                logger.info(msgPrefix + msg);
             }
 
             if (m_taskSequence.isEmpty()) {
