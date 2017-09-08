@@ -246,11 +246,11 @@ public class GEMFunctionManager extends UserFunctionManager {
             String rcmsStateListenerProtocol = fmURL.getProtocol();
             m_rcmsStateListenerURL = rcmsStateListenerProtocol+"://"+rcmsStateListenerHost+":"+rcmsStateListenerPort+"/rcms";
         } catch (MalformedURLException e) {
-            String errMsg = msgPrefix + "Error! MalformedURLException in createAction" + e.getMessage();
-            logger.error(errMsg,e);
-            sendCMSError(errMsg);
+            String msg = "Caught MalformedURLException";
+            logger.error(msgPrefix + msg, e);
+            sendCMSError(msg);
             getParameterSet().put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-            getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(errMsg)));
+            getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
             // if (theEventHandler.TestMode.equals("off")) { firePriorityEvent(GEMInputs.SETERROR); ErrorState = true; return;}
         }
 
@@ -307,9 +307,9 @@ public class GEMFunctionManager extends UserFunctionManager {
                     logger.info(msgPrefix + "Trying to halt TCDS on destroy.");
                     haltTCDSControllers();
                 } catch (UserActionException e) {
-                    String msg = msgPrefix + "destroyAction: got an exception while halting TCDS";
-                    logger.error(msg + ": " + e);
-                    goToError(msg,e);
+                    String msg = "got an exception while halting TCDS";
+                    logger.error(msgPrefix + msg, e);
+                    goToError(msg, e);
                 }
             }
         }
@@ -319,8 +319,8 @@ public class GEMFunctionManager extends UserFunctionManager {
         //     throw e;
         // }
 
-        String msg = msgPrefix + "destroyAction: destroying the Qualified Group";
-        logger.info(msg);
+        String msg = "destroying the Qualified Group";
+        logger.info(msgPrefix + msg);
         this.getQualifiedGroup().destroy();
 
         System.out.println(msgPrefix + "destroyAction executed");
@@ -489,7 +489,7 @@ public class GEMFunctionManager extends UserFunctionManager {
     public void goToError(String errMessage, Exception e)
     {
         String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::goToError(String, Exception): ";
-        errMessage += " Message from the caught exception is: "+e.getMessage();
+        errMessage+= ": Message from the caught exception is: " + e.getMessage();
         goToError(errMessage);
     }
 
@@ -500,7 +500,6 @@ public class GEMFunctionManager extends UserFunctionManager {
     {
         String msgPrefix = "[GEM FM::" + m_FMname + "] GEMFunctionManager::goToError(String): ";
 
-        logger.error(msgPrefix + "" + errMessage);
         sendCMSError(errMessage);
         getParameterSet().put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
         getParameterSet().put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(errMessage)));
@@ -794,99 +793,92 @@ public class GEMFunctionManager extends UserFunctionManager {
         logger.info(msgPrefix + "destroyXDAQ called");
 	// QualifiedGroup qg = getQualifiedGroup();
 
+        /* ** THIS CAUSES FAILURE, POSSIBLY DUE TO FWK BUG WITH LIGHT CONFIGS **
 	// see if there is an exec with a supervisor and kill it first
 	URI supervExecURI = null;
 	if (c_gemSupervisors != null) {
             if (!c_gemSupervisors.isEmpty()) {
-                logger.info(msgPrefix + "destroyXDAQ: killing GEMSupervisor executives ("
-                            + c_gemSupervisors.getApplications().size() + ")");
+                logger.info(msgPrefix + "killing GEMSupervisor executives (" + c_gemSupervisors.getApplications().size() + ")");
                 for (QualifiedResource qr : c_gemSupervisors.getApplications()) {
+                    // seems to not require the looping
                     // Resource supervResource = c_gemSupervisors.getApplications().get(0).getResource();
-                    logger.info(msgPrefix + "destroyXDAQ: killing executive for supervisor process "
-                                + qr.getName());
+                    logger.info(msgPrefix + "killing executive for supervisor process " + qr.getName());
                     Resource supervResource = qr.getResource();
-                    logger.info(msgPrefix + "destroyXDAQ: got supervisor resource " + qr.getName());
-                    XdaqExecutiveResource qrSupervParentExec =
-                        ((XdaqApplicationResource)supervResource).getXdaqExecutiveResourceParent();
-                    logger.info(msgPrefix + "destroyXDAQ: got supervisor executive "
-                                + qrSupervParentExec.getApplicationClassName());
-                    supervExecURI = qrSupervParentExec.getURI();
-                    QualifiedResource qrExec = m_gemQG.seekQualifiedResourceOfURI(supervExecURI);
-                    XdaqExecutive     ex     = (XdaqExecutive) qrExec;
-                    logger.info(msgPrefix + "destroyXDAQ: killing supervisor executive with URI "
-                                + supervExecURI.toString()
-                                + ", executive initialized: " + ex.isInitialized());
+                    logger.info(msgPrefix + "got supervisor resource " + qr.getName());
                     try {
-                        logger.info(msgPrefix + "destroyXDAQ: killing supervisor executive " + ex.getName());
-                        // ex.destroy();
-                        ex.killMe();
-                    } catch ( Exception e) {
-                        String msg = "[GEM "+m_FMname+"] destroyXDAQ: Exception when destroying supervisor executive named:"
-                            + ex.getName()
-                            + " with URI " + ex.getURI().toString();
-                        logger.error(msg + ": " + e);
-                        goToError(msg,e);
+                        XdaqExecutiveResource qrSupervParentExec =
+                            ((XdaqApplicationResource)supervResource).getXdaqExecutiveResourceParent();
+                        logger.info(msgPrefix + "got supervisor executive " + qrSupervParentExec.getApplicationClassName());
+                        supervExecURI = qrSupervParentExec.getURI();
+                        QualifiedResource qrExec = m_gemQG.seekQualifiedResourceOfURI(supervExecURI);
+                        XdaqExecutive     ex     = (XdaqExecutive) qrExec;
+                        logger.info(msgPrefix + "killing supervisor executive with URI " + supervExecURI.toString()
+                                    + ", executive initialized: " + ex.isInitialized());
+                        try {
+                            logger.info(msgPrefix + "killing supervisor executive " + ex.getName());
+                            // ex.destroy();
+                            ex.killMe();
+                        } catch (Exception e) {
+                            String msg = "Exception when destroying supervisor executive named:" + ex.getName()
+                                + " with URI " + ex.getURI().toString();
+                            logger.error(msgPrefix + msg, e);
+                            goToError(msg, e);
+                            throw (UserActionException) e;
+                        }
+                    } catch (Exception e) {
+                        String msg = "Exception when gettting supervisor executive";
+                        logger.error(msgPrefix + msg, e);
+                        goToError(msg, e);
                         throw (UserActionException) e;
                     }
                 }
-                logger.info(msgPrefix + "destroyXDAQ: done killing supervisor executives");
+                logger.info(msgPrefix + "done killing supervisor executives");
             } else {
-                logger.warn(msgPrefix + "destroyXDAQ: unable to find GEMSupervisor executives");
+                logger.warn(msgPrefix + "unable to find GEMSupervisor executives");
             }
         } else {
-            logger.warn(msgPrefix + "destroyXDAQ: unable to find GEMSupervisor container");
+            logger.warn(msgPrefix + "unable to find GEMSupervisor container");
         }
-
+        */
+        
 	// find all XDAQ executives and kill them
 	if (m_gemQG != null) {
-            // if (!m_gemQG.isEmpty()) {
             List<QualifiedResource> qrList = m_gemQG.seekQualifiedResourcesOfType(new XdaqExecutive());
-            logger.info(msgPrefix + "destroyXDAQ: killing all other executives("
-                        + qrList.size() + ") in the QualifiedGroup");
+            logger.info(msgPrefix + "killing all other executives(" + qrList.size() + ") in the QualifiedGroup");
             for (QualifiedResource qr : qrList) {
-                logger.info(msgPrefix + "destroyXDAQ: killing executive " + qr.getName());
+                logger.info(msgPrefix + "killing executive " + qr.getName());
                 XdaqExecutive exec = (XdaqExecutive)qr;
-                logger.info(msgPrefix + "destroyXDAQ: supervisor URI:" + supervExecURI.toString()
+                // logger.info(msgPrefix + "supervisor URI:" + supervExecURI.toString()
+                logger.info(msgPrefix
                             + ", executive URI" + exec.getURI().toString()
                             + ", executive initialized: " + exec.isInitialized());
-                if (!exec.getURI().equals(supervExecURI))
-                    try {
-                        logger.info(msgPrefix + "destroyXDAQ: killing executive " + exec.getName());
-                        // exec.destroy();
-                        exec.killMe();
-                    } catch ( Exception e) {
-                        String msg = "[GEM "+m_FMname+"] destroyXDAQ: Exception when destroying executive named:" + exec.getName()
-                            + " with URI " + exec.getURI().toString();
-                        logger.error(msg + ": " + e);
-                        goToError(msg,e);
-                        throw (UserActionException) e;
-                    }
+                // if (!exec.getURI().equals(supervExecURI)) {
+                try {
+                    logger.info(msgPrefix + "killing executive " + exec.getName());
+                    exec.destroy();
+                    // exec.killMe();
+                } catch ( Exception e) {
+                    String msg = "Exception when destroying executive named:" + exec.getName() + " with URI " + exec.getURI().toString();
+                    logger.error(msgPrefix + msg, e);
+                    goToError(msg,e);
+                    throw (UserActionException) e;
+                }
+                // }
             }
 
-            // List listExecutive = m_gemQG.seekQualifiedResourcesOfType(new XdaqExecutive());
-            // Iterator it = listExecutive.iterator();
-            // while (it.hasNext()) {
-            //     XdaqExecutive ex = (XdaqExecutive) it.next();
-            //     if (!ex.getURI().equals(supervExecURI)) {
-            //         ex.destroy();
-            //     }
-            // }
-            logger.info(msgPrefix + "destroyXDAQ: done killing executives");
-            // } else {
-            //     logger.warn(msgPrefix + "destroyXDAQ: unable to find executives in the QualifiedGroup");
-            // }
+            logger.info(msgPrefix + "done killing executives");
         } else {
-            logger.warn(msgPrefix + "destroyXDAQ: unable to find the QualifiedGroup");
+            logger.warn(msgPrefix + "unable to find the QualifiedGroup");
         }
 
 	// reset the qualified group so that the next time an init is sent all resources will be initialized again
-	//QualifiedGroup qg = getQualifiedGroup();
-        logger.info(msgPrefix + "destroyXDAQ: resetting the QualifiedGroup");
+	// QualifiedGroup qg = getQualifiedGroup();
+        logger.info(msgPrefix + "resetting the QualifiedGroup");
 	if (m_gemQG != null) {
             m_gemQG.reset();
         }
 
-        logger.info(msgPrefix + "destroyXDAQ: done!");
+        logger.info(msgPrefix + "done!");
     }
 
 
