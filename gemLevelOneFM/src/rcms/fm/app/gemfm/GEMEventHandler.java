@@ -1894,6 +1894,26 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                 logger.info(msg);
                 qr.setActive(false);
             }
+	    //Masking applications except the supervisor
+	    if (qr.getResource().getHostName().contains("amc13")) {
+                msg = msgPrefix + "Masking the  application with name "
+                    + qr.getName() + " running on host " + qr.getResource().getHostName();
+                logger.info(msg);
+                qr.setActive(false);
+            }
+	    if (qr.getResource().getHostName().contains("glib")) {
+                msg = msgPrefix + "Masking the  application with name "
+                    + qr.getName() + " running on host " + qr.getResource().getHostName();
+                logger.info(msg);
+                qr.setActive(false);
+            }
+	    if (qr.getResource().getHostName().contains("optohybrid")) {
+                msg = msgPrefix + "Masking the  application with name "
+                    + qr.getName() + " running on host " + qr.getResource().getHostName();
+                logger.info(msg);
+                qr.setActive(false);
+            }
+
         }
 
         logger.info("[GEM "+ m_gemFM.m_FMname + "] SID of QG is " + m_gemQG.getRegistryEntry(GEMParameters.SID));
