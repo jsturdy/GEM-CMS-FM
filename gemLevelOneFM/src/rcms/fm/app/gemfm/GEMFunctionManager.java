@@ -410,11 +410,11 @@ public class GEMFunctionManager extends UserFunctionManager {
             try {
                 logger.debug(msgPrefix + "Trying to close log sessionId = " + sessionId );
                 logSessionConnector.closeSession(sessionId);
-                logger.debug(msgPrefix + "... closed log sessionId = " + sessionId );
-            } catch (LogSessionException e1) {
+                logger.debug(msgPrefix + "Closed log sessionId = " + sessionId );
+            } catch (LogSessionException e) {
                 logger.warn(msgPrefix + "Could not close sessionId, but sessionId was requested and used.\n"
                             + "This is OK only for global runs.\n"
-                            + "Exception: ", e1);
+                            + "Exception: ", e);
             }
         } else {
             logger.warn("[GEM base] logSessionConnector null");

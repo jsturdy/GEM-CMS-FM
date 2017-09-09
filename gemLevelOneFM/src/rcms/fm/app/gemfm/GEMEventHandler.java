@@ -317,6 +317,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 
             logger.info(msgPrefix + "Received Initialize state notification");
 
+            m_gemFM.m_stateNotificationHandler.processNotice(obj);
+
             return;
         } else if (obj instanceof StateEnteredEvent) {
             // triggered by entered state action
@@ -527,6 +529,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 
             logger.info(msgPrefix + "Received Reset state notification");
 
+            m_gemFM.m_stateNotificationHandler.processNotice(obj);
+
             return;
         } else if (obj instanceof StateEnteredEvent) {
             // triggered by entered state action
@@ -641,12 +645,10 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 
             logger.info(msgPrefix + "Received Recover state notification");
 
+            m_gemFM.m_stateNotificationHandler.processNotice(obj);
+
             return;
         } else if (obj instanceof StateEnteredEvent) {
-
-            System.out.println("Executing recoverAction");
-            logger.info("Executing recoverAction");
-
             // set action
             m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("recovering")));
 
@@ -682,11 +684,10 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 
             logger.info(msgPrefix + "Received Configure state notification");
 
+            m_gemFM.m_stateNotificationHandler.processNotice(obj);
+
             return;
         } else if (obj instanceof StateEnteredEvent) {
-            System.out.println(msgPrefix + "Executing configureAction");
-            logger.info(msgPrefix + "Executing configureAction");
-
             // set action
             m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
                                                                 new StringT("Configure action called")));
@@ -885,9 +886,10 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             /************************************************
              * PUT YOUR CODE HERE
              ***********************************************/
-            // START GEMFSMApplications
-            // ENABLE? ferol/EVM/BU/RU?
-            // START TCDS
+
+            logger.info(msgPrefix + "Received Start state notification");
+
+            m_gemFM.m_stateNotificationHandler.processNotice(obj);
 
             return;
         } else if (obj instanceof StateEnteredEvent) {
@@ -975,6 +977,9 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                         try {
                             pam = ((XdaqApplication)qr).getXDAQParameter();
                             pam.select(new String[] {"RunNumber"});
+                            pam.get();
+                            String superRunNumber = pam.getValue("RunNumber");
+                            logger.info(msgPrefix + "got run number " + superRunNumber + " from the supervisor");
                             pam.setValue("RunNumber",m_gemFM.RunNumber.toString());
                             logger.info(msgPrefix + "sending run number to the supervisor");
                             pam.send();
@@ -1035,19 +1040,19 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                             pam = ((XdaqApplication)qr).getXDAQParameter();
                             pam.select(new String[] {"runNumber"});
                             pam.get();
-                            String evmRunNumber = pam.getValue("RunNumber");
-                            logger.info(msgPrefix + "Obtained run number from evm: " + evmRunNumber);
+                            String evmRunNumber = pam.getValue("runNumber");
+                            logger.info(msgPrefix + "Obtained run number from the EVM: " + evmRunNumber);
                             pam.setValue("runNumber",m_gemFM.RunNumber.toString());
                             pam.send();
                         } catch (XDAQTimeoutException e) {
-                            String msg = "Error! XDAQTimeoutException: startAction() when "
-                                + " trying to send the m_gemFM.RunNumber to the GEM supervisor\n Perhaps this "
+                            String msg = "Error! XDAQTimeoutException when "
+                                + " trying to send the m_gemFM.RunNumber to the EVM\n Perhaps this "
                                 + "application is dead!?";
                             m_gemFM.goToError(msg, e);
                             logger.error(msgPrefix + msg);
                         } catch (XDAQException e) {
-                            String msg = "Error! XDAQException: startAction() when trying "
-                                + "to send the m_gemFM.RunNumber to the GEM supervisor";
+                            String msg = "Error! XDAQException when trying "
+                                + "to send the m_gemFM.RunNumber to the EVM";
                             m_gemFM.goToError(msg, e);
                             logger.error(msgPrefix + msg);
                         }
@@ -1075,19 +1080,19 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                             pam = ((XdaqApplication)qr).getXDAQParameter();
                             pam.select(new String[] {"runNumber"});
                             pam.get();
-                            String buRunNumber = pam.getValue("RunNumber");
-                            logger.info(msgPrefix + "Obtained run number from bu: " + buRunNumber);
+                            String buRunNumber = pam.getValue("runNumber");
+                            logger.info(msgPrefix + "Obtained run number from the BU: " + buRunNumber);
                             pam.setValue("runNumber",m_gemFM.RunNumber.toString());
                             pam.send();
                         } catch (XDAQTimeoutException e) {
-                            String msg = "Error! XDAQTimeoutException: startAction() when "
-                                + " trying to send the m_gemFM.RunNumber to the GEM supervisor\n Perhaps this "
-                                + "application is dead!?";
+                            String msg = "Error! XDAQTimeoutException when "
+                                + " trying to send the m_gemFM.RunNumber to the BU\n"
+                                + "Perhaps this application is dead!?";
                             m_gemFM.goToError(msg, e);
                             logger.error(msgPrefix + msg);
                         } catch (XDAQException e) {
-                            String msg = "Error! XDAQException: startAction() when trying "
-                                + "to send the m_gemFM.RunNumber to the GEM supervisor";
+                            String msg = "Error! XDAQException when trying "
+                                + "to send the m_gemFM.RunNumber to the BU";
                             m_gemFM.goToError(msg, e);
                             logger.error(msgPrefix + msg);
                         }
@@ -1160,9 +1165,10 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             /************************************************
              * PUT YOUR CODE HERE
              ***********************************************/
-            // PAUSE TCDS
-            // PAUSE GEMFSMApplications
-            // PAUSE ferol/EVM/BU/RU?
+
+            logger.info(msgPrefix + "Received Pause state notification");
+
+            m_gemFM.m_stateNotificationHandler.processNotice(obj);
 
             return;
         }
@@ -1257,9 +1263,10 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             /************************************************
              * PUT YOUR CODE HERE
              ***********************************************/
-            // STOP TCDS
-            // STOP GEMFSMApplications
-            // STOP ferol/EVM/BU/RU?
+
+            logger.info(msgPrefix + "Received Stop state notification");
+
+            m_gemFM.m_stateNotificationHandler.processNotice(obj);
 
             return;
         }
@@ -1401,9 +1408,10 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             /************************************************
              * PUT YOUR CODE HERE
              ***********************************************/
-            // RESUME ferol/EVM/BU/RU?
-            // RESUME GEMFSMApplications
-            // RESUME TCDS
+
+            logger.info(msgPrefix + "Received Resume state notification");
+
+            m_gemFM.m_stateNotificationHandler.processNotice(obj);
 
             return;
         } else if (obj instanceof StateEnteredEvent) {
@@ -1525,14 +1533,13 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             /************************************************
              * PUT YOUR CODE HERE
              ***********************************************/
-            // HALT TCDS
-            // HALT ferol/EVM/BU/RU?
-            // HALT GEMFSMApplications
+
+            logger.info(msgPrefix + "Received Halt state notification");
+
+            m_gemFM.m_stateNotificationHandler.processNotice(obj);
 
             return;
-        }
-
-        else if (obj instanceof StateEnteredEvent) {
+        } else if (obj instanceof StateEnteredEvent) {
             System.out.println("Executing haltAction");
             logger.info("Executing haltAction");
 
@@ -1628,14 +1635,13 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             /************************************************
              * PUT YOUR CODE HERE
              ***********************************************/
-            // ? TCDS
-            // ? ferol/EVM/BU/RU?
-            // ? GEMFSMApplications
+
+            logger.info(msgPrefix + "Received PrepareTTSTestMode state notification");
+
+            m_gemFM.m_stateNotificationHandler.processNotice(obj);
 
             return;
-        }
-
-        else if (obj instanceof StateEnteredEvent) {
+        } else if (obj instanceof StateEnteredEvent) {
             System.out.println("Executing preparingTestModeAction");
             logger.info("Executing preparingTestModeAction");
 
@@ -1674,14 +1680,13 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             /************************************************
              * PUT YOUR CODE HERE
              ***********************************************/
-            // ? TCDS
-            // ? ferol/EVM/BU/RU?
-            // ? GEMFSMApplications
+
+            logger.info(msgPrefix + "Received TestTTS state notification");
+
+            m_gemFM.m_stateNotificationHandler.processNotice(obj);
 
             return;
-        }
-
-        else if (obj instanceof StateEnteredEvent) {
+        } else if (obj instanceof StateEnteredEvent) {
             System.out.println("Executing testingTTSAction");
             logger.info("Executing testingTTSAction");
 
@@ -1760,6 +1765,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 
             logger.info(msgPrefix + "Received ColdResetting state notification");
 
+            m_gemFM.m_stateNotificationHandler.processNotice(obj);
+
             return;
         } else if (obj instanceof StateEnteredEvent) {
             System.out.println("Executing coldResettingAction");
@@ -1800,6 +1807,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
              ***********************************************/
 
             logger.info(msgPrefix + "Received FixSoftError state notification");
+
+            m_gemFM.m_stateNotificationHandler.processNotice(obj);
 
             return;
         } else if (obj instanceof StateEnteredEvent) {
