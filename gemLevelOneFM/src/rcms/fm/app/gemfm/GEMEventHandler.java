@@ -986,13 +986,13 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                             logger.info(msgPrefix + "sent run number to the supervisor");
                         } catch (XDAQTimeoutException e) {
                             String msg = "Error! XDAQTimeoutException when "
-                                + " trying to send the m_gemFM.RunNumber to the GEM supervisor\n Perhaps this "
+                                + " trying to send the run number to the GEM supervisor\n Perhaps this "
                                 + "application is dead!?";
                             m_gemFM.goToError(msg, e);
                             logger.error(msgPrefix + msg);
                         } catch (XDAQException e) {
                             String msg = "Error! XDAQException when trying "
-                                + "to send the m_gemFM.RunNumber to the GEM supervisor";
+                                + "to send the run number to the GEM supervisor";
                             m_gemFM.goToError(msg, e);
                             logger.error(msgPrefix + msg);
                         }
@@ -1046,13 +1046,13 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                             pam.send();
                         } catch (XDAQTimeoutException e) {
                             String msg = "Error! XDAQTimeoutException when "
-                                + " trying to send the m_gemFM.RunNumber to the EVM\n Perhaps this "
+                                + " trying to send the run number to the EVM\n Perhaps this "
                                 + "application is dead!?";
                             m_gemFM.goToError(msg, e);
                             logger.error(msgPrefix + msg);
                         } catch (XDAQException e) {
                             String msg = "Error! XDAQException when trying "
-                                + "to send the m_gemFM.RunNumber to the EVM";
+                                + "to send the run number to the EVM";
                             m_gemFM.goToError(msg, e);
                             logger.error(msgPrefix + msg);
                         }
@@ -1086,13 +1086,13 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                             pam.send();
                         } catch (XDAQTimeoutException e) {
                             String msg = "Error! XDAQTimeoutException when "
-                                + " trying to send the m_gemFM.RunNumber to the BU\n"
+                                + " trying to send the run number to the BU\n"
                                 + "Perhaps this application is dead!?";
                             m_gemFM.goToError(msg, e);
                             logger.error(msgPrefix + msg);
                         } catch (XDAQException e) {
                             String msg = "Error! XDAQException when trying "
-                                + "to send the m_gemFM.RunNumber to the BU";
+                                + "to send the run number to the BU";
                             m_gemFM.goToError(msg, e);
                             logger.error(msgPrefix + msg);
                         }
@@ -1430,6 +1430,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 
             if (m_gemFM.c_gemSupervisors != null) {
                 if (!m_gemFM.c_gemSupervisors.isEmpty()) {
+                    // new run number during resume?
+                    /*
                     XDAQParameter pam = null;
                     // prepare and set for all GEM supervisors the RunType
                     for (QualifiedResource qr : m_gemFM.c_gemSupervisors.getApplications() ){
@@ -1443,21 +1445,22 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                             pam.send();
                         } catch (XDAQTimeoutException e) {
                             String msg = "Error! XDAQTimeoutException: startAction() when "
-                                + " trying to send the m_gemFM.RunNumber to the GEM supervisor\n Perhaps this "
+                                + " trying to send the run number to the GEM supervisor\n Perhaps this "
                                 + "application is dead!?";
                             m_gemFM.goToError(msg, e);
                             logger.error(msgPrefix + msg);
                         } catch (XDAQException e) {
                             String msg = "Error! XDAQException: startAction() when trying "
-                                + "to send the m_gemFM.RunNumber to the GEM supervisor";
+                                + "to send the run number to the GEM supervisor";
                             m_gemFM.goToError(msg, e);
                             logger.error(msgPrefix + msg);
                         }
                     }
+                    */
 
                     try {
-                        logger.info(msgPrefix + "Trying to start GEMSupervisor.");
-                        m_gemFM.c_gemSupervisors.execute(GEMInputs.START);
+                        logger.info(msgPrefix + "Trying to resume GEMSupervisor.");
+                        m_gemFM.c_gemSupervisors.execute(GEMInputs.RESUME);
                     } catch (QualifiedResourceContainerException e) {
                         String msg = e.getMessage();
                         logger.error(msgPrefix + msg);
