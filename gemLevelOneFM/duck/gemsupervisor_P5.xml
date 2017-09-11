@@ -3,7 +3,7 @@
 	      xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
 	      xmlns:xc="http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30">
 
-  <xc:Context url="http://srv-s2g18-33-01.cms:40101">
+  <xc:Context url="http://gem-daq01.cms:40100">
     <xc:Application class="gem::hw::glib::GLIBManager" id="30" instance="0" network="local">
       <properties xmlns="urn:xdaq-application:gem::hw::glib::GLIBManager"
 		  xsi:type="soapenc:Struct">
@@ -69,7 +69,7 @@
           <ConnectionFile     xsi:type="xsd:string">connections.xml</ConnectionFile>
 	  <CardName           xsi:type="xsd:string">gem.shelf01.amc13</CardName>
           <AMCInputEnableList xsi:type="xsd:string">3</AMCInputEnableList>
-          <AMCIgnoreTTSList   xsi:type="xsd:string">0-2,4-15 </AMCIgnoreTTSList>
+          <AMCIgnoreTTSList   xsi:type="xsd:string">1-2,4-12 </AMCIgnoreTTSList>
 
           <EnableDAQLink       xsi:type="xsd:boolean">true</EnableDAQLink>
           <EnableFakeData      xsi:type="xsd:boolean">false</EnableFakeData>

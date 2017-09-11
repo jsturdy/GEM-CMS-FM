@@ -30,7 +30,8 @@ public final class GEMStates {
     public static final State RECOVERING = new State("Recovering");
     public static final State RESETTING  = new State("Resetting");
 
-    public static final State ERROR = new State("Error");
+    public static final State ERROR  = new State("Error");
+    public static final State FAILED = new State("Failed");
 
     public static final State PREPARING_TTSTEST_MODE = new State("PreparingTTSTestMode");
     public static final State TTSTEST_MODE           = new State("TTSTestMode");
