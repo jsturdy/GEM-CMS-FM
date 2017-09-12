@@ -168,7 +168,7 @@ public class GEMFunctionManager extends UserFunctionManager {
     public RunInfo GEMRunInfo = null;
 
     // set from the controlled EventHandler
-    public String  RunType = "";
+    public String  RunType = "local";
     public Integer RunNumber = 0;
     //public Integer CachedRunNumber = 0;
 
@@ -261,10 +261,19 @@ public class GEMFunctionManager extends UserFunctionManager {
         logSessionConnector = getLogSessionConnector();
         logger.info(msgPrefix + "Get log session connector finished");
 
+	getParameterSet().get(GEMParameters.RUN_TYPE).setValue(new StringT(RunType));
         // get session ID // NEEDS TO BE REMOVED FOR GLOBAL OPERATIONS
-        logger.info(msgPrefix + "Get session ID started");
-        getSessionId();
-        logger.info(msgPrefix + "Get session ID finished");
+	if (RunType.equals("local")) {
+	    logger.info(msgPrefix + "Starting SID fetching for run type:" + RunType);
+	    logger.info(msgPrefix + "Get session ID started");
+	    getSessionId();
+	    logger.info(msgPrefix + "Get session ID finished");
+
+	}
+	else {
+	    logger.info(msgPrefix + "No need of fetching SID for run type:" + RunType);
+	    logger.warn("[GEM] logSessionConnector = " + logSessionConnector + ", using default = " + getParameterSet().get(GEMParameters.SID).getValue() + ".");      
+	}
 
         logger.debug(msgPrefix + "createAction executed.");
     }
@@ -289,8 +298,8 @@ public class GEMFunctionManager extends UserFunctionManager {
         logger.debug(msgPrefix + "destroyAction called");
 
         // try to close any open session ID only if we are in local run mode i.e. not CDAQ and not miniDAQ runs and if it's a LV1FM
-        // if (RunType.equals("local") && !containerFMChildren.isEmpty()) { closeSessionId(); }
-        closeSessionId();  // NEEDS TO BE CORRECTED TO ONLY BE CALLED IN LOCAL RUNS
+        if (RunType.equals("local")) { closeSessionId(); }
+        //closeSessionId();  // NEEDS TO BE CORRECTED TO ONLY BE CALLED IN LOCAL RUNS
 
         try {
             // retrieve the Function Managers and kill themDestroy all XDAQ applications

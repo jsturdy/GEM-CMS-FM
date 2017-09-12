@@ -98,7 +98,6 @@ public class GEMEventHandler extends UserStateNotificationHandler {
      * <code>SID</code>: Session ID for database connections
      */
     public Integer m_SID = 0;
-
     /**
      * <code>RunSequenceName</code>: Run sequence name, for attaining a run sequence number
      */
@@ -151,7 +150,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
         throws rcms.fm.fw.EventHandlerException
     {
         String msgPrefix = "[GEM FM:: " + ((GEMFunctionManager)getUserFunctionManager()).m_FMname
-            + "] GEMEventHandler::GEMEventHandler(): ";
+	+ "] GEMEventHandler::GEMEventHandler(): ";
         // String msgPrefix = "[GEM FM::" + m_gemFM.m_FMname + "] GEMEventHandler::init(): ";
 
         logger.info(msgPrefix + "Starting");
@@ -2303,92 +2302,5 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             }
         }
     }
-
-  // thread which checks the HCAL supervisor state
-  /*protected class HCALSupervisorWatchThread extends Thread {
-
-    public HCALSupervisorWatchThread() {
-      HCALSupervisorWatchThreadList.add(this);
-    }
-
-    public void run() {
-      stopHCALSupervisorWatchThread = false;
-
-      int icount = 0;
-      while ((stopHCALSupervisorWatchThread == false) && (functionManager != null) && (functionManager.isDestroyed() == false)) {
-        icount++;
-        Date now = Calendar.getInstance().getTime();
-
-        // poll HCAL supervisor status in the Configuring/Configured/Running/RunningDegraded states every 5 sec to see if it is still alive  (dangerous because ERROR state is reported wrongly quite frequently)
-        if (icount%5==0) {
-          if ((functionManager.getState().getStateString().equals(HCALStates.CONFIGURING.toString()) ||
-                functionManager.getState().getStateString().equals(HCALStates.CONFIGURED.toString()) ||
-                functionManager.getState().getStateString().equals(HCALStates.RUNNING.toString()) ||
-                functionManager.getState().getStateString().equals(HCALStates.RUNNINGDEGRADED.toString()))) {
-            if (!functionManager.containerhcalSupervisor.isEmpty()) {
-
-              {
-                String debugMessage = "[HCAL " + functionManager.FMname + "] HCAL supervisor found for checking its state i.e. health - good!";
-                logger.debug(debugMessage);
-              }
-
-              XDAQParameter pam = null;
-              String status   = "undefined";
-              String stateName   = "undefined";
-              String progress = "undefined";
-              String taname   = "undefined";
-
-              // ask for the status of the HCAL supervisor
-              for (QualifiedResource qr : functionManager.containerhcalSupervisor.getApplications() ){
-                try {
-                  pam =((XdaqApplication)qr).getXDAQParameter();
-                  pam.select(new String[] {"TriggerAdapterName", "PartitionState", "InitializationProgress", "stateName"});
-                  pam.get();
-
-                  status = pam.getValue("PartitionState");
-                  stateName = pam.getValue("stateName");
-
-                  if (status==null || stateName==null) {
-                    String errMessage = "[HCAL " + functionManager.FMname + "] Error! Asking the hcalSupervisor for the PartitionState and stateName to see if it is alive or not resulted in a NULL pointer - this is bad!";
-                    functionManager.goToError(errMessage);
-                  }
-
-                  logger.debug("[HCAL " + functionManager.FMname + "] asking for the HCAL supervisor PartitionState to see if it is still alive.\n The PartitionState is: " + status);
-                }
-                catch (XDAQTimeoutException e) {
-                  String errMessage = "[HCAL " + functionManager.FMname + "] Error! XDAQTimeoutException: HCALSupervisorWatchThread()\nProbably the HCAL supervisor application is dead.\nCheck the corresponding jobcontrol status ...\nHere is the exception: " +e;
-                  functionManager.goToError(errMessage);
-                }
-                catch (XDAQException e) {
-                  String errMessage = "[HCAL " + functionManager.FMname + "] Error! XDAQException: HCALSupervisorWatchThread()\nProbably the HCAL supervisor application is in a bad condition.\nCheck the corresponding jobcontrol status, etc. ...\nHere is the exception: " +e;
-                  functionManager.goToError(errMessage);
-                }
-
-                if (status.equals("Failed") || status.equals("Faulty") || status.equals("Error") || stateName.equalsIgnoreCase("failed")) {
-                  String errMessage = "[HCAL " + functionManager.FMname + "] Error! HCALSupervisorWatchThread(): supervisor reports partitionState: " + status + " and stateName: " + stateName +"; ";
-                  String supervisorError = ((HCALlevelTwoFunctionManager)functionManager).getSupervisorErrorMessage();
-                  errMessage+=supervisorError;
-                  functionManager.goToError(errMessage);
-                }
-              }
-            }
-            else {
-              String errMessage = "[HCAL " + functionManager.FMname + "] Error! No HCAL supervisor found: HCALSupervisorWatchThread()";
-              functionManager.goToError(errMessage);
-            }
-          }
-        }
-        // delay between polls
-        try { Thread.sleep(1000); }
-        catch (Exception ignored) { return; }
-      }
-
-      // stop the HCAL supervisor watchdog thread
-      System.out.println("[HCAL " + functionManager.FMname + "] ... stopping HCAL supervisor watchdog thread done.");
-      logger.debug("[HCAL " + functionManager.FMname + "] ... stopping HCAL supervisor watchdog thread done.");
-
-      HCALSupervisorWatchThreadList.remove(this);
-    }
-    }*/
 
 }
