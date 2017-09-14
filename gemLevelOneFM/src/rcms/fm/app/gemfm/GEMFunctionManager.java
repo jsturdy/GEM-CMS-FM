@@ -168,6 +168,7 @@ public class GEMFunctionManager extends UserFunctionManager {
     public RunInfo GEMRunInfo = null;
 
     // set from the controlled EventHandler
+    protected GEMEventHandler theEventHandler = null;
     public String  RunType = "local";
     public Integer RunNumber = 0;
     //public Integer CachedRunNumber = 0;
@@ -301,6 +302,10 @@ public class GEMFunctionManager extends UserFunctionManager {
         if (RunType.equals("local")) { closeSessionId(); }
         //closeSessionId();  // NEEDS TO BE CORRECTED TO ONLY BE CALLED IN LOCAL RUNS
 
+	//Stop watchthreads before destroying
+	//theEventHandler.stopMonitorThread = true;
+	theEventHandler.stopGEMSupervisorWatchThread = true;
+
         try {
             // retrieve the Function Managers and kill themDestroy all XDAQ applications
             destroyXDAQ();
@@ -359,7 +364,9 @@ public class GEMFunctionManager extends UserFunctionManager {
 
         // Add event handler
         logger.info(msgPrefix + "Adding the GEMEventHandler");
-        addEventHandler(new GEMEventHandler());
+	theEventHandler = new GEMEventHandler();
+	addEventHandler(theEventHandler);
+        //addEventHandler(new GEMEventHandler());
 
         // Add error handler
         logger.info(msgPrefix + "Adding the GEMErrorHandler");
