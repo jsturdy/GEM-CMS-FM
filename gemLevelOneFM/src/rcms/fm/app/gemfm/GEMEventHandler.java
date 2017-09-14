@@ -2319,7 +2319,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    stopGEMSupervisorWatchThread = false;
 	    
 	    int icount = 0;
-	    while ((stopGEMSupervisorWatchThread == false) && (m_gemFM != null) && (m_gemFM.isDestroyed() == false)) {
+	    while ((stopGEMSupervisorWatchThread == false) && (m_gemFM != null)){// && (m_gemFM.isDestroyed() == false)) { //This needs to be uncommented if we include a isDestroyed function in the FM
 		icount++;
 		Date now = Calendar.getInstance().getTime();
 		
