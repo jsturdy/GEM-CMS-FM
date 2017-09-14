@@ -2332,7 +2332,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			if (!m_gemFM.c_gemSupervisors.isEmpty()) {
 			    
 			    {
-				String debugMessage = "[GEM " + m_gemFM.FMname + "] GEM supervisor found for checking its state: GEMINI still alive!";
+				String debugMessage = "[GEM " + m_gemFM.m_FMname + "] GEM supervisor found for checking its state: GEMINI still alive!";
 				logger.debug(debugMessage);
 			    }
 
@@ -2353,23 +2353,23 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 				    stateName = pam.getValue("stateName");
 				    
 				    if (status==null || stateName==null) {
-					String errMessage = "[GEM " + m_gemFM.FMname + "] Error! Asking the hcalSupervisor for the PartitionState and stateName to see if it is alive or not resulted in a NULL pointer - this is bad!";
+					String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! Asking the hcalSupervisor for the PartitionState and stateName to see if it is alive or not resulted in a NULL pointer - this is bad!";
 					m_gemFM.goToError(errMessage);
 				    }
 
-				    logger.debug("[GEM " + m_gemFM.FMname + "] asking for the GEM supervisor PartitionState to see if it is still alive.\n The PartitionState is: " + status);
+				    logger.debug("[GEM " + m_gemFM.m_FMname + "] asking for the GEM supervisor PartitionState to see if it is still alive.\n The PartitionState is: " + status);
 				}
 				catch (XDAQTimeoutException e) {
-				    String errMessage = "[GEM " + m_gemFM.FMname + "] Error! XDAQTimeoutException: GEMSupervisorWatchThread()\nProbably the GEM supervisor application is dead.\nCheck the corresponding jobcontrol status ...\nHere is the exception: " +e;
+				    String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! XDAQTimeoutException: GEMSupervisorWatchThread()\nProbably the GEM supervisor application is dead.\nCheck the corresponding jobcontrol status ...\nHere is the exception: " +e;
 				    m_gemFM.goToError(errMessage);
 				}
 				catch (XDAQException e) {
-				    String errMessage = "[GEM " + m_gemFM.FMname + "] Error! XDAQException: GEMSupervisorWatchThread()\nProbably the GEM supervisor application is in a bad condition.\nCheck the corresponding jobcontrol status, etc. ...\nHere is the exception: " +e;
+				    String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! XDAQException: GEMSupervisorWatchThread()\nProbably the GEM supervisor application is in a bad condition.\nCheck the corresponding jobcontrol status, etc. ...\nHere is the exception: " +e;
 				    m_gemFM.goToError(errMessage);
 				}
 
 				if (status.equals("Failed") || status.equals("Faulty") || status.equals("Error") || stateName.equalsIgnoreCase("failed")) {
-				    String errMessage = "[GEM " + m_gemFM.FMname + "] Error! GEMSupervisorWatchThread(): supervisor reports partitionState: " + status + " and stateName: " + stateName +"; ";
+				    String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! GEMSupervisorWatchThread(): supervisor reports partitionState: " + status + " and stateName: " + stateName +"; ";
 				    String supervisorError = m_gemFM.getSupervisorErrorMessage();
 				    errMessage+=supervisorError;
 				    m_gemFM.goToError(errMessage);
@@ -2377,7 +2377,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			    }
 			}
 			else {
-			    String errMessage = "[GEM " + m_gemFM.FMname + "] Error! No GEM supervisor found: GEMSupervisorWatchThread()";
+			    String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! No GEM supervisor found: GEMSupervisorWatchThread()";
 			    m_gemFM.goToError(errMessage);
 			}
 		    }
@@ -2388,10 +2388,10 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    }
 
 	    // stop the GEM supervisor watchdog thread
-	    System.out.println("[GEM " + m_gemFM.FMname + "] ... stopping GEM supervisor watchdog thread done.");
-	    logger.debug("[GEM " + m_gemFM.FMname + "] ... stopping GEM supervisor watchdog thread done.");
+	    System.out.println("[GEM " + m_gemFM.m_FMname + "] ... stopping GEM supervisor watchdog thread done.");
+	    logger.debug("[GEM " + m_gemFM.m_FMname + "] ... stopping GEM supervisor watchdog thread done.");
 
-	    GEMSupervisorWatchThreadList.remove(this);
+	    //GEMSupervisorWatchThreadList.remove(this);
 	}
     }
 
