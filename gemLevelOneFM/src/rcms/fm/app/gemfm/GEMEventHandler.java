@@ -2311,9 +2311,9 @@ public class GEMEventHandler extends UserStateNotificationHandler {
     // thread which checks the GEM supervisor state
     protected class GEMSupervisorWatchThread extends Thread {
 	
-	public GEMSupervisorWatchThread() {
+	/*public GEMSupervisorWatchThread() {
 	    GEMSupervisorWatchThreadList.add(this);
-	}
+	    }*/
 	
 	public void run() {
 	    stopGEMSupervisorWatchThread = false;
@@ -2370,8 +2370,9 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 
 				if (status.equals("Failed") || status.equals("Faulty") || status.equals("Error") || stateName.equalsIgnoreCase("failed")) {
 				    String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! GEMSupervisorWatchThread(): supervisor reports partitionState: " + status + " and stateName: " + stateName +"; ";
-				    String supervisorError = m_gemFM.getSupervisorErrorMessage();
-				    errMessage+=supervisorError;
+				    //Usefulin case wehave an error string from the supervisor
+				    //String supervisorError = m_gemFM.getSupervisorErrorMessage();
+				    //errMessage+=supervisorError;
 				    m_gemFM.goToError(errMessage);
 				}
 			    }
