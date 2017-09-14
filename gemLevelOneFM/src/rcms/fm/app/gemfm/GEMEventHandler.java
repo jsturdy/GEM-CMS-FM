@@ -454,6 +454,12 @@ public class GEMEventHandler extends UserStateNotificationHandler {
              * PUT YOUR CODE HERE
              ***********************************************/
 
+	    // start the GEMSupervisor watchdog thread
+	    System.out.println("[GEM LVL1 " + m_gemFM.m_FMname + "] Starting GEM supervisor watchdog thread ...");
+	    logger.debug("[GEM LVL1 " + m_gemFM.m_FMname + "] Starting GEM supervisor watchdog thread ...");
+	    GEMSupervisorWatchThread SThread = new GEMSupervisorWatchThread();
+	    SThread.start();
+
             // force TCDS HALTED
             if (m_gemFM.c_tcdsControllers != null) {
                 if (!m_gemFM.c_tcdsControllers.isEmpty()) {
