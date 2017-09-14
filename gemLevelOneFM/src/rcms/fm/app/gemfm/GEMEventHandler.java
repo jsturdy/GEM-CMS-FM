@@ -520,7 +520,74 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             .setValue(new StringT(globalConfKey));
             */
             // go to HALT
-            m_gemFM.fireEvent(GEMInputs.SETHALTED);
+            //m_gemFM.fireEvent(GEMInputs.SETHALTED); 
+	    //We need to assure that all applications (supervisor and managers are in halted state before setting halted in the FM)
+	    boolean isAMC13halted = false;
+	    boolean isAMC13Rhalted = false;
+	    boolean isGLIBhalted = false;
+	    boolean isOHhalted = false;
+	    boolean isSupervisorhalted = false;
+	    int htcount = 0;
+            while ((isAMC13halted == false) || (isAMC13Rhalted == false) || (isGLIBhalted == false) || (isOHhalted == false) || (isSupervisorhalted == false)){
+		icount++;
+		if (icount%2==0) {
+		    if (!m_gemFM.c_gemSupervisors.isEmpty() && !isSupervisorhalted) {
+			{
+			    String debugMessage = "[GEM " + m_gemFM.m_FMname + "] GEM supervisor found for checking its state: GEMINI is indeed alive!";
+			    logger.debug(debugMessage);
+			}
+			XDAQParameter pam = null;
+			String status   = "undefined";
+			String stateName   = "undefined";
+			
+			// ask for the status of the GEM supervisor
+			for (QualifiedResource qr : m_gemFM.c_gemSupervisors.getApplications() ){
+			    try {
+				pam =((XdaqApplication)qr).getXDAQParameter();
+				pam.select(new String[] {"PartitionState", "stateName"});
+				pam.get();
+                                
+				status = pam.getValue("PartitionState");
+				stateName = pam.getValue("stateName");
+				
+				if (status==null || stateName==null) {
+				    String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! Asking the gemSupervisor for the PartitionState and stateName to see if it is alive or not resulted in a NULL pointer - this is bad!";
+				    m_gemFM.goToError(errMessage);
+				}
+				logger.debug("[GEM " + m_gemFM.m_FMname + "] asking for the GEM supervisor PartitionState to see if it is still alive.\n The PartitionState is: " + status);
+			    }
+			    catch (XDAQTimeoutException e) {
+				String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! XDAQTimeoutException: on init\nProbably the GEM supervisor application is dead.\nCheck the corresponding jobcontrol status ...\nHere is the exception: " +e;
+				m_gemFM.goToError(errMessage);
+			    }
+			    catch (XDAQException e) {
+				String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! XDAQException: on init\nProbably the GEM supervisor application is in a bad condition.\nCheck the corresponding jobcontrol status, etc. ...\nHere is the exception: " +e;
+				m_gemFM.goToError(errMessage);
+			    }
+			    if (status.equals("Failed") || status.equals("Faulty") || status.equals("Error") || stateName.equalsIgnoreCase("failed")) {
+				String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! on init: supervisor reports partitionState: " + status + " and stateName: " + stateName +"; ";
+				m_gemFM.goToError(errMessage);
+			    }
+			    if (status.equals("Halted")){
+				isSupervisorhalted = true;
+				logger.debug("[GEM " + m_gemFM.m_FMname + "] GEM supervisor went is in halted " + status);
+			    }
+			}
+		    }
+		    else {
+			String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! No GEM supervisor found: On halted";
+			m_gemFM.goToError(errMessage);
+		    }
+		}
+	    }
+	    
+	    if ((isAMC13halted == true) && (isAMC13Rhalted == true) && (isGLIBhalted == true) && (isOHhalted == true) && (isSupervisorhalted == true)){
+		m_gemFM.fireEvent(GEMInputs.SETHALTED);
+	    }
+	    else{
+		String errMessage = "[GEM " + m_gemFM.m_FMname + "] something went wrong! One of the applications or the supervisor is not in halted state";
+		m_gemFM.goToError(errMessage);
+	    }
 
             // set action
             m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
