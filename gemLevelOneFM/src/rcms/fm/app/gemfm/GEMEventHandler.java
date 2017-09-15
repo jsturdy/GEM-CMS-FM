@@ -2411,21 +2411,18 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 
 			    XDAQParameter pam = null;
 			    String status   = "undefined";
-			    String stateName   = "undefined";
-			    String progress = "undefined";  //Needed?
-			    String taname   = "undefined";  //Needed?
 
 			    // ask for the status of the GEM supervisor
 			    for (QualifiedResource qr : m_gemFM.c_gemSupervisors.getApplications() ){
+				logger.info("[GEM " + m_gemFM.m_FMname + "] GEMSupervisorWatchThread(): found qualified resource of GEMSupervisor type");
 				try {
 				    pam =((XdaqApplication)qr).getXDAQParameter();
-				    pam.select(new String[] {"TriggerAdapterName", "PartitionState", "InitializationProgress", "stateName"});
+				    pam.select(new String[] {"StateName"});
 				    pam.get();
 				    
-				    status = pam.getValue("PartitionState");
-				    stateName = pam.getValue("stateName");
+				    status = pam.getValue("StateName");
 				    
-				    if (status==null || stateName==null) {
+				    if (status==null) {
 					String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! Asking the GEMSupervisor for the PartitionState and stateName to see if it is alive or not resulted in a NULL pointer - this is bad!";
 					m_gemFM.goToError(errMessage);
 				    }
@@ -2441,8 +2438,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 				    m_gemFM.goToError(errMessage);
 				}
 
-				if (status.equals("Failed") || status.equals("Faulty") || status.equals("Error") || stateName.equalsIgnoreCase("failed")) {
-				    String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! GEMSupervisorWatchThread(): supervisor reports partitionState: " + status + " and stateName: " + stateName +"; ";
+				if (status.equals("Failed") || status.equals("Faulty") || status.equals("Error")) {
+				    String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! GEMSupervisorWatchThread(): supervisor reports partitionState: " + status +"; ";
 				    //Usefulin case wehave an error string from the supervisor
 				    //String supervisorError = m_gemFM.getSupervisorErrorMessage();
 				    //errMessage+=supervisorError;
