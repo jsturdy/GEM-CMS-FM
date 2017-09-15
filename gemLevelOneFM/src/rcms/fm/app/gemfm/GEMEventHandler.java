@@ -520,17 +520,17 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             .setValue(new StringT(globalConfKey));
             */
             // go to HALT
-            //m_gemFM.fireEvent(GEMInputs.SETHALTED); 
-	    //We need to assure that all applications (supervisor and managers are in halted state before setting halted in the FM)
-	    boolean isAMC13halted = false;
+            m_gemFM.fireEvent(GEMInputs.SETHALTED); 
+	    //We need to assure that all applications (supervisor and managers are in halted state before setting halted in the FM) in case StateVector from RCMS does not work
+	    /*boolean isAMC13halted = false;
 	    boolean isAMC13Rhalted = false;
 	    boolean isGLIBhalted = false;
 	    boolean isOHhalted = false;
 	    boolean isSupervisorhalted = false;
 	    int htcount = 0;
             while ((isAMC13halted == false) || (isAMC13Rhalted == false) || (isGLIBhalted == false) || (isOHhalted == false) || (isSupervisorhalted == false)){
-		icount++;
-		if (icount%2==0) {
+		htcount++;
+		if (htcount%2==0) {
 		    if (!m_gemFM.c_gemSupervisors.isEmpty() && !isSupervisorhalted) {
 			{
 			    String debugMessage = "[GEM " + m_gemFM.m_FMname + "] GEM supervisor found for checking its state: GEMINI is indeed alive!";
@@ -587,7 +587,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 	    else{
 		String errMessage = "[GEM " + m_gemFM.m_FMname + "] something went wrong! One of the applications or the supervisor is not in halted state";
 		m_gemFM.goToError(errMessage);
-	    }
+		}*/
 
             // set action
             m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
@@ -2406,7 +2406,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 			    
 			    {
 				String debugMessage = "[GEM " + m_gemFM.m_FMname + "] GEM supervisor found for checking its state: GEMINI still alive!";
-				logger.debug(debugMessage);
+				logger.info(debugMessage);
 			    }
 
 			    XDAQParameter pam = null;
@@ -2426,11 +2426,11 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 				    stateName = pam.getValue("stateName");
 				    
 				    if (status==null || stateName==null) {
-					String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! Asking the hcalSupervisor for the PartitionState and stateName to see if it is alive or not resulted in a NULL pointer - this is bad!";
+					String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! Asking the GEMSupervisor for the PartitionState and stateName to see if it is alive or not resulted in a NULL pointer - this is bad!";
 					m_gemFM.goToError(errMessage);
 				    }
 
-				    logger.debug("[GEM " + m_gemFM.m_FMname + "] asking for the GEM supervisor PartitionState to see if it is still alive.\n The PartitionState is: " + status);
+				    logger.info("[GEM " + m_gemFM.m_FMname + "] asking for the GEM supervisor PartitionState to see if it is still alive.\n The PartitionState is: " + status);
 				}
 				catch (XDAQTimeoutException e) {
 				    String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! XDAQTimeoutException: GEMSupervisorWatchThread()\nProbably the GEM supervisor application is dead.\nCheck the corresponding jobcontrol status ...\nHere is the exception: " +e;
@@ -2463,7 +2463,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 
 	    // stop the GEM supervisor watchdog thread
 	    System.out.println("[GEM " + m_gemFM.m_FMname + "] ... stopping GEM supervisor watchdog thread done.");
-	    logger.debug("[GEM " + m_gemFM.m_FMname + "] ... stopping GEM supervisor watchdog thread done.");
+	    logger.info("[GEM " + m_gemFM.m_FMname + "] ... stopping GEM supervisor watchdog thread done.");
 
 	    //GEMSupervisorWatchThreadList.remove(this);
 	}
