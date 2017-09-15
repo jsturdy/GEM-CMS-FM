@@ -2417,10 +2417,10 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 				logger.info("[GEM " + m_gemFM.m_FMname + "] GEMSupervisorWatchThread(): found qualified resource of GEMSupervisor type");
 				try {
 				    pam =((XdaqApplication)qr).getXDAQParameter();
-				    pam.select(new String[] {"StateName"});
+				    pam.select(new String[] {"FSMState"}); //This needs to be replaced with StateName, but not working for now
 				    pam.get();
 				    
-				    status = pam.getValue("StateName");
+				    status = pam.getValue("FSMState");
 				    
 				    if (status==null) {
 					String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! Asking the GEMSupervisor for the PartitionState and stateName to see if it is alive or not resulted in a NULL pointer - this is bad!";
