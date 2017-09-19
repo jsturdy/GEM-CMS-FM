@@ -492,7 +492,7 @@ public class GEMFunctionManager extends UserFunctionManager {
 	try {
 	    theErrorHandler.setError(error);
         } catch (Exception e) {
-            logger.warn(msgPrefix + "" + getClass().toString() + ": Failed to send error message " + errMessage);
+            logger.warn(msgPrefix + getClass().toString() + ": Failed to send error message " + errMessage);
 	}
     }
 
