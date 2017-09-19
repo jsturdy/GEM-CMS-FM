@@ -113,11 +113,13 @@ public class GEMEventHandler extends UserStateNotificationHandler {
      */
     public boolean stopGEMSupervisorWatchThread =  false; 
 
+    public String msgPrefix = "[GEM FM] GEMEventHandler::GEMEventHandler(): ";
+
     public GEMEventHandler()
         throws rcms.fm.fw.EventHandlerException
     {
         // String msgPrefix = "[GEM FM::" + m_gemFM.m_FMname + "] GEMEventHandler::GEMEventHandler(): ";
-        String msgPrefix = "[GEM FM] GEMEventHandler::GEMEventHandler(): ";
+        //String msgPrefix = "[GEM FM] GEMEventHandler::GEMEventHandler(): ";
 
         // this handler inherits UserStateNotificationHandler
         // so it is already registered for StateNotification events
