@@ -169,6 +169,7 @@ public class GEMFunctionManager extends UserFunctionManager {
 
     // set from the controlled EventHandler
     protected GEMEventHandler theEventHandler = null;
+    protected GEMErrorHandler theErrorHandler = null;
     public String  RunType = "local";
     public Integer RunNumber = 0;
     //public Integer CachedRunNumber = 0;
@@ -370,7 +371,9 @@ public class GEMFunctionManager extends UserFunctionManager {
 
         // Add error handler
         logger.info(msgPrefix + "Adding the GEMErrorHandler");
-        addEventHandler(new GEMErrorHandler());
+	theErrorHandler = new GEMErrorHandler();
+	addEventHandler(theErrorHandler);
+        //addEventHandler(new GEMErrorHandler());
 
         // Add state notification handler
         logger.info(msgPrefix + "Creating the state notification handler");
@@ -481,11 +484,16 @@ public class GEMFunctionManager extends UserFunctionManager {
         getParameterSet().get("ERROR_MSG").setValue(new StringT(errMessage));
 
         // send error
-        try {
+        /*try {
             getParentErrorNotifier().sendError(error);
         } catch (Exception e) {
             logger.warn(msgPrefix + "" + getClass().toString() + ": Failed to send error message " + errMessage);
-        }
+	    }*/
+	try {
+	    theErrorHandler.setError(error);
+        } catch (Exception e) {
+            logger.warn(msgPrefix + "" + getClass().toString() + ": Failed to send error message " + errMessage);
+	}
     }
 
 
