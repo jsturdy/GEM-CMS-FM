@@ -113,13 +113,11 @@ public class GEMEventHandler extends UserStateNotificationHandler {
      */
     public boolean stopGEMSupervisorWatchThread =  false; 
 
-    public String msgPrefix = "[GEM FM] GEMEventHandler::GEMEventHandler(): ";
-
     public GEMEventHandler()
         throws rcms.fm.fw.EventHandlerException
     {
         // String msgPrefix = "[GEM FM::" + m_gemFM.m_FMname + "] GEMEventHandler::GEMEventHandler(): ";
-        //String msgPrefix = "[GEM FM] GEMEventHandler::GEMEventHandler(): ";
+        String msgPrefix = "[GEM FM] GEMEventHandler::GEMEventHandler(): ";
 
         // this handler inherits UserStateNotificationHandler
         // so it is already registered for StateNotification events
@@ -2065,8 +2063,15 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                         + "This is OK if LV2 has not received it from LV1.");
         }
 
+	// find xdaq applications -> XDAQ Executive
         List<QualifiedResource> xdaqExecList = m_gemQG.seekQualifiedResourcesOfType(new XdaqExecutive());
         m_gemFM.c_xdaqExecs                  = new XdaqApplicationContainer(xdaqExecList);
+
+	List<String> executiveClasses = m_gemFM.c_xdaqExecs.getApplicationClasses();
+        for (String cla : executiveClasses) {
+            msg = "found executive class: " + cla;
+            logger.info(msgPrefix + msg);
+        }
 
         // Always set TCDS executive and xdaq apps to initialized and the associated jobcontrol to Active=false
         maskTCDSExecAndJC(m_gemQG);
@@ -2083,43 +2088,28 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             }
         }
 
-        // find xdaq applications
+        // find xdaq applications -> JOB CONTROL
         List<QualifiedResource> jcList = m_gemQG.seekQualifiedResourcesOfType(new JobControl());
         m_gemFM.c_JCs                  = new XdaqApplicationContainer(jcList);
 
+	//Something similar here to show which jobcontrol applications were found?
+	/*List<String> jobcontrolClasses = m_gemFM.c_JCs.getApplicationClasses();
+        for (String cla : jobcontrolClasses) {
+            msg = "found jobcontrol class: " + cla;
+            logger.info(msgPrefix + msg);
+	    }*/
+
         for (QualifiedResource qr: jcList) {
-            if (qr.getResource().getHostName().contains("tcds")) {
-                msg = "Masking the  application with name " + qr.getName()
-                    + " running on host " + qr.getResource().getHostName();
-                logger.info(msgPrefix + msg);
-                qr.setActive(false);
-            }
-	    //Masking applications except the supervisor -----> Not sure we need to keep this
-	    /*if (qr.getResource().getHostName().contains("amc13")) {
-                msg = msgPrefix + "Masking the  application with name "
-                    + qr.getName() + " running on host " + qr.getResource().getHostName();
-                logger.info(msg);
-                qr.setActive(false);
-            }
-	    if (qr.getResource().getHostName().contains("glib")) {
-                msg = msgPrefix + "Masking the  application with name "
-                    + qr.getName() + " running on host " + qr.getResource().getHostName();
-                logger.info(msg);
-                qr.setActive(false);
-            }
-	    if (qr.getResource().getHostName().contains("optohybrid")) {
+	    logger.info(msgPrefix + "Masking resources loop. Resource found: " + qr.getName() 
+			+ " running on host " + qr.getResource().getHostName());
+	    //Masking jobcontrol applications
+	    /*if (qr.getName().contains("jobcontrol")) {
                 msg = msgPrefix + "Masking the  application with name "
                     + qr.getName() + " running on host " + qr.getResource().getHostName();
                 logger.info(msg);
                 qr.setActive(false);
             }
 	    */
-	    if (qr.getResource().getHostName().contains("tcds")) {
-                msg = msgPrefix + "Masking the  application with name "
-                    + qr.getName() + " running on host " + qr.getResource().getHostName();
-                logger.info(msg);
-                qr.setActive(false);
-            }
         }
 
         logger.info("[GEM "+ m_gemFM.m_FMname + "] SID of QG is " + m_gemQG.getRegistryEntry(GEMParameters.SID));
@@ -2146,30 +2136,32 @@ public class GEMEventHandler extends UserStateNotificationHandler {
         }
 
         // TCDS apps -> Needs to be defined for GEM
-        logger.info(msgPrefix + "Looking for TCDS");
-        logger.info(msgPrefix + "Getting all LPMControllers");
-        List<XdaqApplication> lpmList  = m_gemFM.c_xdaqServiceApps
-            .getApplicationsOfClass("tcds::lpm::LPMController");
-        logger.info(msgPrefix + "Getting all ICIControllers");
-        List<XdaqApplication> iciList  = m_gemFM.c_xdaqServiceApps
-            .getApplicationsOfClass("tcds::ici::ICIController");
-        logger.info(msgPrefix + "Getting all PIControllers");
-        List<XdaqApplication> piList   = m_gemFM.c_xdaqServiceApps
-            .getApplicationsOfClass("tcds::pi::PIController" );
-        logger.info(msgPrefix + "Making the TCDS list");
-        List<XdaqApplication> tcdsList = new ArrayList<XdaqApplication>();
-
-        logger.info(msgPrefix + "Adding TCDS applications to TCDS list");
-        tcdsList.addAll(lpmList);
-        tcdsList.addAll(iciList);
-        tcdsList.addAll(piList);
-
-        logger.info(msgPrefix + "Creating the TCDS containers");
-        m_gemFM.c_tcdsControllers = new XdaqApplicationContainer(tcdsList);
-        m_gemFM.c_lpmControllers  = new XdaqApplicationContainer(lpmList);
-        m_gemFM.c_iciControllers  = new XdaqApplicationContainer(iciList);
-        m_gemFM.c_piControllers   = new XdaqApplicationContainer(piList);
-
+	if (usingTCDS) {
+	    logger.info(msgPrefix + "Looking for TCDS");
+	    logger.info(msgPrefix + "Getting all LPMControllers");
+	    List<XdaqApplication> lpmList  = m_gemFM.c_xdaqServiceApps
+		.getApplicationsOfClass("tcds::lpm::LPMController");
+	    logger.info(msgPrefix + "Getting all ICIControllers");
+	    List<XdaqApplication> iciList  = m_gemFM.c_xdaqServiceApps
+		.getApplicationsOfClass("tcds::ici::ICIController");
+	    logger.info(msgPrefix + "Getting all PIControllers");
+	    List<XdaqApplication> piList   = m_gemFM.c_xdaqServiceApps
+		.getApplicationsOfClass("tcds::pi::PIController" );
+	    logger.info(msgPrefix + "Making the TCDS list");
+	    List<XdaqApplication> tcdsList = new ArrayList<XdaqApplication>();
+	    
+	    logger.info(msgPrefix + "Adding TCDS applications to TCDS list");
+	    tcdsList.addAll(lpmList);
+	    tcdsList.addAll(iciList);
+	    tcdsList.addAll(piList);
+	    
+	    logger.info(msgPrefix + "Creating the TCDS containers");
+	    m_gemFM.c_tcdsControllers = new XdaqApplicationContainer(tcdsList);
+	    m_gemFM.c_lpmControllers  = new XdaqApplicationContainer(lpmList);
+	    m_gemFM.c_iciControllers  = new XdaqApplicationContainer(iciList);
+	    m_gemFM.c_piControllers   = new XdaqApplicationContainer(piList);
+	}
+	    
         // Now if we are using TCDS, give all of the TCDS applications the URN that they need.
 
         try {
@@ -2391,6 +2383,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 
     // thread which checks the GEM supervisor state
     protected class GEMSupervisorWatchThread extends Thread {
+
+	String msgPrefix = "[GEM FM::" + m_gemFM.m_FMname + "] GEMEventHandler::GEMSupervisorWatchThread(): ";
 	
 	/*public GEMSupervisorWatchThread() {
 	    GEMSupervisorWatchThreadList.add(this);
