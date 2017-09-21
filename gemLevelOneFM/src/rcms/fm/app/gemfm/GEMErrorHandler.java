@@ -62,11 +62,11 @@ public class GEMErrorHandler extends UserErrorHandler {
     }
 
     public void setError(CMSError error)
-	throws UserActionException 
+	throws UserActionException
     {
 	try {
 	    m_gemFM.getParentErrorNotifier().sendError(error);
-	} 
+	}
 	catch (Exception e) {
 	    throw new UserActionException("Cannot send error", e);
 	}

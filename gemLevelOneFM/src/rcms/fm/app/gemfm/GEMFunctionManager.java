@@ -274,7 +274,7 @@ public class GEMFunctionManager extends UserFunctionManager {
 	}
 	else {
 	    logger.info(msgPrefix + "No need of fetching SID for run type:" + RunType);
-	    logger.warn("[GEM] logSessionConnector = " + logSessionConnector + ", using default = " + getParameterSet().get(GEMParameters.SID).getValue() + ".");      
+	    logger.warn("[GEM] logSessionConnector = " + logSessionConnector + ", using default = " + getParameterSet().get(GEMParameters.SID).getValue() + ".");
 	}
 
         logger.debug(msgPrefix + "createAction executed.");
