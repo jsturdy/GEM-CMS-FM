@@ -53,6 +53,7 @@ public class GEMParameters {
 
     // Command parameters
     public static final String SID             = "SID";
+    public static final String RUN_TYPE             = "RUN_TYPE";
     public static final String GLOBAL_CONF_KEY = "GLOBAL_CONF_KEY";
 
     public static final String RUN_NUMBER     = "RUN_NUMBER";
@@ -104,6 +105,8 @@ public class GEMParameters {
         // Database connection session identifier
         LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<IntegerT> (SID, new IntegerT(0),
                                                                           Exported.READONLY) );
+        LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT>(RUN_TYPE, new StringT("not set"),
+                                                                        Exported.READONLY) );
         LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<StringT>(GLOBAL_CONF_KEY, new StringT("not set"),
                                                                         Exported.READONLY) );
         LVL_ONE_PARAMETER_SET.put(new FunctionManagerParameter<IntegerT>(RUN_NUMBER, new IntegerT(-1),
