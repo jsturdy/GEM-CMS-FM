@@ -116,8 +116,9 @@ public class GEMEventHandler extends UserStateNotificationHandler {
     public GEMEventHandler()
         throws rcms.fm.fw.EventHandlerException
     {
-        // String msgPrefix = "[GEM FM::" + m_gemFM.m_FMname + "] GEMEventHandler::GEMEventHandler(): ";
-        String msgPrefix = "[GEM FM] GEMEventHandler::GEMEventHandler(): ";
+        // String msgPrefix = "[GEM FM:: " + ((GEMFunctionManager)getUserFunctionManager()).m_FMname
+        String msgPrefix = "[GEM FM:: (pre-init)"
+            + "] GEMEventHandler::GEMEventHandler(): ";
 
         // this handler inherits UserStateNotificationHandler
         // so it is already registered for StateNotification events
@@ -155,8 +156,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
         throws rcms.fm.fw.EventHandlerException
     {
         String msgPrefix = "[GEM FM:: " + ((GEMFunctionManager)getUserFunctionManager()).m_FMname
-	+ "] GEMEventHandler::GEMEventHandler(): ";
-        // String msgPrefix = "[GEM FM::" + m_gemFM.m_FMname + "] GEMEventHandler::init(): ";
+            + "] GEMEventHandler::GEMEventHandler(): ";
 
         logger.info(msgPrefix + "Starting");
 
@@ -840,6 +840,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
              * PUT YOUR CODE HERE
              ***********************************************/
 
+            m_gemFM.FEDEnableMask = fedEnableMask;
+
             // Set the configuration parameters in the Function Manager parameters
             ((FunctionManagerParameter<IntegerT>)m_gemPSet
              .get(GEMParameters.CONFIGURED_WITH_RUN_NUMBER))
@@ -870,6 +872,31 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             // configure GEMFSMApplications
             if (m_gemFM.c_gemSupervisors != null) {
                 if (!m_gemFM.c_gemSupervisors.isEmpty()) {
+                    XDAQParameter pam = null;
+                    // prepare and set for all GEM supervisors the RunType
+                    for (QualifiedResource qr : m_gemFM.c_gemSupervisors.getApplications()){
+                        try {
+                            pam = ((XdaqApplication)qr).getXDAQParameter();
+                            pam.select(new String[] {"FEDEnableMask"});
+                            pam.get();
+                            String fedMask = pam.getValue("FEDEnableMask");
+                            logger.info(msgPrefix + "got fedMask " + fedMask + " from the supervisor");
+                            pam.setValue("FEDDnableMask",m_gemFM.FEDEnableMask);
+                            logger.info(msgPrefix + "sending FEDEnableMask to the supervisor");
+                            pam.send();
+                            logger.info(msgPrefix + "sent FEDEnableMask to the supervisor");
+                        } catch (XDAQTimeoutException e) {
+                            String msg = "Error! XDAQTimeoutException when trying to send the FEDEnableMask to the GEM supervisor\n."
+                                + "Perhaps this application is dead!?";
+                            logger.error(msgPrefix + msg, e);
+                            m_gemFM.goToError(msg, e);
+                        } catch (XDAQException e) {
+                            String msg = "Error! XDAQException when trying to send the FEDEnableMask to the GEM supervisor";
+                            logger.error(msgPrefix + msg, e);
+                            m_gemFM.goToError(msg, e);
+                        }
+                    }
+
                     try {
                         logger.info(msgPrefix + "Trying to configure GEMSupervisor.");
                         m_gemFM.c_gemSupervisors.execute(GEMInputs.CONFIGURE);

@@ -172,6 +172,7 @@ public class GEMFunctionManager extends UserFunctionManager {
     protected GEMErrorHandler theErrorHandler = null;
     public String  RunType = "local";
     public Integer RunNumber = 0;
+    public String  FEDEnableMask = "0&0%";
     //public Integer CachedRunNumber = 0;
 
     // GEM RunInfo namespace, the FM name will be added in the createAction() method
@@ -1039,13 +1040,13 @@ public class GEMFunctionManager extends UserFunctionManager {
         configuredConds.registerConditionState(c_FMs,             GEMStates.CONFIGURED);
         configuredConds.setResultState(GEMStates.CONFIGURED);
 
-        // // Conditions for State RUNNING/ENABLED
-        // StateVector runningConds = new StateVector();
-        // runningConds.registerConditionState(c_tcdsControllers, GEMStates.RUNNING);
-        // runningConds.registerConditionState(c_uFEDKIT,         GEMStates.RUNNING);
-        // runningConds.registerConditionState(c_gemSupervisors,  GEMStates.RUNNING);
-        // runningConds.registerConditionState(c_FMs,             GEMStates.RUNNING);
-        // runningConds.setResultState(GEMStates.RUNNING);
+        // Conditions for State RUNNING/ENABLED
+        StateVector runningConds = new StateVector();
+        runningConds.registerConditionState(c_tcdsControllers, GEMStates.RUNNING);
+        runningConds.registerConditionState(c_uFEDKIT,         GEMStates.RUNNING);
+        runningConds.registerConditionState(c_gemSupervisors,  GEMStates.RUNNING);
+        runningConds.registerConditionState(c_FMs,             GEMStates.RUNNING);
+        runningConds.setResultState(GEMStates.RUNNING);
 
         // // Conditions for State RUNNINGDEGRADED
         // StateVector runningdegradedConds = new StateVector();
@@ -1086,7 +1087,7 @@ public class GEMFunctionManager extends UserFunctionManager {
         m_svCalc.add(initialConds);
         m_svCalc.add(haltedConds);
         m_svCalc.add(configuredConds);
-        // m_svCalc.add(runningConds);
+        m_svCalc.add(runningConds);
         // m_svCalc.add(runningdegradedConds);
         // m_svCalc.add(runningsofterrordetectedConds);
         // m_svCalc.add(pausedConds);
