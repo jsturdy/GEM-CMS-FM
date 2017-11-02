@@ -1,2 +1,17 @@
-gemLevelOneFM/classes/
-*.*~
+# Ignore everything
+*
+# Don't ignore subdirectories
+!*/
+# Don't ignore special files
+!*.md
+!*.rst
+# Ignore RPM directories
+*/rpm
+# Don't ignore source files, etc
+!*.gitignore
+!*.java
+# Don't ignore CSS/JS etc
+!*.js
+!*.jsp
+!*.css
+!*.html
