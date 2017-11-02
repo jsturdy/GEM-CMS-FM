@@ -4,10 +4,19 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Hashtable;
+import java.lang.Integer;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Calendar;
+import java.lang.Double;
+import java.math.BigInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Random;
+import java.net.URL;
+import java.net.MalformedURLException;
 
 import java.io.StringWriter;
 import java.io.PrintWriter;
@@ -89,7 +98,6 @@ public class GEMEventHandler extends UserStateNotificationHandler {
      * <code>SID</code>: Session ID for database connections
      */
     public Integer m_SID = 0;
-
     /**
      * <code>RunSequenceName</code>: Run sequence name, for attaining a run sequence number
      */
@@ -100,11 +108,17 @@ public class GEMEventHandler extends UserStateNotificationHandler {
      */
     public Integer m_RunSeqNumber = 0;
 
+    /**
+     * <code>stopGEMSupervisorWatchThread</code>: To stop GEM supervisor thread
+     */
+    public boolean stopGEMSupervisorWatchThread =  false;
+
     public GEMEventHandler()
         throws rcms.fm.fw.EventHandlerException
     {
-        // String msgPrefix = "[GEM FM::" + m_gemFM.m_FMname + "] GEMEventHandler::GEMEventHandler(): ";
-        String msgPrefix = "[GEM FM] GEMEventHandler::GEMEventHandler(): ";
+        // String msgPrefix = "[GEM FM:: " + ((GEMFunctionManager)getUserFunctionManager()).m_FMname
+        String msgPrefix = "[GEM FM:: (pre-init)"
+            + "] GEMEventHandler::GEMEventHandler(): ";
 
         // this handler inherits UserStateNotificationHandler
         // so it is already registered for StateNotification events
@@ -143,7 +157,6 @@ public class GEMEventHandler extends UserStateNotificationHandler {
     {
         String msgPrefix = "[GEM FM:: " + ((GEMFunctionManager)getUserFunctionManager()).m_FMname
             + "] GEMEventHandler::GEMEventHandler(): ";
-        // String msgPrefix = "[GEM FM::" + m_gemFM.m_FMname + "] GEMEventHandler::init(): ";
 
         logger.info(msgPrefix + "Starting");
 
@@ -441,6 +454,12 @@ public class GEMEventHandler extends UserStateNotificationHandler {
              * PUT YOUR CODE HERE
              ***********************************************/
 
+	    // start the GEMSupervisor watchdog thread
+	    System.out.println("[GEM LVL1 " + m_gemFM.m_FMname + "] Starting GEM supervisor watchdog thread ...");
+	    logger.debug("[GEM LVL1 " + m_gemFM.m_FMname + "] Starting GEM supervisor watchdog thread ...");
+	    GEMSupervisorWatchThread SThread = new GEMSupervisorWatchThread();
+	    SThread.start();
+
             // force TCDS HALTED
             if (m_gemFM.c_tcdsControllers != null) {
                 if (!m_gemFM.c_tcdsControllers.isEmpty()) {
@@ -502,6 +521,73 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             */
             // go to HALT
             m_gemFM.fireEvent(GEMInputs.SETHALTED);
+	    //We need to assure that all applications (supervisor and managers are in halted state before setting halted in the FM) in case StateVector from RCMS does not work
+	    /*boolean isAMC13halted = false;
+	    boolean isAMC13Rhalted = false;
+	    boolean isGLIBhalted = false;
+	    boolean isOHhalted = false;
+	    boolean isSupervisorhalted = false;
+	    int htcount = 0;
+            while ((isAMC13halted == false) || (isAMC13Rhalted == false) || (isGLIBhalted == false) || (isOHhalted == false) || (isSupervisorhalted == false)){
+		htcount++;
+		if (htcount%2==0) {
+		    if (!m_gemFM.c_gemSupervisors.isEmpty() && !isSupervisorhalted) {
+			{
+			    String debugMessage = "[GEM " + m_gemFM.m_FMname + "] GEM supervisor found for checking its state: GEMINI is indeed alive!";
+			    logger.debug(debugMessage);
+			}
+			XDAQParameter pam = null;
+			String status   = "undefined";
+			String stateName   = "undefined";
+
+			// ask for the status of the GEM supervisor
+			for (QualifiedResource qr : m_gemFM.c_gemSupervisors.getApplications() ){
+			    try {
+				pam =((XdaqApplication)qr).getXDAQParameter();
+				pam.select(new String[] {"PartitionState", "stateName"});
+				pam.get();
+
+				status = pam.getValue("PartitionState");
+				stateName = pam.getValue("stateName");
+
+				if (status==null || stateName==null) {
+				    String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! Asking the gemSupervisor for the PartitionState and stateName to see if it is alive or not resulted in a NULL pointer - this is bad!";
+				    m_gemFM.goToError(errMessage);
+				}
+				logger.debug("[GEM " + m_gemFM.m_FMname + "] asking for the GEM supervisor PartitionState to see if it is still alive.\n The PartitionState is: " + status);
+			    }
+			    catch (XDAQTimeoutException e) {
+				String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! XDAQTimeoutException: on init\nProbably the GEM supervisor application is dead.\nCheck the corresponding jobcontrol status ...\nHere is the exception: " +e;
+				m_gemFM.goToError(errMessage);
+			    }
+			    catch (XDAQException e) {
+				String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! XDAQException: on init\nProbably the GEM supervisor application is in a bad condition.\nCheck the corresponding jobcontrol status, etc. ...\nHere is the exception: " +e;
+				m_gemFM.goToError(errMessage);
+			    }
+			    if (status.equals("Failed") || status.equals("Faulty") || status.equals("Error") || stateName.equalsIgnoreCase("failed")) {
+				String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! on init: supervisor reports partitionState: " + status + " and stateName: " + stateName +"; ";
+				m_gemFM.goToError(errMessage);
+			    }
+			    if (status.equals("Halted")){
+				isSupervisorhalted = true;
+				logger.debug("[GEM " + m_gemFM.m_FMname + "] GEM supervisor went is in halted " + status);
+			    }
+			}
+		    }
+		    else {
+			String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! No GEM supervisor found: On halted";
+			m_gemFM.goToError(errMessage);
+		    }
+		}
+	    }
+
+	    if ((isAMC13halted == true) && (isAMC13Rhalted == true) && (isGLIBhalted == true) && (isOHhalted == true) && (isSupervisorhalted == true)){
+		m_gemFM.fireEvent(GEMInputs.SETHALTED);
+	    }
+	    else{
+		String errMessage = "[GEM " + m_gemFM.m_FMname + "] something went wrong! One of the applications or the supervisor is not in halted state";
+		m_gemFM.goToError(errMessage);
+		}*/
 
             // set action
             m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
@@ -754,6 +840,8 @@ public class GEMEventHandler extends UserStateNotificationHandler {
              * PUT YOUR CODE HERE
              ***********************************************/
 
+            m_gemFM.FEDEnableMask = fedEnableMask;
+
             // Set the configuration parameters in the Function Manager parameters
             ((FunctionManagerParameter<IntegerT>)m_gemPSet
              .get(GEMParameters.CONFIGURED_WITH_RUN_NUMBER))
@@ -784,6 +872,31 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             // configure GEMFSMApplications
             if (m_gemFM.c_gemSupervisors != null) {
                 if (!m_gemFM.c_gemSupervisors.isEmpty()) {
+                    XDAQParameter pam = null;
+                    // prepare and set for all GEM supervisors the RunType
+                    for (QualifiedResource qr : m_gemFM.c_gemSupervisors.getApplications()){
+                        try {
+                            pam = ((XdaqApplication)qr).getXDAQParameter();
+                            pam.select(new String[] {"FEDEnableMask"});
+                            pam.get();
+                            String fedMask = pam.getValue("FEDEnableMask");
+                            logger.info(msgPrefix + "got fedMask " + fedMask + " from the supervisor");
+                            pam.setValue("FEDDnableMask",m_gemFM.FEDEnableMask);
+                            logger.info(msgPrefix + "sending FEDEnableMask to the supervisor");
+                            pam.send();
+                            logger.info(msgPrefix + "sent FEDEnableMask to the supervisor");
+                        } catch (XDAQTimeoutException e) {
+                            String msg = "Error! XDAQTimeoutException when trying to send the FEDEnableMask to the GEM supervisor\n."
+                                + "Perhaps this application is dead!?";
+                            logger.error(msgPrefix + msg, e);
+                            m_gemFM.goToError(msg, e);
+                        } catch (XDAQException e) {
+                            String msg = "Error! XDAQException when trying to send the FEDEnableMask to the GEM supervisor";
+                            logger.error(msgPrefix + msg, e);
+                            m_gemFM.goToError(msg, e);
+                        }
+                    }
+
                     try {
                         logger.info(msgPrefix + "Trying to configure GEMSupervisor.");
                         m_gemFM.c_gemSupervisors.execute(GEMInputs.CONFIGURE);
@@ -1977,8 +2090,15 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                         + "This is OK if LV2 has not received it from LV1.");
         }
 
+	// find xdaq applications -> XDAQ Executive
         List<QualifiedResource> xdaqExecList = m_gemQG.seekQualifiedResourcesOfType(new XdaqExecutive());
         m_gemFM.c_xdaqExecs                  = new XdaqApplicationContainer(xdaqExecList);
+
+	List<String> executiveClasses = m_gemFM.c_xdaqExecs.getApplicationClasses();
+        for (String cla : executiveClasses) {
+            msg = "found executive class: " + cla;
+            logger.info(msgPrefix + msg);
+        }
 
         // Always set TCDS executive and xdaq apps to initialized and the associated jobcontrol to Active=false
         maskTCDSExecAndJC(m_gemQG);
@@ -1995,17 +2115,28 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             }
         }
 
-        // find xdaq applications
+        // find xdaq applications -> JOB CONTROL
         List<QualifiedResource> jcList = m_gemQG.seekQualifiedResourcesOfType(new JobControl());
         m_gemFM.c_JCs                  = new XdaqApplicationContainer(jcList);
 
+	//Something similar here to show which jobcontrol applications were found?
+	/*List<String> jobcontrolClasses = m_gemFM.c_JCs.getApplicationClasses();
+        for (String cla : jobcontrolClasses) {
+            msg = "found jobcontrol class: " + cla;
+            logger.info(msgPrefix + msg);
+	    }*/
+
         for (QualifiedResource qr: jcList) {
-            if (qr.getResource().getHostName().contains("tcds")) {
-                msg = "Masking the  application with name " + qr.getName()
-                    + " running on host " + qr.getResource().getHostName();
-                logger.info(msgPrefix + msg);
+	    logger.info(msgPrefix + "Masking resources loop. Resource found: " + qr.getName()
+			+ " running on host " + qr.getResource().getHostName());
+	    //Masking jobcontrol applications
+	    /*if (qr.getName().contains("jobcontrol")) {
+                msg = msgPrefix + "Masking the  application with name "
+                    + qr.getName() + " running on host " + qr.getResource().getHostName();
+                logger.info(msg);
                 qr.setActive(false);
             }
+	    */
         }
 
         logger.info("[GEM "+ m_gemFM.m_FMname + "] SID of QG is " + m_gemQG.getRegistryEntry(GEMParameters.SID));
@@ -2032,29 +2163,31 @@ public class GEMEventHandler extends UserStateNotificationHandler {
         }
 
         // TCDS apps -> Needs to be defined for GEM
-        logger.info(msgPrefix + "Looking for TCDS");
-        logger.info(msgPrefix + "Getting all LPMControllers");
-        List<XdaqApplication> lpmList  = m_gemFM.c_xdaqServiceApps
-            .getApplicationsOfClass("tcds::lpm::LPMController");
-        logger.info(msgPrefix + "Getting all ICIControllers");
-        List<XdaqApplication> iciList  = m_gemFM.c_xdaqServiceApps
-            .getApplicationsOfClass("tcds::ici::ICIController");
-        logger.info(msgPrefix + "Getting all PIControllers");
-        List<XdaqApplication> piList   = m_gemFM.c_xdaqServiceApps
-            .getApplicationsOfClass("tcds::pi::PIController" );
-        logger.info(msgPrefix + "Making the TCDS list");
-        List<XdaqApplication> tcdsList = new ArrayList<XdaqApplication>();
+	if (usingTCDS) {
+	    logger.info(msgPrefix + "Looking for TCDS");
+	    logger.info(msgPrefix + "Getting all LPMControllers");
+	    List<XdaqApplication> lpmList  = m_gemFM.c_xdaqServiceApps
+		.getApplicationsOfClass("tcds::lpm::LPMController");
+	    logger.info(msgPrefix + "Getting all ICIControllers");
+	    List<XdaqApplication> iciList  = m_gemFM.c_xdaqServiceApps
+		.getApplicationsOfClass("tcds::ici::ICIController");
+	    logger.info(msgPrefix + "Getting all PIControllers");
+	    List<XdaqApplication> piList   = m_gemFM.c_xdaqServiceApps
+		.getApplicationsOfClass("tcds::pi::PIController" );
+	    logger.info(msgPrefix + "Making the TCDS list");
+	    List<XdaqApplication> tcdsList = new ArrayList<XdaqApplication>();
 
-        logger.info(msgPrefix + "Adding TCDS applications to TCDS list");
-        tcdsList.addAll(lpmList);
-        tcdsList.addAll(iciList);
-        tcdsList.addAll(piList);
+	    logger.info(msgPrefix + "Adding TCDS applications to TCDS list");
+	    tcdsList.addAll(lpmList);
+	    tcdsList.addAll(iciList);
+	    tcdsList.addAll(piList);
 
-        logger.info(msgPrefix + "Creating the TCDS containers");
-        m_gemFM.c_tcdsControllers = new XdaqApplicationContainer(tcdsList);
-        m_gemFM.c_lpmControllers  = new XdaqApplicationContainer(lpmList);
-        m_gemFM.c_iciControllers  = new XdaqApplicationContainer(iciList);
-        m_gemFM.c_piControllers   = new XdaqApplicationContainer(piList);
+	    logger.info(msgPrefix + "Creating the TCDS containers");
+	    m_gemFM.c_tcdsControllers = new XdaqApplicationContainer(tcdsList);
+	    m_gemFM.c_lpmControllers  = new XdaqApplicationContainer(lpmList);
+	    m_gemFM.c_iciControllers  = new XdaqApplicationContainer(iciList);
+	    m_gemFM.c_piControllers   = new XdaqApplicationContainer(piList);
+	}
 
         // Now if we are using TCDS, give all of the TCDS applications the URN that they need.
 
@@ -2145,10 +2278,15 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                     pam =((XdaqApplication)qr).getXDAQParameter();
                     logger.info(msgPrefix + "got parameters, selecting:");
 
-                    pam.select(new String[] {"TriggerAdapterName", "PartitionState", "InitializationProgress","ReportStateToRCMS"});
-                    logger.info(msgPrefix + "parameters selected, getting:");
+                    //pam.select(new String[] {"TriggerAdapterName", "PartitionState", "InitializationProgress","ReportStateToRCMS"});
+                    pam.select(new String[] {"HandleTCDS", "dbPort"});
+                    logger.info(msgPrefix + "initXDAQ: parameters selected, getting:");
                     pam.get();
-                    logger.info(msgPrefix + "got selectedparameters!");
+		    String DoesSupervisorHandleTCDS =  pam.getValue("HandleTCDS");
+		    String WichDBPort = pam.getValue("dbPort");
+                    logger.info(msgPrefix + "initXDAQ: got selected parameters!");
+		    logger.info(msgPrefix + "HandleTCDS: " + DoesSupervisorHandleTCDS);
+		    logger.info(msgPrefix + "dbPort: " + WichDBPort);
 
                     dowehaveanasyncgemSupervisor = pam.getValue("ReportStateToRCMS");
                     msg = "asking for the GEM supervisor ReportStateToRCMS results is: " + dowehaveanasyncgemSupervisor;
@@ -2269,4 +2407,92 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             }
         }
     }
+
+    // thread which checks the GEM supervisor state
+    protected class GEMSupervisorWatchThread extends Thread {
+
+	String msgPrefix = "[GEM FM::" + m_gemFM.m_FMname + "] GEMEventHandler::GEMSupervisorWatchThread(): ";
+
+	/*public GEMSupervisorWatchThread() {
+	    GEMSupervisorWatchThreadList.add(this);
+	    }*/
+
+	public void run() {
+	    stopGEMSupervisorWatchThread = false;
+
+	    int icount = 0;
+	    while ((stopGEMSupervisorWatchThread == false) && (m_gemFM != null)){// && (m_gemFM.isDestroyed() == false)) { //This needs to be uncommented if we include a isDestroyed function in the FM
+		icount++;
+		Date now = Calendar.getInstance().getTime();
+
+		// poll GEM supervisor status in the Configuring/Configured/Running/RunningDegraded states every 5 sec to see if it is still alive  (dangerous because ERROR state is reported wrongly quite frequently)
+		if (icount%5==0) {
+		    if ((m_gemFM.getState().getStateString().equals(GEMStates.CONFIGURING.toString()) ||
+			 m_gemFM.getState().getStateString().equals(GEMStates.CONFIGURED.toString()) ||
+			 m_gemFM.getState().getStateString().equals(GEMStates.RUNNING.toString()) ||
+			 m_gemFM.getState().getStateString().equals(GEMStates.RUNNINGDEGRADED.toString()))) {
+			if (!m_gemFM.c_gemSupervisors.isEmpty()) {
+
+			    {
+				String debugMessage = "[GEM " + m_gemFM.m_FMname + "] GEM supervisor found for checking its state: GEMINI still alive!";
+				logger.info(debugMessage);
+			    }
+
+			    XDAQParameter pam = null;
+			    String status   = "undefined";
+
+			    // ask for the status of the GEM supervisor
+			    for (QualifiedResource qr : m_gemFM.c_gemSupervisors.getApplications() ){
+				logger.info(msgPrefix + " GEMSupervisorWatchThread(): found qualified resource of GEMSupervisor type");
+				try {
+				    pam =((XdaqApplication)qr).getXDAQParameter();
+				    pam.select(new String[] {"FSMState"}); //This needs to be replaced with StateName, but not working for now
+				    pam.get();
+
+				    status = pam.getValue("FSMState");
+
+				    if (status==null) {
+					String errMessage = msgPrefix + " Error! Asking the GEMSupervisor for the PartitionState and stateName to see if it is alive or not resulted in a NULL pointer - this is bad!";
+					m_gemFM.goToError(errMessage);
+				    }
+
+				    logger.info(msgPrefix + " asking for the GEM supervisor PartitionState to see if it is still alive.\n The PartitionState is: " + status);
+				}
+				catch (XDAQTimeoutException e) {
+				    String errMessage = msgPrefix + " Error! XDAQTimeoutException: GEMSupervisorWatchThread()\nProbably the GEM supervisor application is dead.\nCheck the corresponding jobcontrol status ...\nHere is the exception: " +e;
+				    m_gemFM.goToError(errMessage);
+				}
+				catch (XDAQException e) {
+				    String errMessage = msgPrefix + " Error! XDAQException: GEMSupervisorWatchThread()\nProbably the GEM supervisor application is in a bad condition.\nCheck the corresponding jobcontrol status, etc. ...\nHere is the exception: " +e;
+				    m_gemFM.goToError(errMessage);
+				}
+
+				if (status.equals("Failed") || status.equals("Faulty") || status.equals("Error")) {
+				    String errMessage = msgPrefix + " Error! GEMSupervisorWatchThread(): supervisor reports partitionState: " + status +"; ";
+				    //Usefulin case wehave an error string from the supervisor
+				    //String supervisorError = m_gemFM.getSupervisorErrorMessage();
+				    //errMessage+=supervisorError;
+				    m_gemFM.goToError(errMessage);
+				}
+			    }
+			}
+			else {
+			    String errMessage = msgPrefix + " Error! No GEM supervisor found: GEMSupervisorWatchThread()";
+			    m_gemFM.goToError(errMessage);
+			}
+		    }
+		}
+		// delay between polls
+		try { Thread.sleep(1000); }
+		catch (Exception ignored) { return; }
+	    }
+
+	    // stop the GEM supervisor watchdog thread
+	    System.out.println(msgPrefix + " ... stopping GEM supervisor watchdog thread done.");
+	    logger.info(msgPrefix + " ... stopping GEM supervisor watchdog thread done.");
+
+	    //GEMSupervisorWatchThreadList.remove(this);
+	}
+    }
+
 }

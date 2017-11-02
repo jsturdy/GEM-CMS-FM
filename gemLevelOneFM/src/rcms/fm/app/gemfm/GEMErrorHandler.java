@@ -3,6 +3,7 @@ package rcms.fm.app.gemfm;
 import rcms.fm.fw.EventHandlerException;
 import rcms.fm.fw.user.UserActionException;
 import rcms.fm.fw.user.UserErrorHandler;
+import rcms.errorFormat.CMS.CMSError;
 import rcms.statemachine.definition.State;
 import rcms.util.logger.RCMSLogger;
 
@@ -34,6 +35,9 @@ public class GEMErrorHandler extends UserErrorHandler {
         // so it is already registered for Error events
         String msgPrefix = "[GEM FM] GEMEventHandler::GEMEventHandler(): ";
 
+	// register for CMSError events
+	subscribeForEvents(CMSError.class);
+
         // error handler
         addAction(State.ANYSTATE, "errorHandler");
 
@@ -56,4 +60,16 @@ public class GEMErrorHandler extends UserErrorHandler {
         System.out.println(msgPrefix + "Got an event: " + obj.getClass() );
         logger.error(msgPrefix + "Got an event: " + obj.getClass() );
     }
+
+    public void setError(CMSError error)
+	throws UserActionException
+    {
+	try {
+	    m_gemFM.getParentErrorNotifier().sendError(error);
+	}
+	catch (Exception e) {
+	    throw new UserActionException("Cannot send error", e);
+	}
+    }
+
 }

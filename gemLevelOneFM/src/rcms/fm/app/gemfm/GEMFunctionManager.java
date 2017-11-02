@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.MalformedURLException;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -65,6 +66,7 @@ import rcms.errorFormat.CMS.CMSError;
 
 import rcms.util.logsession.LogSessionException;
 import rcms.util.logsession.LogSessionConnector;
+import rcms.errorFormat.CMS.CMSError;
 
 import rcms.utilities.fm.task.Task;
 import rcms.utilities.fm.task.SimpleTask;
@@ -166,8 +168,11 @@ public class GEMFunctionManager extends UserFunctionManager {
     public RunInfo GEMRunInfo = null;
 
     // set from the controlled EventHandler
-    public String  RunType = "";
+    protected GEMEventHandler theEventHandler = null;
+    protected GEMErrorHandler theErrorHandler = null;
+    public String  RunType = "local";
     public Integer RunNumber = 0;
+    public String  FEDEnableMask = "0&0%";
     //public Integer CachedRunNumber = 0;
 
     // GEM RunInfo namespace, the FM name will be added in the createAction() method
@@ -259,10 +264,19 @@ public class GEMFunctionManager extends UserFunctionManager {
         logSessionConnector = getLogSessionConnector();
         logger.info(msgPrefix + "Get log session connector finished");
 
+	getParameterSet().get(GEMParameters.RUN_TYPE).setValue(new StringT(RunType));
         // get session ID // NEEDS TO BE REMOVED FOR GLOBAL OPERATIONS
-        logger.info(msgPrefix + "Get session ID started");
-        getSessionId();
-        logger.info(msgPrefix + "Get session ID finished");
+	if (RunType.equals("local")) {
+	    logger.info(msgPrefix + "Starting SID fetching for run type:" + RunType);
+	    logger.info(msgPrefix + "Get session ID started");
+	    getSessionId();
+	    logger.info(msgPrefix + "Get session ID finished");
+
+	}
+	else {
+	    logger.info(msgPrefix + "No need of fetching SID for run type:" + RunType);
+	    logger.warn("[GEM] logSessionConnector = " + logSessionConnector + ", using default = " + getParameterSet().get(GEMParameters.SID).getValue() + ".");
+	}
 
         logger.debug(msgPrefix + "createAction executed.");
     }
@@ -287,8 +301,12 @@ public class GEMFunctionManager extends UserFunctionManager {
         logger.debug(msgPrefix + "destroyAction called");
 
         // try to close any open session ID only if we are in local run mode i.e. not CDAQ and not miniDAQ runs and if it's a LV1FM
-        // if (RunType.equals("local") && !containerFMChildren.isEmpty()) { closeSessionId(); }
-        closeSessionId();  // NEEDS TO BE CORRECTED TO ONLY BE CALLED IN LOCAL RUNS
+        if (RunType.equals("local")) { closeSessionId(); }
+        //closeSessionId();  // NEEDS TO BE CORRECTED TO ONLY BE CALLED IN LOCAL RUNS
+
+	//Stop watchthreads before destroying
+	//theEventHandler.stopMonitorThread = true;
+	theEventHandler.stopGEMSupervisorWatchThread = true;
 
         try {
             // retrieve the Function Managers and kill themDestroy all XDAQ applications
@@ -348,11 +366,15 @@ public class GEMFunctionManager extends UserFunctionManager {
 
         // Add event handler
         logger.info(msgPrefix + "Adding the GEMEventHandler");
-        addEventHandler(new GEMEventHandler());
+	theEventHandler = new GEMEventHandler();
+	addEventHandler(theEventHandler);
+        //addEventHandler(new GEMEventHandler());
 
         // Add error handler
         logger.info(msgPrefix + "Adding the GEMErrorHandler");
-        addEventHandler(new GEMErrorHandler());
+	theErrorHandler = new GEMErrorHandler();
+	addEventHandler(theErrorHandler);
+        //addEventHandler(new GEMErrorHandler());
 
         // Add state notification handler
         logger.info(msgPrefix + "Creating the state notification handler");
@@ -463,11 +485,16 @@ public class GEMFunctionManager extends UserFunctionManager {
         getParameterSet().get("ERROR_MSG").setValue(new StringT(errMessage));
 
         // send error
-        try {
+        /*try {
             getParentErrorNotifier().sendError(error);
         } catch (Exception e) {
             logger.warn(msgPrefix + "" + getClass().toString() + ": Failed to send error message " + errMessage);
-        }
+	    }*/
+	try {
+	    theErrorHandler.setError(error);
+        } catch (Exception e) {
+            logger.warn(msgPrefix + getClass().toString() + ": Failed to send error message " + errMessage);
+	}
     }
 
 
@@ -782,6 +809,9 @@ public class GEMFunctionManager extends UserFunctionManager {
         }
     }
 
+    /*public boolean isDestroyed() {
+	return destroyed;
+	}*/
     /**----------------------------------------------------------------------
      * get all XDAQ executives and kill them
      */
@@ -1010,13 +1040,13 @@ public class GEMFunctionManager extends UserFunctionManager {
         configuredConds.registerConditionState(c_FMs,             GEMStates.CONFIGURED);
         configuredConds.setResultState(GEMStates.CONFIGURED);
 
-        // // Conditions for State RUNNING/ENABLED
-        // StateVector runningConds = new StateVector();
-        // runningConds.registerConditionState(c_tcdsControllers, GEMStates.RUNNING);
-        // runningConds.registerConditionState(c_uFEDKIT,         GEMStates.RUNNING);
-        // runningConds.registerConditionState(c_gemSupervisors,  GEMStates.RUNNING);
-        // runningConds.registerConditionState(c_FMs,             GEMStates.RUNNING);
-        // runningConds.setResultState(GEMStates.RUNNING);
+        // Conditions for State RUNNING/ENABLED
+        StateVector runningConds = new StateVector();
+        runningConds.registerConditionState(c_tcdsControllers, GEMStates.RUNNING);
+        runningConds.registerConditionState(c_uFEDKIT,         GEMStates.RUNNING);
+        runningConds.registerConditionState(c_gemSupervisors,  GEMStates.RUNNING);
+        runningConds.registerConditionState(c_FMs,             GEMStates.RUNNING);
+        runningConds.setResultState(GEMStates.RUNNING);
 
         // // Conditions for State RUNNINGDEGRADED
         // StateVector runningdegradedConds = new StateVector();
@@ -1057,7 +1087,7 @@ public class GEMFunctionManager extends UserFunctionManager {
         m_svCalc.add(initialConds);
         m_svCalc.add(haltedConds);
         m_svCalc.add(configuredConds);
-        // m_svCalc.add(runningConds);
+        m_svCalc.add(runningConds);
         // m_svCalc.add(runningdegradedConds);
         // m_svCalc.add(runningsofterrordetectedConds);
         // m_svCalc.add(pausedConds);

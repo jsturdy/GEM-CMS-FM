@@ -26,14 +26,14 @@
         <ConnectionFile xsi:type="xsd:string">connections.xml</ConnectionFile>
         <AllOptoHybridsInfo xsi:type="soapenc:Array"  soapenc:arrayType="xsd:ur-type[144]"><!-- MAX_OH_PER_AMC(12) * MAX_AMC_PER_UTCA(12)-->
           <OptoHybridInfo   xsi:type="soapenc:Struct" soapenc:position="12"> <!-- position must be (slot-1)*MAX_OH_PER_AMC(12)+link -->
-            <crateID xsi:type="xsd:integer">1</crateID>
-            <slot    xsi:type="xsd:integer">2</slot>
-            <link    xsi:type="xsd:integer">0</link>
-            <present xsi:type="xsd:boolean">true</present>
+            <crateID        xsi:type="xsd:integer">1</crateID>
+            <slot           xsi:type="xsd:integer">2</slot>
+            <link           xsi:type="xsd:integer">0</link>
+            <present        xsi:type="xsd:boolean">true</present>
 
             <triggerSource xsi:type="xsd:integer">0</triggerSource>
 
-            <SBitConfig xsi:type="soapenc:Struct">
+            <SBitConfig   xsi:type="soapenc:Struct">
               <Mode       xsi:type="xsd:unsignedShort">1</Mode>
               <Output0Src xsi:type="xsd:unsignedShort">0</Output0Src>
               <Output1Src xsi:type="xsd:unsignedShort">1</Output1Src>
