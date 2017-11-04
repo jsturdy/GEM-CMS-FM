@@ -57,6 +57,14 @@ import net.hep.cms.xdaqctl.XDAQMessageException;
 import rcms.util.logsession.LogSessionException;
 import rcms.util.logsession.LogSessionConnector;
 
+import rcms.utilities.fm.task.Task;
+import rcms.utilities.fm.task.SimpleTask;
+import rcms.utilities.fm.task.TaskSequence;
+
+import rcms.statemachine.definition.Input;
+import rcms.statemachine.definition.State;
+import rcms.statemachine.definition.StateMachineDefinitionException;
+
 import rcms.utilities.runinfo.RunNumberData;
 import rcms.utilities.runinfo.RunSequenceNumber;
 import rcms.utilities.runinfo.RunInfo;
@@ -454,146 +462,34 @@ public class GEMEventHandler extends UserStateNotificationHandler {
              * PUT YOUR CODE HERE
              ***********************************************/
 
-	    // start the GEMSupervisor watchdog thread
+	    // start the GEMSupervisor watchdog thread, is this necessary? what does it provide?
 	    System.out.println("[GEM LVL1 " + m_gemFM.m_FMname + "] Starting GEM supervisor watchdog thread ...");
 	    logger.debug("[GEM LVL1 " + m_gemFM.m_FMname + "] Starting GEM supervisor watchdog thread ...");
-	    GEMSupervisorWatchThread SThread = new GEMSupervisorWatchThread();
-	    SThread.start();
+	    // GEMSupervisorWatchThread SThread = new GEMSupervisorWatchThread();
+	    // SThread.start();
 
-            // force TCDS HALTED
-            if (m_gemFM.c_tcdsControllers != null) {
-                if (!m_gemFM.c_tcdsControllers.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to halt TCDS on initialize.");
-                        m_gemFM.haltTCDSControllers();
-                    } catch (UserActionException e) {
-                        String msg = "Caught UserActionException";
-                        logger.error(msgPrefix + msg, e);
-                        m_gemFM.goToError(msg, e);
-                        // m_gemFM.sendCMSError(msg);  // when do this rather than goToError, or both?
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
+            // put everything into a task list? TCDS -> GEM -> EVM/BU/RU
+            TaskSequence initTaskSeq = new TaskSequence(GEMStates.INITIALIZING,GEMInputs.SETHALTED);
 
-            // initialize GEMFSMApplications
-            if (m_gemFM.c_gemSupervisors != null) {
-                if (!m_gemFM.c_gemSupervisors.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to initialize GEMSupervisor.");
-                        m_gemFM.c_gemSupervisors.execute(GEMInputs.INITIALIZE);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "Caught QualifiedResourceContainerException";
-                        logger.error(msgPrefix + msg, e);
-                        m_gemFM.goToError(msg, e);
-                        // m_gemFM.sendCMSError(msg);  // when do this rather than goToError, or both?
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",     new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
+            m_gemFM.m_stateNotificationHandler.executeTaskSequence(m_gemFM.getInitSequence(initTaskSeq));
 
-            // ? ferol/EVM/BU/RU?
-            if (m_gemFM.c_uFEDKIT != null) {
-                if (!m_gemFM.c_uFEDKIT.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to halt uFEDKIT resources on initialize.");
-                        m_gemFM.c_uFEDKIT.execute(GEMInputs.HALT);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "Caught QualifiedResourceContainerException";
-                        logger.error(msgPrefix + msg, e);
-                        m_gemFM.goToError(msg, e);
-                        // m_gemFM.sendCMSError(msg);  // when do this rather than goToError, or both?
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",     new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
             /*
             // set exported parameters
             ((FunctionManagerParameter<IntegerT>)m_gemPSet
-            .get(GEMParameters.INITIALIZED_WITH_SID))
-            .setValue(new IntegerT(m_SID));
+             .get(GEMParameters.INITIALIZED_WITH_SID))
+                .setValue(new IntegerT(m_SID));
             ((FunctionManagerParameter<StringT>)m_gemPSet
-            .get(GEMParameters.INITIALIZED_WITH_GLOBAL_CONF_KEY))
-            .setValue(new StringT(globalConfKey));
+             .get(GEMParameters.INITIALIZED_WITH_GLOBAL_CONF_KEY))
+                .setValue(new StringT(globalConfKey));
             */
-            // go to HALT
-            m_gemFM.fireEvent(GEMInputs.SETHALTED);
-	    //We need to assure that all applications (supervisor and managers are in halted state before setting halted in the FM) in case StateVector from RCMS does not work
-	    /*boolean isAMC13halted = false;
-	    boolean isAMC13Rhalted = false;
-	    boolean isGLIBhalted = false;
-	    boolean isOHhalted = false;
-	    boolean isSupervisorhalted = false;
-	    int htcount = 0;
-            while ((isAMC13halted == false) || (isAMC13Rhalted == false) || (isGLIBhalted == false) || (isOHhalted == false) || (isSupervisorhalted == false)){
-		htcount++;
-		if (htcount%2==0) {
-		    if (!m_gemFM.c_gemSupervisors.isEmpty() && !isSupervisorhalted) {
-			{
-			    String debugMessage = "[GEM " + m_gemFM.m_FMname + "] GEM supervisor found for checking its state: GEMINI is indeed alive!";
-			    logger.debug(debugMessage);
-			}
-			XDAQParameter pam = null;
-			String status   = "undefined";
-			String stateName   = "undefined";
-
-			// ask for the status of the GEM supervisor
-			for (QualifiedResource qr : m_gemFM.c_gemSupervisors.getApplications() ){
-			    try {
-				pam =((XdaqApplication)qr).getXDAQParameter();
-				pam.select(new String[] {"PartitionState", "stateName"});
-				pam.get();
-
-				status = pam.getValue("PartitionState");
-				stateName = pam.getValue("stateName");
-
-				if (status==null || stateName==null) {
-				    String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! Asking the gemSupervisor for the PartitionState and stateName to see if it is alive or not resulted in a NULL pointer - this is bad!";
-				    m_gemFM.goToError(errMessage);
-				}
-				logger.debug("[GEM " + m_gemFM.m_FMname + "] asking for the GEM supervisor PartitionState to see if it is still alive.\n The PartitionState is: " + status);
-			    }
-			    catch (XDAQTimeoutException e) {
-				String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! XDAQTimeoutException: on init\nProbably the GEM supervisor application is dead.\nCheck the corresponding jobcontrol status ...\nHere is the exception: " +e;
-				m_gemFM.goToError(errMessage);
-			    }
-			    catch (XDAQException e) {
-				String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! XDAQException: on init\nProbably the GEM supervisor application is in a bad condition.\nCheck the corresponding jobcontrol status, etc. ...\nHere is the exception: " +e;
-				m_gemFM.goToError(errMessage);
-			    }
-			    if (status.equals("Failed") || status.equals("Faulty") || status.equals("Error") || stateName.equalsIgnoreCase("failed")) {
-				String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! on init: supervisor reports partitionState: " + status + " and stateName: " + stateName +"; ";
-				m_gemFM.goToError(errMessage);
-			    }
-			    if (status.equals("Halted")){
-				isSupervisorhalted = true;
-				logger.debug("[GEM " + m_gemFM.m_FMname + "] GEM supervisor went is in halted " + status);
-			    }
-			}
-		    }
-		    else {
-			String errMessage = "[GEM " + m_gemFM.m_FMname + "] Error! No GEM supervisor found: On halted";
-			m_gemFM.goToError(errMessage);
-		    }
-		}
-	    }
-
-	    if ((isAMC13halted == true) && (isAMC13Rhalted == true) && (isGLIBhalted == true) && (isOHhalted == true) && (isSupervisorhalted == true)){
-		m_gemFM.fireEvent(GEMInputs.SETHALTED);
-	    }
-	    else{
-		String errMessage = "[GEM " + m_gemFM.m_FMname + "] something went wrong! One of the applications or the supervisor is not in halted state";
-		m_gemFM.goToError(errMessage);
-		}*/
+            // go to HALT, wait for task list?
+            // m_gemFM.fireEvent(GEMInputs.SETHALTED);
 
             // set action
-            m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
-                                                                new StringT("")));
-            m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,
-                                                                new StringT("Initialized -> Halted")));
+            // m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
+            //                                                     new StringT("")));
+            // m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,
+            //                                                     new StringT("Initialized -> Halted")));
 
             logger.info("initAction Executed");
         }
@@ -649,19 +545,6 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                 m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
             }
 
-            // force TCDS HALTED
-            if (m_gemFM.c_tcdsControllers != null) {
-                if (!m_gemFM.c_tcdsControllers.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to halt TCDS on reset.");
-                        m_gemFM.haltTCDSControllers();
-                    } catch (UserActionException e) {
-                        String msg = "Caught UserActionException";
-                        logger.warn(msgPrefix + msg, e);
-                    }
-                }
-            }
-
             // reset GEMFSMApplications and then send INITIALIZE
             if (m_gemFM.c_gemSupervisors != null) {
                 if (!m_gemFM.c_gemSupervisors.isEmpty()) {
@@ -672,45 +555,27 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                         String msg = "Caught QualifiedResourceContainerException";
                         logger.warn(msgPrefix + msg, e);
                     }
-
-                    // need to now initialize GEM resoureces as RESET puts them into INITIAL state,
-                    // but RCMS puts things into HALTED state
-
-                    try {
-                        logger.info(msgPrefix + "Trying to initialize GEMSupervisor");
-                        m_gemFM.c_gemSupervisors.execute(GEMInputs.INITIALIZE);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "Caught QualifiedResourceContainerException";
-                        logger.warn(msgPrefix + msg, e);
-                    }
                 }
             }
 
-            // ? ferol/EVM/BU/RU?
-            if (m_gemFM.c_uFEDKIT != null) {
-                if (!m_gemFM.c_uFEDKIT.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to halt uFEDKIT resources on reset.");
-                        m_gemFM.c_uFEDKIT.execute(GEMInputs.HALT);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "Caught QualifiedResourceContainerException";
-                        logger.warn(msgPrefix + msg, e);
-                    }
-                }
-            }
+            // do standard init
+            // put everything into a task list? TCDS -> GEM -> EVM/BU/RU
+            TaskSequence initTaskSeq = new TaskSequence(GEMStates.RESETTING,GEMInputs.SETHALTED);
+
+            m_gemFM.m_stateNotificationHandler.executeTaskSequence(m_gemFM.getInitSequence(initTaskSeq));
 
             m_gemFM.GEMRunInfo = null; // make RunInfo ready for the next round of run info to store
 
             // go to Initital
-            m_gemFM.fireEvent(GEMInputs.SETHALTED);
+            // m_gemFM.fireEvent(GEMInputs.SETHALTED);
 
             // Clean-up of the Function Manager parameters
             cleanUpFMParameters();
 
-            m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
-                                                                new StringT("")));
-            m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,
-                                                                new StringT("Reset - Halted")));
+            // m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
+            //                                                     new StringT("")));
+            // m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,
+            //                                                     new StringT("Reset - Halted")));
 
             logger.info("resetAction Executed");
         }
@@ -743,6 +608,10 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             // force TCDS HALTED
             // force GEMFSMApplications HALTED
             // force ferol/EVM/BU/RU HALTED?
+
+            // TaskSequence initTaskSeq = new TaskSequence(GEMStates.INITIALIZING,GEMInputs.SETHALTED);
+
+            // m_gemFM.m_stateNotificationHandler.executeTaskSequence(m_gemFM.getInitSequence(initTaskSeq));
 
             // leave intermediate state
             m_gemFM.fireEvent(GEMInputs.SETHALTED);
@@ -853,135 +722,16 @@ public class GEMEventHandler extends UserStateNotificationHandler {
              .get(GEMParameters.CONFIGURED_WITH_FED_ENABLE_MASK))
                 .setValue(new StringT(fedEnableMask));
 
-            // configure TCDS (LPM then ICI then PI)
-            if (m_gemFM.c_tcdsControllers != null) {
-                if (!m_gemFM.c_tcdsControllers.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to configure TCDS on configure.");
-                        m_gemFM.configureTCDSControllers();
-                    } catch (UserActionException e) {
-                        String msg = "Caught UserActionException";
-                        logger.error(msgPrefix + msg, e);
-                        //m_gemFM.sendCMSError(msg);
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
+            // put everything into a task list? TCDS -> GEM -> EVM/BU/RU
+            TaskSequence confTaskSeq = new TaskSequence(GEMStates.CONFIGURING,GEMInputs.SETCONFIGURED);
 
-            // configure GEMFSMApplications
-            if (m_gemFM.c_gemSupervisors != null) {
-                if (!m_gemFM.c_gemSupervisors.isEmpty()) {
-                    XDAQParameter pam = null;
-                    // prepare and set for all GEM supervisors the RunType
-                    for (QualifiedResource qr : m_gemFM.c_gemSupervisors.getApplications()){
-                        try {
-                            pam = ((XdaqApplication)qr).getXDAQParameter();
-                            pam.select(new String[] {"FEDEnableMask"});
-                            pam.get();
-                            String fedMask = pam.getValue("FEDEnableMask");
-                            logger.info(msgPrefix + "got fedMask " + fedMask + " from the supervisor");
-                            pam.setValue("FEDDnableMask",m_gemFM.FEDEnableMask);
-                            logger.info(msgPrefix + "sending FEDEnableMask to the supervisor");
-                            pam.send();
-                            logger.info(msgPrefix + "sent FEDEnableMask to the supervisor");
-                        } catch (XDAQTimeoutException e) {
-                            String msg = "Error! XDAQTimeoutException when trying to send the FEDEnableMask to the GEM supervisor\n."
-                                + "Perhaps this application is dead!?";
-                            logger.error(msgPrefix + msg, e);
-                            m_gemFM.goToError(msg, e);
-                        } catch (XDAQException e) {
-                            String msg = "Error! XDAQException when trying to send the FEDEnableMask to the GEM supervisor";
-                            logger.error(msgPrefix + msg, e);
-                            m_gemFM.goToError(msg, e);
-                        }
-                    }
-
-                    try {
-                        logger.info(msgPrefix + "Trying to configure GEMSupervisor.");
-                        m_gemFM.c_gemSupervisors.execute(GEMInputs.CONFIGURE);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "Caught QualifiedResourceContainerException";
-                        logger.error(msgPrefix + msg, e);
-                        //m_gemFM.sendCMSError(msg);
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
-
-            // configure ferol/EVM/BU/RU?
-            // need to send the FED_ENABLE_MASK to the EVM and BU
-            // need to configure first the EVM then BU and then the FerolController
-            /*
-              if (m_gemFM.c_uFEDKIT != null) {
-              if (!m_gemFM.c_uFEDKIT.isEmpty()) {
-              try {
-              logger.info(msgPrefix + "Trying to configure uFEDKIT resources on configure.");
-              m_gemFM.c_uFEDKIT.execute(GEMInputs.CONFIGURE);
-              } catch (QualifiedResourceContainerException e) {
-              String msg = "Caught QualifiedResourceContainerException";
-              logger.error(msgPrefix + msg, e);
-              //m_gemFM.sendCMSError(msg);
-              m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-              m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-              }
-              }
-              }
-            */
-            // need to ensure that necessary paramters are sent
-            // these applications expect empty command transitions it seems
-            if (m_gemFM.c_EVMs != null) {
-                if (!m_gemFM.c_EVMs.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to configure EVM resources on configure.");
-                        m_gemFM.c_EVMs.execute(GEMInputs.CONFIGURE);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "Caught QualifiedResourceContainerException";
-                        logger.error(msgPrefix + msg, e);
-                        //m_gemFM.sendCMSError(msg);
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
-
-            if (m_gemFM.c_BUs != null) {
-                if (!m_gemFM.c_BUs.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to configure BU resources on configure.");
-                        m_gemFM.c_BUs.execute(GEMInputs.CONFIGURE);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "Caught QualifiedResourceContainerException";
-                        logger.error(msgPrefix + msg, e);
-                        // m_gemFM.sendCMSError(msg);
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
-
-            if (m_gemFM.c_Ferols != null) {
-                if (!m_gemFM.c_Ferols.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to configure Ferol resources on configure.");
-                        m_gemFM.c_Ferols.execute(GEMInputs.CONFIGURE);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "Caught QualifiedResourceContainerException";
-                        logger.error(msgPrefix + msg, e);
-                        // m_gemFM.sendCMSError(msg);
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
-
+            m_gemFM.m_stateNotificationHandler.executeTaskSequence(m_gemFM.getConfSequence(confTaskSeq));
             // leave intermediate state
-            m_gemFM.fireEvent(GEMInputs.SETCONFIGURED);
+            // m_gemFM.fireEvent(GEMInputs.SETCONFIGURED);
 
             // set action
-            m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
-            m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Configured")));
+            // m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
+            // m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Configured")));
 
             logger.info("configureAction Executed");
         }
@@ -1074,188 +824,25 @@ public class GEMEventHandler extends UserStateNotificationHandler {
             /*
             // Set the run number in the Function Manager parameters
             ((FunctionManagerParameter<IntegerT>)m_gemPSet
-            .get(GEMParameters.STARTED_WITH_RUN_NUMBER))
-            .setValue(new IntegerT(runNumber));
+             .get(GEMParameters.STARTED_WITH_RUN_NUMBER))
+                .setValue(new IntegerT(runNumber));
             */
 
             logger.info(msgPrefix + "runNumber is " + runNumber);
 
-            // START GEMFSMApplications
-            if (m_gemFM.c_gemSupervisors != null) {
-                if (!m_gemFM.c_gemSupervisors.isEmpty()) {
-                    XDAQParameter pam = null;
-                    // prepare and set for all GEM supervisors the RunType
-                    for (QualifiedResource qr : m_gemFM.c_gemSupervisors.getApplications()){
-                        try {
-                            pam = ((XdaqApplication)qr).getXDAQParameter();
-                            pam.select(new String[] {"RunNumber"});
-                            pam.get();
-                            String superRunNumber = pam.getValue("RunNumber");
-                            logger.info(msgPrefix + "got run number " + superRunNumber + " from the supervisor");
-                            pam.setValue("RunNumber",m_gemFM.RunNumber.toString());
-                            logger.info(msgPrefix + "sending run number to the supervisor");
-                            pam.send();
-                            logger.info(msgPrefix + "sent run number to the supervisor");
-                        } catch (XDAQTimeoutException e) {
-                            String msg = "Error! XDAQTimeoutException when trying to send the run number to the GEM supervisor\n."
-                                + "Perhaps this application is dead!?";
-                            logger.error(msgPrefix + msg, e);
-                            m_gemFM.goToError(msg, e);
-                        } catch (XDAQException e) {
-                            String msg = "Error! XDAQException when trying to send the run number to the GEM supervisor";
-                            logger.error(msgPrefix + msg, e);
-                            m_gemFM.goToError(msg, e);
-                        }
-                    }
 
-                    try {
-                        logger.info(msgPrefix + "Trying to start GEMSupervisor.");
-                        m_gemFM.c_gemSupervisors.execute(GEMInputs.START);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "Caught QualifiedResourceContainerException";
-                        logger.error(msgPrefix + msg, e);
-                        // m_gemFM.sendCMSError(msg);
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
+            // put everything into a task list? TCDS -> GEM -> EVM/BU/RU
+            TaskSequence startTaskSeq = new TaskSequence(GEMStates.STARTING,GEMInputs.SETRUNNING);
 
-            // ENABLE? ferol/EVM/BU/RU?
-            // need to start first the EVM then BU and then the FerolController
-            /*
-              if (m_gemFM.c_uFEDKIT != null) {
-              if (!m_gemFM.c_uFEDKIT.isEmpty()) {
-              try {
-              logger.info(msgPrefix + "Trying to enable uFEDKIT resources on start.");
-              m_gemFM.c_uFEDKIT.execute(GEMInputs.ENABLE);
-              } catch (QualifiedResourceContainerException e) {
-              String msg = "Caught QualifiedResourceContainerException";
-              logger.error(msgPrefix + msg, e);
-              m_gemFM.goToError(msg, e);
-              // m_gemFM.sendCMSError(msg);  // when do this rather than goToError, or both?
-              m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-              m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-              }
-              }
-              }
-            */
-
-            if (m_gemFM.c_EVMs != null) {
-                if (!m_gemFM.c_EVMs.isEmpty()) {
-                    XDAQParameter pam = null;
-                    // prepare and set the runNumber for all EVMs
-                    for (QualifiedResource qr : m_gemFM.c_EVMs.getApplications()){
-                        try {
-                            pam = ((XdaqApplication)qr).getXDAQParameter();
-                            pam.select(new String[] {"runNumber"});
-                            pam.get();
-                            String evmRunNumber = pam.getValue("runNumber");
-                            logger.info(msgPrefix + "Obtained run number from the EVM: " + evmRunNumber);
-                            pam.setValue("runNumber",m_gemFM.RunNumber.toString());
-                            pam.send();
-                        } catch (XDAQTimeoutException e) {
-                            String msg = "Error! XDAQTimeoutException when trying to send the run number to the EVM\n"
-                                + "Perhaps this application is dead!?";
-                            logger.error(msgPrefix + msg, e);
-                            m_gemFM.goToError(msg, e);
-                        } catch (XDAQException e) {
-                            String msg = "Error! XDAQException when trying to send the run number to the EVM";
-                            logger.error(msgPrefix + msg, e);
-                            m_gemFM.goToError(msg, e);
-                        }
-                    }
-
-                    try {
-                        logger.info(msgPrefix + "Trying to enable EVM resources on start.");
-                        m_gemFM.c_EVMs.execute(GEMInputs.ENABLE);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "Caught QualifiedResourceContainerException";
-                        logger.error(msgPrefix + msg, e);
-                        //m_gemFM.sendCMSError(msg);
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
-
-            if (m_gemFM.c_BUs != null) {
-                if (!m_gemFM.c_BUs.isEmpty()) {
-                    XDAQParameter pam = null;
-                    // prepare and set the runNumber for all BUs
-                    for (QualifiedResource qr : m_gemFM.c_BUs.getApplications()){
-                        try {
-                            pam = ((XdaqApplication)qr).getXDAQParameter();
-                            pam.select(new String[] {"runNumber"});
-                            pam.get();
-                            String buRunNumber = pam.getValue("runNumber");
-                            logger.info(msgPrefix + "Obtained run number from the BU: " + buRunNumber);
-                            pam.setValue("runNumber",m_gemFM.RunNumber.toString());
-                            pam.send();
-                        } catch (XDAQTimeoutException e) {
-                            String msg = "Error! XDAQTimeoutException when trying to send the run number to the BU\n"
-                                + "Perhaps this application is dead!?";
-                            logger.error(msgPrefix + msg, e);
-                            m_gemFM.goToError(msg, e);
-                        } catch (XDAQException e) {
-                            String msg = "Error! XDAQException when trying to send the run number to the BU";
-                            logger.error(msgPrefix + msg, e);
-                            m_gemFM.goToError(msg, e);
-                        }
-                    }
-
-                    try {
-                        logger.info(msgPrefix + "Trying to enable BU resources on start.");
-                        m_gemFM.c_BUs.execute(GEMInputs.ENABLE);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "Caught QualifiedResourceContainerException";
-                        logger.error(msgPrefix + msg, e);
-                        // m_gemFM.sendCMSError(msg);
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
-
-            if (m_gemFM.c_Ferols != null) {
-                if (!m_gemFM.c_Ferols.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to enable Ferol resources on start.");
-                        m_gemFM.c_Ferols.execute(GEMInputs.ENABLE);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "Caught QualifiedResourceContainerException";
-                        logger.error(msgPrefix + msg, e);
-                        // m_gemFM.sendCMSError(msg);
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
-
-            // ENABLE TCDS
-            if (m_gemFM.c_tcdsControllers != null) {
-                if (!m_gemFM.c_tcdsControllers.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to enable TCDS resources on start.");
-                        m_gemFM.enableTCDSControllers();
-                    } catch (UserActionException e) {
-                        String msg = "Caught UserActionException";
-                        logger.error(msgPrefix + msg, e);
-                        m_gemFM.goToError(msg, e);
-                        // m_gemFM.sendCMSError(msg);  // when do this rather than goToError, or both?
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
+            m_gemFM.m_stateNotificationHandler.executeTaskSequence(m_gemFM.getStartSequence(startTaskSeq));
 
             // leave intermediate state
-            m_gemFM.fireEvent(GEMInputs.SETRUNNING);
+            // m_gemFM.fireEvent(GEMInputs.SETRUNNING);
 
-            m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
-                                                                new StringT("")));
-            m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,
-                                                                new StringT("Running!!!")));
+            // m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
+            //                                                     new StringT("")));
+            // m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,
+            //                                                     new StringT("Running!!!")));
             logger.debug("startAction Executed");
         }
     }
@@ -1294,65 +881,15 @@ public class GEMEventHandler extends UserStateNotificationHandler {
              * PUT YOUR CODE HERE
              ***********************************************/
 
-            // pause TCDS
-            if (m_gemFM.c_tcdsControllers != null) {
-                if (!m_gemFM.c_tcdsControllers.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to pause TCDS on pause.");
-                        m_gemFM.pauseTCDSControllers();
-                    } catch (UserActionException e) {
-                        String msg = "Caught UserActionException";
-                        logger.error(msgPrefix + msg, e);
-                        m_gemFM.goToError(msg, e);
-                        // m_gemFM.sendCMSError(msg);  // when do this rather than goToError, or both?
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
+            TaskSequence pauseTaskSeq = new TaskSequence(GEMStates.PAUSING,GEMInputs.SETPAUSED);
 
-            // pause GEMFSMApplications
-            if (m_gemFM.c_gemSupervisors != null) {
-                if (!m_gemFM.c_gemSupervisors.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to pause GEMSupervisor.");
-                        m_gemFM.c_gemSupervisors.execute(GEMInputs.PAUSE);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "Caught QualifiedResourceContainerException";
-                        logger.error(msgPrefix + msg, e);
-                        m_gemFM.goToError(msg, e);
-                        // m_gemFM.sendCMSError(msg);  // when do this rather than goToError, or both?
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
-
-            /*
-            // PAUSE ferol/EVM/BU/RU?
-            if (m_gemFM.c_uFEDKIT != null) {
-            if (!m_gemFM.c_uFEDKIT.isEmpty()) {
-            try {
-            logger.info(msgPrefix + "Trying to pause uFEDKIT resources on pause.");
-            m_gemFM.c_uFEDKIT.execute(GEMInputs.PAUSE);
-            } catch (QualifiedResourceContainerException e) {
-            String msg = "Caught QualifiedResourceContainerException";
-            logger.error(msgPrefix + msg, e);
-            m_gemFM.goToError(msg, e);
-            // m_gemFM.sendCMSError(msg);  // when do this rather than goToError, or both?
-            m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-            m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-            }
-            }
-            }
-            */
-
+            m_gemFM.m_stateNotificationHandler.executeTaskSequence(m_gemFM.getPauseSequence(pauseTaskSeq));
             // leave intermediate state
-            m_gemFM.fireEvent(GEMInputs.SETPAUSED);
+            // m_gemFM.fireEvent(GEMInputs.SETPAUSED);
 
-            // set action
-            m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
-            m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Paused")));
+            // // set action
+            // m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
+            // m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Paused")));
 
             logger.debug("pausingAction Executed");
         }
@@ -1391,113 +928,18 @@ public class GEMEventHandler extends UserStateNotificationHandler {
              * PUT YOUR CODE HERE
              ***********************************************/
 
-            // stop TCDS
-            if (m_gemFM.c_tcdsControllers != null) {
-                if (!m_gemFM.c_tcdsControllers.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to stop TCDS on stop.");
-                        m_gemFM.stopTCDSControllers();
-                    } catch (UserActionException e) {
-                        String msg = "Caught UserActionException";
-                        logger.error(msgPrefix + msg, e);
-                        m_gemFM.goToError(msg, e);
-                        // m_gemFM.sendCMSError(msg);  // when do this rather than goToError, or both?
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
+            TaskSequence stopTaskSeq = new TaskSequence(GEMStates.STOPPING,GEMInputs.SETCONFIGURED);
 
-            // stop GEMFSMApplications
-            if (m_gemFM.c_gemSupervisors != null) {
-                if (!m_gemFM.c_gemSupervisors.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to stop GEMSupervisor.");
-                        m_gemFM.c_gemSupervisors.execute(GEMInputs.STOP);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "Caught QualifiedResourceContainerException";
-                        logger.error(msgPrefix + msg, e);
-                        m_gemFM.goToError(msg, e);
-                        // m_gemFM.sendCMSError(msg);  // when do this rather than goToError, or both?
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
-
-            // ? ferol/EVM/BU/RU?
-            // stop ferol then BU then EVM
-            /*
-              if (m_gemFM.c_uFEDKIT != null) {
-              if (!m_gemFM.c_uFEDKIT.isEmpty()) {
-              try {
-              logger.info(msgPrefix + "Trying to stop uFEDKIT resources on stop.");
-              m_gemFM.c_uFEDKIT.execute(GEMInputs.STOP);
-              } catch (QualifiedResourceContainerException e) {
-              String msg = "Caught QualifiedResourceContainerException";
-              logger.error(msgPrefix + msg, e);
-              m_gemFM.goToError(msg, e);
-              // m_gemFM.sendCMSError(msg);  // when do this rather than goToError, or both?
-              m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-              m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-              }
-              }
-              }
-            */
-
-            if (m_gemFM.c_EVMs != null) {
-                if (!m_gemFM.c_EVMs.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to stop EVM resources on stop.");
-                        m_gemFM.c_EVMs.execute(GEMInputs.STOP);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "Caught QualifiedResourceContainerException";
-                        logger.error(msgPrefix + msg, e);
-                        // m_gemFM.sendCMSError(msg);
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
-
-            if (m_gemFM.c_BUs != null) {
-                if (!m_gemFM.c_BUs.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to stop BU resources on stop.");
-                        m_gemFM.c_BUs.execute(GEMInputs.STOP);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "Caught QualifiedResourceContainerException";
-                        logger.error(msgPrefix + msg, e);
-                        // m_gemFM.sendCMSError(msg);
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
-
-            if (m_gemFM.c_Ferols != null) {
-                if (!m_gemFM.c_Ferols.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to stop Ferol resources on stop.");
-                        m_gemFM.c_Ferols.execute(GEMInputs.STOP);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "Caught QualifiedResourceContainerException";
-                        logger.error(msgPrefix + msg, e);
-                        // m_gemFM.sendCMSError(msg);
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
+            m_gemFM.m_stateNotificationHandler.executeTaskSequence(m_gemFM.getStopSequence(stopTaskSeq));
 
             // leave intermediate state
-            m_gemFM.fireEvent(GEMInputs.SETCONFIGURED);
+            // m_gemFM.fireEvent(GEMInputs.SETCONFIGURED);
 
-            // set action
-            m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
-                                                                new StringT("")));
-            m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,
-                                                                new StringT("Stopping - Configured")));
+            // // set action
+            // m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
+            //                                                     new StringT("")));
+            // m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,
+            //                                                     new StringT("Stopping - Configured")));
 
             logger.debug("stopAction Executed");
         }
@@ -1534,98 +976,22 @@ public class GEMEventHandler extends UserStateNotificationHandler {
              * PUT YOUR CODE HERE
              ***********************************************/
 
-            if (m_gemFM.c_gemSupervisors != null) {
-                if (!m_gemFM.c_gemSupervisors.isEmpty()) {
-                    // new run number during resume?
-                    /*
-                    XDAQParameter pam = null;
-                    // prepare and set for all GEM supervisors the RunType
-                    for (QualifiedResource qr : m_gemFM.c_gemSupervisors.getApplications()){
-                        try {
-                            pam = ((XdaqApplication)qr).getXDAQParameter();
-                            pam.select(new String[] {"RunNumber"});
-                            pam.get();
-                            String superRunNumber = pam.getValue("RunNumber");
-                            logger.info(msgPrefix + "Obtained run number from supervisor: " + superRunNumber);
-                            pam.setValue("RunNumber",m_gemFM.RunNumber.toString());
-                            pam.send();
-                        } catch (XDAQTimeoutException e) {
-                            String msg = "Error! XDAQTimeoutException: startAction() when "
-                                + " trying to send the run number to the GEM supervisor\n Perhaps this "
-                                + "application is dead!?";
-                            logger.error(msgPrefix + msg, e);
-                            m_gemFM.goToError(msg, e);
-                        } catch (XDAQException e) {
-                            String msg = "Error! XDAQException: startAction() when trying "
-                                + "to send the run number to the GEM supervisor";
-                            logger.error(msgPrefix + msg, e);
-                            m_gemFM.goToError(msg, e);
-                        }
-                    }
-                    */
+            TaskSequence resumeTaskSeq = new TaskSequence(GEMStates.RESUMING,GEMInputs.SETRUNNING);
 
-                    try {
-                        logger.info(msgPrefix + "Trying to resume GEMSupervisor.");
-                        m_gemFM.c_gemSupervisors.execute(GEMInputs.RESUME);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "Caught QualifiedResourceContainerException";
-                        logger.error(msgPrefix + msg, e);
-                        // m_gemFM.sendCMSError(msg);
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
-
-            /*
-            // RESUME? ferol/EVM/BU/RU?
-            // need to resume first the EVM then BU and then the FerolController
-            if (m_gemFM.c_uFEDKIT != null) {
-            if (!m_gemFM.c_uFEDKIT.isEmpty()) {
-            try {
-            logger.info(msgPrefix + "Trying to enable uFEDKIT resources on start.");
-            m_gemFM.c_uFEDKIT.execute(GEMInputs.ENABLE);
-            } catch (QualifiedResourceContainerException e) {
-            String msg = "Caught QualifiedResourceContainerException";
-            logger.error(msgPrefix + msg, e);
-            m_gemFM.goToError(msg, e);
-            // m_gemFM.sendCMSError(msg);  // when do this rather than goToError, or both?
-            m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-            m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-            }
-            }
-            }
-            */
-
-            // RESUME TCDS
-            if (m_gemFM.c_tcdsControllers != null) {
-                if (!m_gemFM.c_tcdsControllers.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to enable TCDS resources on resume.");
-                        m_gemFM.enableTCDSControllers();
-                    } catch (UserActionException e) {
-                        String msg = "Caught UserActionException";
-                        logger.error(msgPrefix + msg, e);
-                        m_gemFM.goToError(msg, e);
-                        // m_gemFM.sendCMSError(msg);  // when do this rather than goToError, or both?
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
+            m_gemFM.m_stateNotificationHandler.executeTaskSequence(m_gemFM.getResumeSequence(resumeTaskSeq));
 
             // leave intermediate state
-            m_gemFM.fireEvent(m_gemFM.hasSoftError() ? GEMInputs.SETRESUMEDSOFTERRORDETECTED :
-                               (m_gemFM.isDegraded() ? GEMInputs.SETRESUMEDDEGRADED : GEMInputs.SETRESUMED));
+            // m_gemFM.fireEvent(m_gemFM.hasSoftError() ? GEMInputs.SETRESUMEDSOFTERRORDETECTED :
+            //                    (m_gemFM.isDegraded() ? GEMInputs.SETRESUMEDDEGRADED : GEMInputs.SETRESUMED));
 
 
             // Clean-up of the Function Manager parameters
             cleanUpFMParameters();
 
-            m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
-                                                                new StringT("")));
-            m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,
-                                                                new StringT("Resuming - Running")));
+            // m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
+            //                                                     new StringT("")));
+            // m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,
+            //                                                     new StringT("Resuming - Running")));
 
             logger.debug("resumeAction Executed");
         }
@@ -1662,56 +1028,9 @@ public class GEMEventHandler extends UserStateNotificationHandler {
              * PUT YOUR CODE HERE
              ***********************************************/
 
-            // halt TCDS
-            if (m_gemFM.c_tcdsControllers != null) {
-                if (!m_gemFM.c_tcdsControllers.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to halt TCDS on halt.");
-                        m_gemFM.haltTCDSControllers();
-                    } catch (UserActionException e) {
-                        String msg = "Caught UserActionException";
-                        logger.error(msgPrefix + msg, e);
-                        m_gemFM.goToError(msg, e);
-                        // m_gemFM.sendCMSError(msg);  // when do this rather than goToError, or both?
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
+            TaskSequence haltTaskSeq = new TaskSequence(GEMStates.HALTING,GEMInputs.SETHALTED);
 
-            // halt GEMFSMApplications
-            if (m_gemFM.c_gemSupervisors != null) {
-                if (!m_gemFM.c_gemSupervisors.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to halt GEMSupervisor.");
-                        m_gemFM.c_gemSupervisors.execute(GEMInputs.HALT);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "Caught QualifiedResourceContainerException";
-                        logger.error(msgPrefix + msg, e);
-                        m_gemFM.goToError(msg, e);
-                        // m_gemFM.sendCMSError(msg);  // when do this rather than goToError, or both?
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
-
-            // ? ferol/EVM/BU/RU?
-            if (m_gemFM.c_uFEDKIT != null) {
-                if (!m_gemFM.c_uFEDKIT.isEmpty()) {
-                    try {
-                        logger.info(msgPrefix + "Trying to halt uFEDKIT resources on halt.");
-                        m_gemFM.c_uFEDKIT.execute(GEMInputs.HALT);
-                    } catch (QualifiedResourceContainerException e) {
-                        String msg = "Caught QualifiedResourceContainerException";
-                        logger.error(msgPrefix + msg, e);
-                        m_gemFM.goToError(msg, e);
-                        // m_gemFM.sendCMSError(msg);  // when do this rather than goToError, or both?
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
-                        m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
-                    }
-                }
-            }
+            m_gemFM.m_stateNotificationHandler.executeTaskSequence(m_gemFM.getHaltSequence(haltTaskSeq));
 
             // check from which state we came.
             if (m_gemFM.getPreviousState().equals(GEMStates.TTSTEST_MODE)) {
@@ -1719,15 +1038,14 @@ public class GEMEventHandler extends UserStateNotificationHandler {
                 // 1. give back control of sTTS to HW
             }
 
-
             // leave intermediate state
-            m_gemFM.fireEvent(GEMInputs.SETHALTED);
+            // m_gemFM.fireEvent(GEMInputs.SETHALTED);
 
             // Clean-up of the Function Manager parameters
             cleanUpFMParameters();
 
-            m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
-            m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Halted")));
+            // m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,new StringT("")));
+            // m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,new StringT("Halted")));
 
             logger.debug(msgPrefix + "haltAction Executed");
         }

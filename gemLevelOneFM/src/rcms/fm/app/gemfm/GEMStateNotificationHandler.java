@@ -101,6 +101,9 @@ public class GEMStateNotificationHandler extends UserEventHandler  {
                 // debug
                 StateNotification tmp = (StateNotification)notice;
                 String debugMsg = "StateNotification: ";
+                logger.info(msgPrefix + tmp);
+                logger.info(msgPrefix + tmp.getReason());
+                logger.info(msgPrefix + tmp.getReason().trim());
                 if (tmp != null)
                     debugMsg+= tmp.getToState();
                 if (m_taskSequence != null && m_taskSequence.getCompletionEvent() != null)
@@ -259,7 +262,6 @@ public class GEMStateNotificationHandler extends UserEventHandler  {
             logger.info(msgPrefix + "Starting execution of TaskSequence: " + m_taskSequence.completion());
             m_taskSequence.startExecution();
             logger.info(msgPrefix + "After m_taskSequence.startExecution(): " + m_taskSequence.completion());
-            // } catch (EventHandlerException e) {
             // } catch (EventHandlerException e) {
         } catch (Exception e) {
             m_taskSequence = null;

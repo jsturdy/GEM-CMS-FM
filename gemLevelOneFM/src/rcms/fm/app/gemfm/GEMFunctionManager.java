@@ -46,6 +46,14 @@ import rcms.fm.resource.qualifiedresource.XdaqApplication;
 import rcms.fm.resource.qualifiedresource.XdaqExecutive;
 import rcms.fm.resource.qualifiedresource.FunctionManager;
 
+import rcms.xdaqctl.XDAQParameter;
+import rcms.xdaqctl.XDAQMessage;
+
+import net.hep.cms.xdaqctl.XDAQException;
+import net.hep.cms.xdaqctl.XDAQTimeoutException;
+import net.hep.cms.xdaqctl.XDAQMessageException;
+
+
 import rcms.resourceservice.db.resource.Resource;
 import rcms.resourceservice.db.resource.xdaq.XdaqApplicationResource;
 import rcms.resourceservice.db.resource.xdaq.XdaqExecutiveResource;
@@ -301,7 +309,9 @@ public class GEMFunctionManager extends UserFunctionManager {
         logger.debug(msgPrefix + "destroyAction called");
 
         // try to close any open session ID only if we are in local run mode i.e. not CDAQ and not miniDAQ runs and if it's a LV1FM
-        if (RunType.equals("local")) { closeSessionId(); }
+        if (RunType.equals("local")) {
+            closeSessionId();
+        }
         //closeSessionId();  // NEEDS TO BE CORRECTED TO ONLY BE CALLED IN LOCAL RUNS
 
 	//Stop watchthreads before destroying
@@ -582,6 +592,925 @@ public class GEMFunctionManager extends UserFunctionManager {
         // Input is RESET
 
         // return tcdsParameters;
+    }
+
+    public TaskSequence getInitSequence(TaskSequence initTaskSeq)
+    {
+        String msgPrefix = "[GEM FM] GEMFunctionManager::getInitSequence(): ";
+
+        // force TCDS HALTED
+        if (this.c_lpmControllers != null) {
+            if (!this.c_lpmControllers.isEmpty()) {
+                Input initInputLPM = new Input(GEMInputs.HALT.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                initInputLPM.setParameters(pSet);
+                SimpleTask lpmInitTask = new SimpleTask(this.c_lpmControllers,initInputLPM,
+                                                        GEMStates.INITIALIZING,GEMStates.HALTED,
+                                                        "Initializing LPMControllers");
+                initTaskSeq.addLast(lpmInitTask);
+            }
+        }
+        if (this.c_iciControllers != null) {
+            if (!this.c_iciControllers.isEmpty()) {
+                Input initInputICI = new Input(GEMInputs.HALT.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                initInputICI.setParameters(pSet);
+                SimpleTask iciInitTask = new SimpleTask(this.c_iciControllers,initInputICI,
+                                                        GEMStates.INITIALIZING,GEMStates.HALTED,
+                                                            "Initializing ICIControllers");
+                initTaskSeq.addLast(iciInitTask);
+            }
+        }
+        if (this.c_piControllers != null) {
+            if (!this.c_piControllers.isEmpty()) {
+                Input initInputPI  = new Input(GEMInputs.HALT.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                initInputPI.setParameters(pSet);
+                SimpleTask piInitTask = new SimpleTask(this.c_piControllers,initInputPI,
+                                                       GEMStates.INITIALIZING,GEMStates.HALTED,
+                                                       "Initializing PIControllers");
+                initTaskSeq.addLast(piInitTask);
+            }
+        }
+
+        // initialize GEMFSMApplications
+        if (this.c_gemSupervisors != null) {
+            if (!this.c_gemSupervisors.isEmpty()) {
+                Input initInputGEMSuper  = new Input(GEMInputs.INITIALIZE.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                initInputGEMSuper.setParameters(pSet);
+                SimpleTask gemSuperInitTask = new SimpleTask(this.c_gemSupervisors,initInputGEMSuper,
+                                                             GEMStates.INITIALIZING,GEMStates.HALTED,
+                                                             "Initializing GEMSupervisor");
+                initTaskSeq.addLast(gemSuperInitTask);
+            }
+        }
+
+        // ? ferol/EVM/BU/RU?
+        if (this.c_BUs != null) {
+            if (!this.c_BUs.isEmpty()) {
+                Input initInputBU  = new Input(GEMInputs.HALT.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                initInputBU.setParameters(pSet);
+                SimpleTask buInitTask = new SimpleTask(this.c_BUs,initInputBU,
+                                                       GEMStates.INITIALIZING,GEMStates.HALTED,
+                                                       "Initializing BUs");
+                initTaskSeq.addLast(buInitTask);
+            }
+        }
+        if (this.c_RUs != null) {
+            if (!this.c_RUs.isEmpty()) {
+                Input initInputRU  = new Input(GEMInputs.HALT.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                initInputRU.setParameters(pSet);
+                SimpleTask ruInitTask = new SimpleTask(this.c_RUs,initInputRU,
+                                                       GEMStates.INITIALIZING,GEMStates.HALTED,
+                                                       "Initializing RUs");
+                initTaskSeq.addLast(ruInitTask);
+            }
+        }
+        if (this.c_EVMs != null) {
+            if (!this.c_EVMs.isEmpty()) {
+                Input initInputEVM  = new Input(GEMInputs.HALT.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                initInputEVM.setParameters(pSet);
+                SimpleTask evmInitTask = new SimpleTask(this.c_EVMs,initInputEVM,
+                                                        GEMStates.INITIALIZING,GEMStates.HALTED,
+                                                        "Initializing EVMs");
+                initTaskSeq.addLast(evmInitTask);
+            }
+        }
+        if (this.c_Ferols != null) {
+            if (!this.c_Ferols.isEmpty()) {
+                Input initInputFerol  = new Input(GEMInputs.HALT.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                initInputFerol.setParameters(pSet);
+                SimpleTask ferolInitTask = new SimpleTask(this.c_Ferols,initInputFerol,
+                                                          GEMStates.INITIALIZING,GEMStates.HALTED,
+                                                          "Initializing Ferols");
+                initTaskSeq.addLast(ferolInitTask);
+            }
+        }
+        if (this.c_FEDStreamer != null) {
+            if (!this.c_FEDStreamer.isEmpty()) {
+                Input initInputFEDStreamer  = new Input(GEMInputs.HALT.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                initInputFEDStreamer.setParameters(pSet);
+                SimpleTask fedStreamerInitTask = new SimpleTask(this.c_FEDStreamer,initInputFEDStreamer,
+                                                                GEMStates.INITIALIZING,GEMStates.HALTED,
+                                                                "Initializing FEDStreamers");
+                initTaskSeq.addLast(fedStreamerInitTask);
+            }
+        }
+
+        logger.info(msgPrefix + "returning initTaskSeq");
+        return initTaskSeq;
+    }
+
+    public TaskSequence getConfSequence(TaskSequence confTaskSeq)
+    {
+        String msgPrefix = "[GEM FM] GEMFunctionManager::getConfSequence(): ";
+
+        // configure TCDS (LPM then ICI then PI)
+        if (this.c_lpmControllers != null) {
+            if (!this.c_lpmControllers.isEmpty()) {
+                Input confInputLPM = new Input(GEMInputs.HALT.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                pSet.put(new CommandParameter<StringT>("fedEnableMask",               new StringT("0&0%")));
+                // prepare command plus the parameters to send
+                confInputLPM.setParameters(pSet);
+                SimpleTask lpmConfTask = new SimpleTask(this.c_lpmControllers,confInputLPM,
+                                                        GEMStates.CONFIGURING,GEMStates.CONFIGURED,
+                                                        "Configuring LPMControllers");
+                confTaskSeq.addLast(lpmConfTask);
+            }
+        }
+        if (this.c_piControllers != null) {
+            if (!this.c_piControllers.isEmpty()) {
+                Input confInputPI  = new Input(GEMInputs.HALT.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                pSet.put(new CommandParameter<BooleanT>("skipPLLReset",               new BooleanT(true)));
+                pSet.put(new CommandParameter<BooleanT>("usePrimaryTCDS",             new BooleanT(true)));
+                pSet.put(new CommandParameter<StringT>("fedEnableMask",               new StringT("0&0%")));
+                // prepare command plus the parameters to send
+                confInputPI.setParameters(pSet);
+                SimpleTask piConfTask = new SimpleTask(this.c_piControllers,confInputPI,
+                                                       GEMStates.CONFIGURING,GEMStates.CONFIGURED,
+                                                       "Configuring PIControllers");
+                confTaskSeq.addLast(piConfTask);
+            }
+        }
+        if (this.c_iciControllers != null) {
+            if (!this.c_iciControllers.isEmpty()) {
+                Input confInputICI = new Input(GEMInputs.HALT.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                // prepare command plus the parameters to send
+                confInputICI.setParameters(pSet);
+                SimpleTask iciConfTask = new SimpleTask(this.c_iciControllers,confInputICI,
+                                                        GEMStates.CONFIGURING,GEMStates.CONFIGURED,
+                                                        "Configuring ICIControllers");
+                confTaskSeq.addLast(iciConfTask);
+            }
+        }
+
+        // configure GEMFSMApplications
+        if (this.c_gemSupervisors != null) {
+            if (!this.c_gemSupervisors.isEmpty()) {
+                XDAQParameter pam = null;
+                // prepare and set for all GEM supervisors the RunType
+                for (QualifiedResource qr : this.c_gemSupervisors.getApplications()){
+                    try {
+                        pam = ((XdaqApplication)qr).getXDAQParameter();
+                        pam.select(new String[] {"FEDEnableMask"});
+                        pam.get();
+                        String fedMask = pam.getValue("FEDEnableMask");
+                        logger.info(msgPrefix + "got fedMask " + fedMask + " from the supervisor");
+                        pam.setValue("FEDDnableMask",this.FEDEnableMask);
+                        logger.info(msgPrefix + "sending FEDEnableMask to the supervisor");
+                        pam.send();
+                        logger.info(msgPrefix + "sent FEDEnableMask to the supervisor");
+                    } catch (XDAQTimeoutException e) {
+                        String msg = "Error! XDAQTimeoutException when trying to send the FEDEnableMask to the GEM supervisor\n."
+                            + "Perhaps this application is dead!?";
+                        logger.error(msgPrefix + msg, e);
+                        this.goToError(msg, e);
+                    } catch (XDAQException e) {
+                        String msg = "Error! XDAQException when trying to send the FEDEnableMask to the GEM supervisor";
+                        logger.error(msgPrefix + msg, e);
+                        this.goToError(msg, e);
+                    }
+                }
+
+                Input confInputGEMSuper  = new Input(GEMInputs.CONFIGURE.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                confInputGEMSuper.setParameters(pSet);
+                SimpleTask gemSuperConfTask = new SimpleTask(this.c_gemSupervisors,confInputGEMSuper,
+                                                             GEMStates.CONFIGURING,GEMStates.CONFIGURED,
+                                                             "Configuring GEMSupervisor");
+                confTaskSeq.addLast(gemSuperConfTask);
+            }
+        }
+
+        // configure ferol/EVM/BU/RU?
+        // need to send the FED_ENABLE_MASK to the EVM and BU
+        // need to configure first the EVM then BU and then the FerolController
+        /*
+        if (this.c_uFEDKIT != null) {
+            if (!this.c_uFEDKIT.isEmpty()) {
+                try {
+                    logger.info(msgPrefix + "Trying to configure uFEDKIT resources on configure.");
+                    this.c_uFEDKIT.execute(GEMInputs.CONFIGURE);
+                } catch (QualifiedResourceContainerException e) {
+                    String msg = "Caught QualifiedResourceContainerException";
+                    logger.error(msgPrefix + msg, e);
+                    //this.sendCMSError(msg);
+                    m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
+                    m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
+                }
+            }
+        }
+        */
+        // need to ensure that necessary paramters are sent
+        // these applications expect empty command transitions it seems
+        // if (this.c_uFEDKIT != null) {
+        if (this.c_BUs != null) {
+            if (!this.c_BUs.isEmpty()) {
+                Input confInputBU  = new Input(GEMInputs.CONFIGURE.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                confInputBU.setParameters(pSet);
+                SimpleTask buConfTask = new SimpleTask(this.c_BUs,confInputBU,
+                                                       GEMStates.CONFIGURING,GEMStates.CONFIGURED,
+                                                       "Configuring BUs");
+                confTaskSeq.addLast(buConfTask);
+            }
+        }
+        if (this.c_RUs != null) {
+            if (!this.c_RUs.isEmpty()) {
+                Input confInputRU  = new Input(GEMInputs.CONFIGURE.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                confInputRU.setParameters(pSet);
+                SimpleTask ruConfTask = new SimpleTask(this.c_RUs,confInputRU,
+                                                       GEMStates.CONFIGURING,GEMStates.CONFIGURED,
+                                                       "Configuring RUs");
+                confTaskSeq.addLast(ruConfTask);
+            }
+        }
+        if (this.c_EVMs != null) {
+            if (!this.c_EVMs.isEmpty()) {
+                Input confInputEVM  = new Input(GEMInputs.CONFIGURE.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                confInputEVM.setParameters(pSet);
+                SimpleTask evmConfTask = new SimpleTask(this.c_EVMs,confInputEVM,
+                                                        GEMStates.CONFIGURING,GEMStates.CONFIGURED,
+                                                        "Configuring EVMs");
+                confTaskSeq.addLast(evmConfTask);
+            }
+        }
+        if (this.c_Ferols != null) {
+            if (!this.c_Ferols.isEmpty()) {
+                Input confInputFerol  = new Input(GEMInputs.CONFIGURE.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                confInputFerol.setParameters(pSet);
+                SimpleTask ferolConfTask = new SimpleTask(this.c_Ferols,confInputFerol,
+                                                          GEMStates.CONFIGURING,GEMStates.CONFIGURED,
+                                                          "Configuring Ferols");
+                confTaskSeq.addLast(ferolConfTask);
+            }
+        }
+        if (this.c_FEDStreamer != null) {
+            if (!this.c_FEDStreamer.isEmpty()) {
+                Input confInputFEDStreamer  = new Input(GEMInputs.CONFIGURE.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                confInputFEDStreamer.setParameters(pSet);
+                SimpleTask fedStreamerConfTask = new SimpleTask(this.c_FEDStreamer,confInputFEDStreamer,
+                                                                GEMStates.CONFIGURING,GEMStates.CONFIGURED,
+                                                                "Configuring FEDStreamers");
+                confTaskSeq.addLast(fedStreamerConfTask);
+            }
+        }
+
+        logger.info(msgPrefix + "returning confTaskSeq");
+        return confTaskSeq;
+    }
+
+
+    public TaskSequence getStartSequence(TaskSequence startTaskSeq)
+    {
+        String msgPrefix = "[GEM FM] GEMFunctionManager::getStartSequence(): ";
+
+        // start GEMFSMApplications
+        if (this.c_gemSupervisors != null) {
+            if (!this.c_gemSupervisors.isEmpty()) {
+                XDAQParameter pam = null;
+                // prepare and set for all GEM supervisors the RunType
+                for (QualifiedResource qr : this.c_gemSupervisors.getApplications()){
+                    try {
+                        pam = ((XdaqApplication)qr).getXDAQParameter();
+                        pam.select(new String[] {"RunNumber"});
+                        pam.get();
+                        String superRunNumber = pam.getValue("RunNumber");
+                        logger.info(msgPrefix + "got run number " + superRunNumber + " from the supervisor");
+                        pam.setValue("RunNumber",this.RunNumber.toString());
+                        logger.info(msgPrefix + "sending run number to the supervisor");
+                        pam.send();
+                        logger.info(msgPrefix + "sent run number to the supervisor");
+                    } catch (XDAQTimeoutException e) {
+                        String msg = "Error! XDAQTimeoutException when trying to send the FEDEnableMask to the GEM supervisor\n."
+                            + "Perhaps this application is dead!?";
+                        logger.error(msgPrefix + msg, e);
+                        this.goToError(msg, e);
+                    } catch (XDAQException e) {
+                        String msg = "Error! XDAQException when trying to send the FEDEnableMask to the GEM supervisor";
+                        logger.error(msgPrefix + msg, e);
+                        this.goToError(msg, e);
+                    }
+                }
+
+                Input startInputGEMSuper  = new Input(GEMInputs.START.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareStartigurationString", new StringT("")));
+                startInputGEMSuper.setParameters(pSet);
+                SimpleTask gemSuperStartTask = new SimpleTask(this.c_gemSupervisors,startInputGEMSuper,
+                                                             GEMStates.STARTING,GEMStates.RUNNING,
+                                                             "Starting GEMSupervisor");
+                startTaskSeq.addLast(gemSuperStartTask);
+            }
+        }
+
+        // need to ensure that necessary paramters are sent
+        // these applications expect empty command transitions it seems
+        if (this.c_BUs != null) {
+            if (!this.c_BUs.isEmpty()) {
+                XDAQParameter pam = null;
+                // prepare and set the runNumber for all BUs
+                for (QualifiedResource qr : this.c_BUs.getApplications()){
+                    try {
+                        pam = ((XdaqApplication)qr).getXDAQParameter();
+                        pam.select(new String[] {"runNumber"});
+                        pam.get();
+                        String buRunNumber = pam.getValue("runNumber");
+                        logger.info(msgPrefix + "Obtained run number from the BU: " + buRunNumber);
+                        pam.setValue("runNumber",this.RunNumber.toString());
+                        pam.send();
+                    } catch (XDAQTimeoutException e) {
+                        String msg = "Error! XDAQTimeoutException when trying to send the run number to the BU\n"
+                            + "Perhaps this application is dead!?";
+                        logger.error(msgPrefix + msg, e);
+                        this.goToError(msg, e);
+                    } catch (XDAQException e) {
+                        String msg = "Error! XDAQException when trying to send the run number to the BU";
+                        logger.error(msgPrefix + msg, e);
+                        this.goToError(msg, e);
+                    }
+                }
+
+                Input startInputBU  = new Input(GEMInputs.ENABLE.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareStartigurationString", new StringT("")));
+                startInputBU.setParameters(pSet);
+                SimpleTask buStartTask = new SimpleTask(this.c_BUs,startInputBU,
+                                                       GEMStates.STARTING,GEMStates.RUNNING,
+                                                       "Starting BUs");
+                startTaskSeq.addLast(buStartTask);
+            }
+        }
+        if (this.c_RUs != null) {
+            if (!this.c_RUs.isEmpty()) {
+                Input startInputRU  = new Input(GEMInputs.START.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareStartigurationString", new StringT("")));
+                startInputRU.setParameters(pSet);
+                SimpleTask ruStartTask = new SimpleTask(this.c_RUs,startInputRU,
+                                                       GEMStates.STARTING,GEMStates.RUNNING,
+                                                       "Starting RUs");
+                startTaskSeq.addLast(ruStartTask);
+            }
+        }
+        if (this.c_EVMs != null) {
+            if (!this.c_EVMs.isEmpty()) {
+                XDAQParameter pam = null;
+                // prepare and set the runNumber for all EVMs
+                for (QualifiedResource qr : this.c_EVMs.getApplications()){
+                    try {
+                        pam = ((XdaqApplication)qr).getXDAQParameter();
+                        pam.select(new String[] {"runNumber"});
+                        pam.get();
+                        String evmRunNumber = pam.getValue("runNumber");
+                        logger.info(msgPrefix + "Obtained run number from the EVM: " + evmRunNumber);
+                        pam.setValue("runNumber",this.RunNumber.toString());
+                        pam.send();
+                    } catch (XDAQTimeoutException e) {
+                        String msg = "Error! XDAQTimeoutException when trying to send the run number to the EVM\n"
+                            + "Perhaps this application is dead!?";
+                        logger.error(msgPrefix + msg, e);
+                        this.goToError(msg, e);
+                    } catch (XDAQException e) {
+                        String msg = "Error! XDAQException when trying to send the run number to the EVM";
+                        logger.error(msgPrefix + msg, e);
+                        this.goToError(msg, e);
+                    }
+                }
+
+                Input startInputEVM  = new Input(GEMInputs.ENABLE.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareStartigurationString", new StringT("")));
+                startInputEVM.setParameters(pSet);
+                SimpleTask evmStartTask = new SimpleTask(this.c_EVMs,startInputEVM,
+                                                        GEMStates.STARTING,GEMStates.RUNNING,
+                                                        "Starting EVMs");
+                startTaskSeq.addLast(evmStartTask);
+            }
+        }
+        if (this.c_Ferols != null) {
+            if (!this.c_Ferols.isEmpty()) {
+                Input startInputFerol  = new Input(GEMInputs.ENABLE.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareStartigurationString", new StringT("")));
+                startInputFerol.setParameters(pSet);
+                SimpleTask ferolStartTask = new SimpleTask(this.c_Ferols,startInputFerol,
+                                                          GEMStates.STARTING,GEMStates.RUNNING,
+                                                          "Starting Ferols");
+                startTaskSeq.addLast(ferolStartTask);
+            }
+        }
+        if (this.c_FEDStreamer != null) {
+            if (!this.c_FEDStreamer.isEmpty()) {
+                Input startInputFEDStreamer  = new Input(GEMInputs.ENABLE.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareStartigurationString", new StringT("")));
+                startInputFEDStreamer.setParameters(pSet);
+                SimpleTask fedStreamerStartTask = new SimpleTask(this.c_FEDStreamer,startInputFEDStreamer,
+                                                                GEMStates.STARTING,GEMStates.RUNNING,
+                                                                "Starting FEDStreamers");
+                startTaskSeq.addLast(fedStreamerStartTask);
+            }
+        }
+
+        // TCDS
+        if (this.c_lpmControllers != null) {
+            if (!this.c_lpmControllers.isEmpty()) {
+                Input startInputLPM = new Input(GEMInputs.ENABLE.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // prepare command plus the parameters to send
+                startInputLPM.setParameters(pSet);
+                SimpleTask lpmStartTask = new SimpleTask(this.c_lpmControllers,startInputLPM,
+                                                         GEMStates.STARTING,GEMStates.RUNNING,
+                                                         "Starting LPMControllers");
+                startTaskSeq.addLast(lpmStartTask);
+            }
+        }
+        if (this.c_piControllers != null) {
+            if (!this.c_piControllers.isEmpty()) {
+                Input startInputPI  = new Input(GEMInputs.ENABLE.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // prepare command plus the parameters to send
+                startInputPI.setParameters(pSet);
+                SimpleTask piStartTask = new SimpleTask(this.c_piControllers,startInputPI,
+                                                        GEMStates.STARTING,GEMStates.RUNNING,
+                                                        "Starting PIControllers");
+                startTaskSeq.addLast(piStartTask);
+            }
+        }
+        if (this.c_iciControllers != null) {
+            if (!this.c_iciControllers.isEmpty()) {
+                Input startInputICI = new Input(GEMInputs.ENABLE.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // prepare command plus the parameters to send
+                startInputICI.setParameters(pSet);
+                SimpleTask iciStartTask = new SimpleTask(this.c_iciControllers,startInputICI,
+                                                         GEMStates.STARTING,GEMStates.RUNNING,
+                                                         "Starting ICIControllers");
+                startTaskSeq.addLast(iciStartTask);
+            }
+        }
+
+        logger.info(msgPrefix + "returning startTaskSeq");
+        return startTaskSeq;
+    }
+
+    public TaskSequence getPauseSequence(TaskSequence pauseTaskSeq)
+    {
+        String msgPrefix = "[GEM FM] GEMFunctionManager::getPauseSequence(): ";
+
+        // pause TCDS
+        if (this.c_lpmControllers != null) {
+            if (!this.c_lpmControllers.isEmpty()) {
+                Input pauseInputLPM = new Input(GEMInputs.PAUSE.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                pauseInputLPM.setParameters(pSet);
+                SimpleTask lpmPauseTask = new SimpleTask(this.c_lpmControllers,pauseInputLPM,
+                                                         GEMStates.PAUSING,GEMStates.PAUSED,
+                                                         "Pausing LPMControllers");
+                pauseTaskSeq.addLast(lpmPauseTask);
+            }
+        }
+        if (this.c_iciControllers != null) {
+            if (!this.c_iciControllers.isEmpty()) {
+                Input pauseInputICI = new Input(GEMInputs.PAUSE.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                pauseInputICI.setParameters(pSet);
+                SimpleTask iciPauseTask = new SimpleTask(this.c_iciControllers,pauseInputICI,
+                                                             GEMStates.PAUSING,GEMStates.PAUSED,
+                                                         "Pausing ICIControllers");
+                pauseTaskSeq.addLast(iciPauseTask);
+            }
+        }
+        if (this.c_piControllers != null) {
+            if (!this.c_piControllers.isEmpty()) {
+                Input pauseInputPI  = new Input(GEMInputs.PAUSE.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                pauseInputPI.setParameters(pSet);
+                SimpleTask piPauseTask = new SimpleTask(this.c_piControllers,pauseInputPI,
+                                                        GEMStates.PAUSING,GEMStates.PAUSED,
+                                                        "Pausing PIControllers");
+                pauseTaskSeq.addLast(piPauseTask);
+            }
+        }
+
+        // pause GEMFSMApplications
+        if (this.c_gemSupervisors != null) {
+            if (!this.c_gemSupervisors.isEmpty()) {
+                Input pauseInputGEMSuper = new Input(GEMInputs.PAUSE.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                pauseInputGEMSuper.setParameters(pSet);
+                SimpleTask gemSuperPauseTask = new SimpleTask(this.c_gemSupervisors,pauseInputGEMSuper,
+                                                              GEMStates.PAUSING,GEMStates.PAUSED,
+                                                              "Pausing GEMSupervisor");
+                pauseTaskSeq.addLast(gemSuperPauseTask);
+            }
+        }
+
+        /*
+        // PAUSE ferol/EVM/BU/RU?
+        if (this.c_uFEDKIT != null) {
+            if (!this.c_uFEDKIT.isEmpty()) {
+                try {
+                    logger.info(msgPrefix + "Trying to pause uFEDKIT resources on pause.");
+                    this.c_uFEDKIT.execute(GEMInputs.PAUSE);
+                } catch (QualifiedResourceContainerException e) {
+                    String msg = "Caught QualifiedResourceContainerException";
+                    logger.error(msgPrefix + msg, e);
+                    this.goToError(msg, e);
+                    // this.sendCMSError(msg);  // when do this rather than goToError, or both?
+                    m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
+                    m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
+                }
+            }
+        }
+        */
+
+        logger.info(msgPrefix + "returning pauseTaskSeq");
+        return pauseTaskSeq;
+    }
+
+    public TaskSequence getResumeSequence(TaskSequence resumeTaskSeq)
+    {
+        String msgPrefix = "[GEM FM] GEMFunctionManager::getResumeSequence(): ";
+
+        if (this.c_gemSupervisors != null) {
+            if (!this.c_gemSupervisors.isEmpty()) {
+                // new run number during resume?
+                /*
+                XDAQParameter pam = null;
+                // prepare and set for all GEM supervisors the RunType
+                for (QualifiedResource qr : this.c_gemSupervisors.getApplications()){
+                    try {
+                        pam = ((XdaqApplication)qr).getXDAQParameter();
+                        pam.select(new String[] {"RunNumber"});
+                        pam.get();
+                        String superRunNumber = pam.getValue("RunNumber");
+                        logger.info(msgPrefix + "Obtained run number from supervisor: " + superRunNumber);
+                        pam.setValue("RunNumber",this.RunNumber.toString());
+                        pam.send();
+                    } catch (XDAQTimeoutException e) {
+                        String msg = "Error! XDAQTimeoutException: startAction() when "
+                            + " trying to send the run number to the GEM supervisor\n Perhaps this "
+                            + "application is dead!?";
+                        logger.error(msgPrefix + msg, e);
+                        this.goToError(msg, e);
+                    } catch (XDAQException e) {
+                        String msg = "Error! XDAQException: startAction() when trying "
+                            + "to send the run number to the GEM supervisor";
+                        logger.error(msgPrefix + msg, e);
+                        this.goToError(msg, e);
+                    }
+                }
+                */
+
+                Input resumeInputGEMSuper  = new Input(GEMInputs.RESUME.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                resumeInputGEMSuper.setParameters(pSet);
+                SimpleTask gemSuperResumeTask = new SimpleTask(this.c_gemSupervisors,resumeInputGEMSuper,
+                                                             GEMStates.RESUMING,GEMStates.RUNNING,
+                                                             "Resuming GEMSupervisor");
+                resumeTaskSeq.addLast(gemSuperResumeTask);
+            }
+        }
+
+        /*
+        // RESUME? ferol/EVM/BU/RU?
+        // need to resume first the EVM then BU and then the FerolController
+        if (this.c_uFEDKIT != null) {
+            if (!this.c_uFEDKIT.isEmpty()) {
+                try {
+                    logger.info(msgPrefix + "Trying to enable uFEDKIT resources on start.");
+                    this.c_uFEDKIT.execute(GEMInputs.ENABLE);
+                } catch (QualifiedResourceContainerException e) {
+                    String msg = "Caught QualifiedResourceContainerException";
+                    logger.error(msgPrefix + msg, e);
+                    this.goToError(msg, e);
+                    // this.sendCMSError(msg);  // when do this rather than goToError, or both?
+                    m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
+                    m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
+                }
+            }
+        }
+        */
+
+        // RESUME TCDS
+        if (this.c_tcdsControllers != null) {
+            if (!this.c_tcdsControllers.isEmpty()) {
+                if (!this.c_lpmControllers.isEmpty()) {
+                    Input resumeInputLPM = new Input(GEMInputs.RESUME.toString());
+                    ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                    // prepare command plus the parameters to send
+                    resumeInputLPM.setParameters(pSet);
+                    SimpleTask lpmResumeTask = new SimpleTask(this.c_lpmControllers,resumeInputLPM,
+                                                            GEMStates.RESUMING,GEMStates.RUNNING,
+                                                            "Resuming LPMControllers");
+                    resumeTaskSeq.addLast(lpmResumeTask);
+                }
+                if (!this.c_piControllers.isEmpty()) {
+                    Input resumeInputPI  = new Input(GEMInputs.RESUME.toString());
+                    ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                    // prepare command plus the parameters to send
+                    resumeInputPI.setParameters(pSet);
+                    SimpleTask piResumeTask = new SimpleTask(this.c_piControllers,resumeInputPI,
+                                                           GEMStates.RESUMING,GEMStates.RUNNING,
+                                                           "Resuming PIControllers");
+                    resumeTaskSeq.addLast(piResumeTask);
+                }
+                if (!this.c_iciControllers.isEmpty()) {
+                    Input resumeInputICI = new Input(GEMInputs.RESUME.toString());
+                    ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                    // prepare command plus the parameters to send
+                    resumeInputICI.setParameters(pSet);
+                    SimpleTask iciResumeTask = new SimpleTask(this.c_iciControllers,resumeInputICI,
+                                                            GEMStates.RESUMING,GEMStates.RUNNING,
+                                                            "Resuming ICIControllers");
+                    resumeTaskSeq.addLast(iciResumeTask);
+                }
+            }
+        }
+
+        logger.info(msgPrefix + "returning resumeTaskSeq");
+        return resumeTaskSeq;
+    }
+
+    public TaskSequence getStopSequence(TaskSequence stopTaskSeq)
+    {
+        String msgPrefix = "[GEM FM] GEMFunctionManager::getStopSequence(): ";
+
+        // stop TCDS
+        if (this.c_lpmControllers != null) {
+            if (!this.c_lpmControllers.isEmpty()) {
+                Input stopInputLPM = new Input(GEMInputs.STOP.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                stopInputLPM.setParameters(pSet);
+                SimpleTask lpmStopTask = new SimpleTask(this.c_lpmControllers,stopInputLPM,
+                                                        GEMStates.STOPPING,GEMStates.CONFIGURED,
+                                                        "Stopping LPMControllers");
+                stopTaskSeq.addLast(lpmStopTask);
+            }
+        }
+        if (this.c_iciControllers != null) {
+            if (!this.c_iciControllers.isEmpty()) {
+                Input stopInputICI = new Input(GEMInputs.STOP.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                stopInputICI.setParameters(pSet);
+                SimpleTask iciStopTask = new SimpleTask(this.c_iciControllers,stopInputICI,
+                                                        GEMStates.STOPPING,GEMStates.CONFIGURED,
+                                                        "Stopping ICIControllers");
+                stopTaskSeq.addLast(iciStopTask);
+            }
+        }
+        if (this.c_piControllers != null) {
+            if (!this.c_piControllers.isEmpty()) {
+                Input stopInputPI  = new Input(GEMInputs.STOP.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                stopInputPI.setParameters(pSet);
+                SimpleTask piStopTask = new SimpleTask(this.c_piControllers,stopInputPI,
+                                                       GEMStates.STOPPING,GEMStates.CONFIGURED,
+                                                       "Stopping PIControllers");
+                stopTaskSeq.addLast(piStopTask);
+            }
+        }
+
+        // stop GEMFSMApplications
+        if (this.c_gemSupervisors != null) {
+            if (!this.c_gemSupervisors.isEmpty()) {
+                Input stopInputGEMSuper  = new Input(GEMInputs.STOP.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                stopInputGEMSuper.setParameters(pSet);
+                SimpleTask gemSuperStopTask = new SimpleTask(this.c_gemSupervisors,stopInputGEMSuper,
+                                                             GEMStates.STOPPING,GEMStates.CONFIGURED,
+                                                             "Stopping GEMSupervisor");
+                stopTaskSeq.addLast(gemSuperStopTask);
+            }
+        }
+
+        // ? ferol/EVM/BU/RU?
+        // stop ferol then BU then EVM
+        /*
+        if (this.c_uFEDKIT != null) {
+            if (!this.c_uFEDKIT.isEmpty()) {
+                try {
+                    logger.info(msgPrefix + "Trying to stop uFEDKIT resources on stop.");
+                    this.c_uFEDKIT.execute(GEMInputs.STOP);
+                } catch (QualifiedResourceContainerException e) {
+                    String msg = "Caught QualifiedResourceContainerException";
+                    logger.error(msgPrefix + msg, e);
+                    this.goToError(msg, e);
+                    // this.sendCMSError(msg);  // when do this rather than goToError, or both?
+                    m_gemPSet.put(new FunctionManagerParameter<StringT>("STATE",new StringT("Error")));
+                    m_gemPSet.put(new FunctionManagerParameter<StringT>("ACTION_MSG",new StringT(msg)));
+                }
+            }
+        }
+        */
+
+        if (this.c_EVMs != null) {
+            if (!this.c_EVMs.isEmpty()) {
+                Input stopInputEVM  = new Input(GEMInputs.STOP.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                stopInputEVM.setParameters(pSet);
+                SimpleTask evmStopTask = new SimpleTask(this.c_EVMs,stopInputEVM,
+                                                        GEMStates.STOPPING,GEMStates.CONFIGURED,
+                                                        "Stopping EVMs");
+                stopTaskSeq.addLast(evmStopTask);
+            }
+        }
+
+        if (this.c_RUs != null) {
+            if (!this.c_RUs.isEmpty()) {
+                Input stopInputRU  = new Input(GEMInputs.STOP.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                stopInputRU.setParameters(pSet);
+                SimpleTask ruStopTask = new SimpleTask(this.c_RUs,stopInputRU,
+                                                       GEMStates.STOPPING,GEMStates.CONFIGURED,
+                                                       "Stopping RUs");
+                stopTaskSeq.addLast(ruStopTask);
+            }
+        }
+
+        if (this.c_BUs != null) {
+            if (!this.c_BUs.isEmpty()) {
+                Input stopInputBU  = new Input(GEMInputs.STOP.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                stopInputBU.setParameters(pSet);
+                SimpleTask buStopTask = new SimpleTask(this.c_BUs,stopInputBU,
+                                                       GEMStates.STOPPING,GEMStates.CONFIGURED,
+                                                       "Stopping BUs");
+                stopTaskSeq.addLast(buStopTask);
+            }
+        }
+
+        if (this.c_Ferols != null) {
+            if (!this.c_Ferols.isEmpty()) {
+                Input stopInputFerol  = new Input(GEMInputs.STOP.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                stopInputFerol.setParameters(pSet);
+                SimpleTask ferolStopTask = new SimpleTask(this.c_Ferols,stopInputFerol,
+                                                          GEMStates.STOPPING,GEMStates.CONFIGURED,
+                                                          "Stopping Ferols");
+                stopTaskSeq.addLast(ferolStopTask);
+            }
+        }
+
+        logger.info(msgPrefix + "returning stopTaskSeq");
+        return stopTaskSeq;
+    }
+
+    public TaskSequence getHaltSequence(TaskSequence haltTaskSeq)
+    {
+        String msgPrefix = "[GEM FM] GEMFunctionManager::getHaltSequence(): ";
+
+        // halt TCDS
+        if (this.c_lpmControllers != null) {
+            if (!this.c_lpmControllers.isEmpty()) {
+                Input haltInputLPM = new Input(GEMInputs.HALT.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                haltInputLPM.setParameters(pSet);
+                SimpleTask lpmHaltTask = new SimpleTask(this.c_lpmControllers,haltInputLPM,
+                                                        GEMStates.HALTING,GEMStates.HALTED,
+                                                        "Halting LPMControllers");
+                haltTaskSeq.addLast(lpmHaltTask);
+            }
+        }
+        if (this.c_iciControllers != null) {
+            if (!this.c_iciControllers.isEmpty()) {
+                Input haltInputICI = new Input(GEMInputs.HALT.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                haltInputICI.setParameters(pSet);
+                SimpleTask iciHaltTask = new SimpleTask(this.c_iciControllers,haltInputICI,
+                                                        GEMStates.HALTING,GEMStates.HALTED,
+                                                        "Halting ICIControllers");
+                haltTaskSeq.addLast(iciHaltTask);
+            }
+        }
+        if (this.c_piControllers != null) {
+            if (!this.c_piControllers.isEmpty()) {
+                Input haltInputPI  = new Input(GEMInputs.HALT.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                haltInputPI.setParameters(pSet);
+                SimpleTask piHaltTask = new SimpleTask(this.c_piControllers,haltInputPI,
+                                                       GEMStates.HALTING,GEMStates.HALTED,
+                                                       "Halting PIControllers");
+                haltTaskSeq.addLast(piHaltTask);
+            }
+        }
+
+        // halt GEMFSMApplications
+        if (this.c_gemSupervisors != null) {
+            if (!this.c_gemSupervisors.isEmpty()) {
+                Input haltInputGEMSuper  = new Input(GEMInputs.HALT.toString());
+                ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                haltInputGEMSuper.setParameters(pSet);
+                SimpleTask gemSuperHaltTask = new SimpleTask(this.c_gemSupervisors,haltInputGEMSuper,
+                                                             GEMStates.HALTING,GEMStates.HALTED,
+                                                             "Halting GEMSupervisor");
+                haltTaskSeq.addLast(gemSuperHaltTask);
+            }
+        }
+
+        // ? ferol/EVM/BU/RU?
+        if (this.c_uFEDKIT != null) {
+            if (!this.c_uFEDKIT.isEmpty()) {
+                if (!this.c_BUs.isEmpty()) {
+                    Input haltInputBU  = new Input(GEMInputs.HALT.toString());
+                    ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                    // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                    haltInputBU.setParameters(pSet);
+                    SimpleTask buHaltTask = new SimpleTask(this.c_BUs,haltInputBU,
+                                                           GEMStates.HALTING,GEMStates.HALTED,
+                                                           "Halting BUs");
+                    haltTaskSeq.addLast(buHaltTask);
+                }
+                if (!this.c_RUs.isEmpty()) {
+                    Input haltInputRU  = new Input(GEMInputs.HALT.toString());
+                    ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                    // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                    haltInputRU.setParameters(pSet);
+                    SimpleTask ruHaltTask = new SimpleTask(this.c_RUs,haltInputRU,
+                                                           GEMStates.HALTING,GEMStates.HALTED,
+                                                           "Halting RUs");
+                    haltTaskSeq.addLast(ruHaltTask);
+                }
+                if (!this.c_EVMs.isEmpty()) {
+                    Input haltInputEVM  = new Input(GEMInputs.HALT.toString());
+                    ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                    // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                    haltInputEVM.setParameters(pSet);
+                    SimpleTask evmHaltTask = new SimpleTask(this.c_EVMs,haltInputEVM,
+                                                            GEMStates.HALTING,GEMStates.HALTED,
+                                                            "Halting EVMs");
+                    haltTaskSeq.addLast(evmHaltTask);
+                }
+                if (!this.c_Ferols.isEmpty()) {
+                    Input haltInputFerol  = new Input(GEMInputs.HALT.toString());
+                    ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                    // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                    haltInputFerol.setParameters(pSet);
+                    SimpleTask ferolHaltTask = new SimpleTask(this.c_Ferols,haltInputFerol,
+                                                              GEMStates.HALTING,GEMStates.HALTED,
+                                                              "Halting Ferols");
+                    haltTaskSeq.addLast(ferolHaltTask);
+                }
+                // if (!this.c_FEDStreamer.isEmpty()) {
+                //     Input haltInputFEDStreamer  = new Input(GEMInputs.HALT.toString());
+                //     ParameterSet<CommandParameter> pSet = new ParameterSet<CommandParameter>();
+                //     // pSet.put(new CommandParameter<StringT>("hardwareConfigurationString", new StringT("")));
+                //     haltInputFEDStreamer.setParameters(pSet);
+                //     SimpleTask fedStreamerHaltTask = new SimpleTask(this.c_FEDStreamer,haltInputFEDStreamer,
+                //                                                     GEMStates.HALTING,GEMStates.HALTED,
+                //                                                     "Halting FEDStreamers");
+                //     haltTaskSeq.addLast(fedStreamerHaltTask);
+                // }
+            }
+        }
+
+        logger.info(msgPrefix + "returning haltTaskSeq");
+        return haltTaskSeq;
     }
 
     /**----------------------------------------------------------------------
