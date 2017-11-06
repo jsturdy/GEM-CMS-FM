@@ -3,7 +3,7 @@
 <project name="statemachine" default="release" basedir=".">
 	
 	<!-- Properties the user needs to modify -->
-	<property name="fm.name" value="gemlevelOneFM" />
+	<property name="fm.name" value="gemLevelOneFM" />
 	
 	<property environment="env" />
 	<property file="${env.RCMS_HOME}/framework/installation/configuration/RCMS.properties" />
