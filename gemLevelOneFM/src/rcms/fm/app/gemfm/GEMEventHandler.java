@@ -760,7 +760,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
 
             // set action
             m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.ACTION_MSG,
-                                                                new StringT("Started action called!")));
+                                                                new StringT("Start action called!")));
             m_gemPSet.put(new FunctionManagerParameter<StringT>(GEMParameters.STATE,
                                                                 new StringT("Starting!!!")));
 
@@ -976,7 +976,7 @@ public class GEMEventHandler extends UserStateNotificationHandler {
              * PUT YOUR CODE HERE
              ***********************************************/
 
-            TaskSequence resumeTaskSeq = new TaskSequence(GEMStates.RESUMING,GEMInputs.SETRUNNING);
+            TaskSequence resumeTaskSeq = new TaskSequence(GEMStates.RESUMING,GEMInputs.SETRESUMED);
 
             m_gemFM.m_stateNotificationHandler.executeTaskSequence(m_gemFM.getResumeSequence(resumeTaskSeq));
 
