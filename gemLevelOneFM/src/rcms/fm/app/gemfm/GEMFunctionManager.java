@@ -909,7 +909,7 @@ public class GEMFunctionManager extends UserFunctionManager {
                         String superRunNumber = pam.getValue("RunNumber");
                         logger.info(msgPrefix + "got run number " + superRunNumber + " from the supervisor");
                         pam.setValue("RunNumber",this.RunNumber.toString());
-                        logger.info(msgPrefix + "sending run number to the supervisor");
+                        logger.info(msgPrefix + "sending run number " + this.RunNumber.toString() + " to the supervisor");
                         pam.send();
                         logger.info(msgPrefix + "sent run number to the supervisor");
                     } catch (XDAQTimeoutException e) {
@@ -949,6 +949,7 @@ public class GEMFunctionManager extends UserFunctionManager {
                         String buRunNumber = pam.getValue("runNumber");
                         logger.info(msgPrefix + "Obtained run number from the BU: " + buRunNumber);
                         pam.setValue("runNumber",this.RunNumber.toString());
+                        logger.info(msgPrefix + "sending run number " + this.RunNumber.toString() + " to the BU");
                         pam.send();
                     } catch (XDAQTimeoutException e) {
                         String msg = "Error! XDAQTimeoutException when trying to send the run number to the BU\n"
@@ -996,6 +997,7 @@ public class GEMFunctionManager extends UserFunctionManager {
                         String evmRunNumber = pam.getValue("runNumber");
                         logger.info(msgPrefix + "Obtained run number from the EVM: " + evmRunNumber);
                         pam.setValue("runNumber",this.RunNumber.toString());
+                        logger.info(msgPrefix + "sending run number " + this.RunNumber.toString() + " to the EVM");
                         pam.send();
                     } catch (XDAQTimeoutException e) {
                         String msg = "Error! XDAQTimeoutException when trying to send the run number to the EVM\n"
@@ -1179,6 +1181,7 @@ public class GEMFunctionManager extends UserFunctionManager {
                         String superRunNumber = pam.getValue("RunNumber");
                         logger.info(msgPrefix + "Obtained run number from supervisor: " + superRunNumber);
                         pam.setValue("RunNumber",this.RunNumber.toString());
+                        logger.info(msgPrefix + "sending run number " + this.RunNumber.toString() + " to the supervisor");
                         pam.send();
                     } catch (XDAQTimeoutException e) {
                         String msg = "Error! XDAQTimeoutException: startAction() when "
